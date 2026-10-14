@@ -1,0 +1,27 @@
+id: behavioural_activation
+order: 2
+title: Small steps back to what lifts you
+summary: Notice how what you do and how you feel are linked, then plan one small, doable activity.
+approach: Behavioural activation
+themes: [emotional distress, life stressors]
+steps:
+  - id: activity_and_mood
+    title: Notice the link
+    goal: Explore what a typical recent day looked like and how their mood moved with what they were doing.
+    guidance: Look for moments that felt slightly better or worse, and what they were doing then. Stay non-judgemental about rest and low energy.
+    opener: Shall we walk through a recent day together and notice when your mood dipped or lifted a little?
+  - id: what_used_to_matter
+    title: What used to matter
+    goal: Help them list a few activities that used to bring enjoyment, a sense of achievement, or closeness to people.
+    guidance: Include very small things such as a shower, a walk to the corner or a message to a friend. Don't push any one of them.
+    opener: What are a few things, big or tiny, that used to give you a bit of pleasure or a sense of getting something done?
+  - id: plan_one_small_thing
+    title: Plan one small thing
+    goal: Help them choose one small activity and make it concrete, with what, when and where, plus a plan B if energy is low.
+    guidance: Make it smaller than they think they need. Agree on a time. Normalise not feeling like doing it beforehand.
+    opener: Let's choose one small thing you could do in the next day or two, and make it easy to start.
+  - id: review_and_adjust
+    title: How did it go?
+    goal: Review how the planned activity went, what it was like during and after, and adjust the next step.
+    guidance: Celebrate any attempt. If it didn't happen, get curious about what got in the way without blame, and make it smaller.
+    opener: How did the small thing you planned go? Whatever happened, it's useful to look at it together.

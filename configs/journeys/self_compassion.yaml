@@ -1,0 +1,27 @@
+id: self_compassion
+order: 5
+title: Being on your own side
+summary: Notice the inner critic and practise speaking to yourself the way you'd speak to a friend.
+approach: Compassion-focused practice
+themes: [emotional distress, social & relationships]
+steps:
+  - id: meet_the_critic
+    title: Meet the inner critic
+    goal: Help them notice what their inner critic says, when it gets loud, and how it makes them feel.
+    guidance: Treat the critic with curiosity, not as an enemy. It often tries to protect. Don't argue with it yet.
+    opener: Shall we get to know that critical voice a little? What does it tend to say, and when does it get loud?
+  - id: friend_test
+    title: What would you tell a friend?
+    goal: Ask how they would respond to a close friend in the same situation, and compare it with how they speak to themselves.
+    guidance: Let them notice the difference themselves. Reflect the warmth they show the friend.
+    opener: If a good friend came to you with exactly what you're going through, what would you say to them?
+  - id: kind_phrase
+    title: A phrase for hard moments
+    goal: Help them write one short, believable, kind phrase they can say to themselves when the critic shows up.
+    guidance: It must feel true to them, so avoid forced positivity. Something like "this is hard, and I'm doing what I can" works.
+    opener: Let's find one short, kind sentence you could say to yourself when that critical voice starts up.
+  - id: practise_kindness
+    title: Practise it
+    goal: Review a recent moment when the critic appeared and whether they could use the kind phrase, then refine it.
+    guidance: Any attempt counts. Adjust the phrase if it didn't feel right.
+    opener: Did that critical voice show up since we last talked? I'd love to hear whether the kind phrase helped at all.

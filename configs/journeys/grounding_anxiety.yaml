@@ -1,0 +1,27 @@
+id: grounding_anxiety
+order: 3
+title: Steadying the storm
+summary: Learn to spot anxiety early in the body and bring yourself back to the present.
+approach: Grounding and paced breathing (anxiety management)
+themes: [anxiety & fear]
+steps:
+  - id: body_signals
+    title: Know your early signals
+    goal: Help them notice how anxiety first shows up in their body and thoughts, so they can catch it earlier.
+    guidance: Ask where they feel it first, such as chest, stomach, breath or thoughts racing. Normalise these as the body's alarm system.
+    opener: Shall we map how anxiety first shows up for you, in your body and your thoughts, so you can catch it earlier?
+  - id: five_senses
+    title: 5-4-3-2-1 grounding
+    goal: Guide them through the 5-4-3-2-1 senses exercise in the moment, then talk about how it felt.
+    guidance: Go one sense at a time and wait for their answers. Keep it light; there's no wrong way to do it.
+    opener: Want to try a short grounding exercise together right now? It uses what you can see, hear and feel around you.
+  - id: paced_breathing
+    title: Slow breathing
+    goal: Practise slow breathing with a longer out-breath (for example in for 4, out for 6) for a minute, and notice any change.
+    guidance: Offer it as an experiment. If breathing focus makes them more anxious, switch to grounding through the feet or hands.
+    opener: Shall we try a minute of slow breathing, with a slightly longer out-breath, and see what your body does?
+  - id: wave_plan
+    title: A plan for the next wave
+    goal: Help them write a short personal plan for the next time anxiety rises, covering their signals, what to do first and who or what helps.
+    guidance: Keep it short enough to remember, three lines at most. Use the tools that worked for them.
+    opener: Let's put together a short plan for the next time anxiety starts to rise, using what's worked for you so far.

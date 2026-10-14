@@ -1,0 +1,27 @@
+id: sleep_reset
+order: 4
+title: A gentler path to sleep
+summary: Understand your current sleep and build a wind-down that makes rest more likely.
+approach: CBT for insomnia principles and sleep hygiene
+themes: [life stressors, anxiety & fear]
+steps:
+  - id: sleep_map
+    title: Map your nights
+    goal: Explore their current sleep pattern, including bedtime, time to fall asleep, waking, and what happens in bed when they can't sleep.
+    guidance: Be curious and practical. Don't diagnose a sleep disorder. If sleep problems are severe or long-lasting, mention that a doctor can help.
+    opener: Shall we look at what your nights have been like lately? When you go to bed, how long it takes, and what happens when sleep won't come.
+  - id: wind_down
+    title: Build a wind-down
+    goal: Help them design a 20–30 minute wind-down routine with less light and screens and something calming.
+    guidance: Build on what they already enjoy. Keep it realistic for their life.
+    opener: Let's design a short wind-down for the end of your day, something that tells your body it's time to slow down.
+  - id: worry_time
+    title: Park the worries
+    goal: Introduce scheduled "worry time" earlier in the evening and a notepad by the bed for thoughts that come at night.
+    guidance: Present it as an experiment. Thoughts can be noted and postponed rather than solved at night.
+    opener: Do worries tend to show up at bedtime? Let's try giving them their own time earlier in the evening.
+  - id: review_sleep
+    title: What's changing?
+    goal: Review what they tried, what helped even a little, and choose what to keep.
+    guidance: Small changes count. Keep only what fits their life.
+    opener: How have the nights been since we started? Let's see what's helped, even a little.
