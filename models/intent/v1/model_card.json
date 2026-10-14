@@ -1,0 +1,145 @@
+{
+  "version": "v1",
+  "created": "2026-10-12",
+  "embedder": "BAAI/bge-small-en-v1.5",
+  "labels": [
+    "casual",
+    "help_seeking",
+    "information",
+    "seeking_advice",
+    "seeking_validation",
+    "sharing_experience",
+    "venting"
+  ],
+  "selection": "highest 5-fold CV macro-F1 on silver train",
+  "train_data": {
+    "file": "data/eval/intent/silver.jsonl",
+    "sha256_16": "6fbea859f9afb65a",
+    "n": 2729
+  },
+  "gold_metrics": {
+    "macro_f1": 0.5455,
+    "accuracy": 0.62,
+    "per_class": {
+      "venting": {
+        "precision": 0.739,
+        "recall": 0.625,
+        "f1-score": 0.677,
+        "support": 104.0
+      },
+      "seeking_advice": {
+        "precision": 0.75,
+        "recall": 0.529,
+        "f1-score": 0.621,
+        "support": 34.0
+      },
+      "seeking_validation": {
+        "precision": 0.281,
+        "recall": 0.75,
+        "f1-score": 0.409,
+        "support": 12.0
+      },
+      "help_seeking": {
+        "precision": 0.368,
+        "recall": 0.875,
+        "f1-score": 0.519,
+        "support": 8.0
+      },
+      "information": {
+        "precision": 0.311,
+        "recall": 0.778,
+        "f1-score": 0.444,
+        "support": 18.0
+      },
+      "sharing_experience": {
+        "precision": 0.474,
+        "recall": 0.346,
+        "f1-score": 0.4,
+        "support": 26.0
+      },
+      "casual": {
+        "precision": 0.877,
+        "recall": 0.653,
+        "f1-score": 0.749,
+        "support": 98.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        "venting",
+        "seeking_advice",
+        "seeking_validation",
+        "help_seeking",
+        "information",
+        "sharing_experience",
+        "casual"
+      ],
+      "matrix": [
+        [
+          65,
+          4,
+          14,
+          5,
+          8,
+          5,
+          3
+        ],
+        [
+          6,
+          18,
+          6,
+          4,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          9,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          2,
+          14,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          0,
+          4,
+          9,
+          6
+        ],
+        [
+          6,
+          2,
+          1,
+          1,
+          19,
+          5,
+          64
+        ]
+      ]
+    }
+  },
+  "notes": "Silver labels from Llama 3.1 8B; gold labels by Claude, pending user review."
+}
