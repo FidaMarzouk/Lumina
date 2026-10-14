@@ -1,0 +1,32 @@
+id: thought_record
+order: 1
+title: Untangling a sticky thought
+summary: Slow down one upsetting moment and look at the thought behind the feeling.
+approach: Cognitive restructuring (CBT thought record)
+themes: [anxiety & fear, emotional distress]
+steps:
+  - id: catch_the_moment
+    title: Catch the moment
+    goal: Help the person describe one recent, specific moment that upset them, where it happened, who was there, and what was going on.
+    guidance: Ask about one concrete moment, not their whole week. Reflect back the details you hear. Don't analyse yet.
+    opener: Shall we pick one recent moment that stung and slow it down together? Just the where, when and what happened.
+  - id: name_the_feeling
+    title: Name the feeling
+    goal: Help them name the feelings in that moment and rate how strong each felt from 0 to 10.
+    guidance: Offer a few feeling words if they're stuck. Every feeling is allowed; don't try to change it.
+    opener: Last time we caught a hard moment. Today, could we put names to what you felt in it, and how strong each feeling was?
+  - id: find_the_hot_thought
+    title: Find the hot thought
+    goal: Help them find the thought or image that went through their mind and carried the most feeling.
+    guidance: Ask "what went through your mind just then?" and "what did that say about you, others or the future?". Look for the one with the most charge.
+    opener: When that feeling hit, what was going through your mind? Let's look for the thought that carried the most weight.
+  - id: weigh_it_up
+    title: Weigh it up
+    goal: Gently explore what supports the hot thought and what doesn't quite fit it, like a fair witness would.
+    guidance: Be curious, not argumentative. Ask what a friend might notice. Don't tell them the thought is wrong.
+    opener: Let's be a fair witness to that thought. What fits it, and is there anything that doesn't quite fit?
+  - id: a_kinder_view
+    title: A more balanced view
+    goal: Help them put together a more balanced thought in their own words, and check how the feeling shifts now.
+    guidance: The new thought should be believable to them, not just positive. Ask them to re-rate the feeling from 0 to 10.
+    opener: You've looked at that thought from a few sides. Want to try putting a more balanced version into your own words?

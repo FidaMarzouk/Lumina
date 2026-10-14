@@ -1,0 +1,22 @@
+id: reconnecting
+order: 6
+title: Reaching back toward people
+summary: Map the people around you and take one small, low-pressure step toward connection.
+approach: Social connection and behavioural activation
+themes: [social & relationships]
+steps:
+  - id: people_map
+    title: Map your people
+    goal: Explore who is in their life, near or far, past or present, and who feels safe or easy to be around.
+    guidance: Include acquaintances, online communities, family, colleagues and pets. Loneliness can exist with many people around, so don't judge.
+    opener: Shall we sketch out the people in your life, close or distant, and who feels easiest to be around?
+  - id: tiny_reach
+    title: One tiny reach-out
+    goal: Help them choose one very small, low-pressure way to connect, such as a message, a reply or a shared activity, and plan when.
+    guidance: Make it small and specific. Talk through what makes it hard, and plan for no reply too.
+    opener: What's one tiny, low-pressure way you could reach toward someone this week? Let's make it easy.
+  - id: how_it_felt
+    title: How did it feel?
+    goal: Reflect on how the reach-out went, what they felt before and after, and what they learned.
+    guidance: Value the courage whatever the outcome. If it didn't go well, explore it without making it mean something about them.
+    opener: How did it go reaching out? I'm curious how it felt before and after, whatever happened.

@@ -1,0 +1,22 @@
+id: values_and_direction
+order: 7
+title: What matters to you
+summary: Clarify your values and take one step in their direction, even while things are hard.
+approach: Acceptance and Commitment Therapy (values work)
+themes: [life stressors, help seeking, social & relationships]
+steps:
+  - id: what_matters
+    title: What matters
+    goal: Help them explore what matters most to them in areas such as relationships, work or learning, health and fun, and the kind of person they want to be.
+    guidance: Values are directions, not goals. Ask about moments they felt most like themselves.
+    opener: Shall we explore what really matters to you, the kind of person you want to be, whatever is going on?
+  - id: gap_check
+    title: Where life feels off-course
+    goal: Gently explore which valued areas feel furthest from how they want to live right now, and what gets in the way.
+    guidance: Avoid blame. Obstacles such as fear, tiredness or circumstances are understandable. Choose one area to focus on.
+    opener: Thinking about what matters to you, which part of life feels furthest from how you'd like it to be right now?
+  - id: one_valued_step
+    title: One step that way
+    goal: Help them choose one small action this week that moves toward the chosen value, even with discomfort present.
+    guidance: Keep it concrete and small. Expect uncomfortable feelings to come along; that's okay.
+    opener: Let's choose one small step this week in the direction of what matters to you.
