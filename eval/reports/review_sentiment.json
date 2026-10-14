@@ -1,0 +1,22 @@
+{
+  "n": 1620,
+  "label_counts_stars": {
+    "positive": 1101,
+    "negative": 434,
+    "neutral": 85
+  },
+  "methods": {
+    "vader": {
+      "agreement_with_stars": 0.786,
+      "macro_f1_vs_stars": 0.524,
+      "one_star_labelled_positive": 0.354,
+      "five_star_labelled_negative": 0.038
+    },
+    "transformer": {
+      "agreement_with_stars": 0.862,
+      "macro_f1_vs_stars": 0.609,
+      "one_star_labelled_positive": 0.044,
+      "five_star_labelled_negative": 0.042
+    }
+  }
+}

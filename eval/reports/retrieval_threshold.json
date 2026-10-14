@@ -1,0 +1,64 @@
+{
+  "n_on_topic": 98,
+  "n_off_topic": 300,
+  "on_topic_top1_median": 0.611,
+  "off_topic_top1_median": 0.27,
+  "best_threshold": 0.45,
+  "sweep": [
+    {
+      "threshold": 0.2,
+      "on_topic_kept": 1.0,
+      "off_topic_kept": 0.873
+    },
+    {
+      "threshold": 0.25,
+      "on_topic_kept": 1.0,
+      "off_topic_kept": 0.623
+    },
+    {
+      "threshold": 0.3,
+      "on_topic_kept": 0.99,
+      "off_topic_kept": 0.317
+    },
+    {
+      "threshold": 0.35,
+      "on_topic_kept": 0.99,
+      "off_topic_kept": 0.163
+    },
+    {
+      "threshold": 0.4,
+      "on_topic_kept": 0.949,
+      "off_topic_kept": 0.07
+    },
+    {
+      "threshold": 0.45,
+      "on_topic_kept": 0.908,
+      "off_topic_kept": 0.027
+    },
+    {
+      "threshold": 0.5,
+      "on_topic_kept": 0.878,
+      "off_topic_kept": 0.007
+    },
+    {
+      "threshold": 0.55,
+      "on_topic_kept": 0.694,
+      "off_topic_kept": 0.003
+    },
+    {
+      "threshold": 0.6,
+      "on_topic_kept": 0.551,
+      "off_topic_kept": 0.0
+    },
+    {
+      "threshold": 0.65,
+      "on_topic_kept": 0.306,
+      "off_topic_kept": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "on_topic_kept": 0.163,
+      "off_topic_kept": 0.0
+    }
+  ]
+}
