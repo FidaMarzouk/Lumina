@@ -1,0 +1,73 @@
+# Hand-written market findings, rendered into reports/lumina_report.html by `python -m lumina.reporting`.
+# Each finding must cite a section of that report. Review-based shares come from the newest-review
+# samples, which exist for 3 apps only (Replika, Woebot, Wysa). Vendor claims were quote-verified but
+# not checked for truth, and no benchmark row has been verified by a person yet.
+
+findings:
+  - id: F1
+    title: Pricing is the leading complaint for Replika
+    evidence: >-
+      About 40% of Replika's newest reviews complain about pricing; Woebot and Wysa are around 6–7%
+      (Review themes). Every app except Woebot sells in-app purchases (App facts).
+    opportunity: Make free core support a differentiator.
+    requirement: >-
+      The core support conversation and crisis access are always free. No feature starts or stops
+      mid-conversation because of payment.
+
+  - id: F2
+    title: Access barriers hurt Woebot
+    evidence: >-
+      About 20% of Woebot's newest reviews raise access barriers, mostly access codes and lock-outs;
+      Replika is at about 16%, mostly account and age-gate locks (Review themes). Woebot is sold only
+      in the US storefront and was last updated in Dec 2025; Youper is absent from all four English
+      storefronts (App facts).
+    opportunity: There is a gap for open, English-language AI support with no eligibility gate.
+    requirement: No access codes and no employer or insurer gating. Onboarding is a single step.
+
+  - id: F3
+    title: Conversation quality is a frequent complaint
+    evidence: >-
+      About 30% for Replika and about 12% each for Wysa and Woebot (Review themes). The featured
+      reviews describe scripted, repetitive or misunderstood replies.
+    opportunity: A conversational, context-aware assistant, which competitors' scripted flows are not.
+    requirement: LLM conversation that uses the recent turns, evaluated for relevance and consistency.
+
+  - id: F4
+    title: Emotional support is what satisfied users praise
+    evidence: >-
+      About 67% of Wysa's newest reviews and about 45% of Woebot's praise emotional support
+      (Review themes). Positive reviews also centre on support and therapeutic tools (Segmentation).
+    opportunity: Empathy is the core value, not the feature count.
+    requirement: >-
+      Empathy-first replies, evaluated with a rubric. Therapeutic exercises are offered as optional tools.
+
+  - id: F5
+    title: Most competitors link data to the user
+    evidence: >-
+      Of the 7 apps with store pages, 5 declare "data linked to you" or "used to track you". Only Wysa
+      and Ash declare "not linked" (Benchmark, privacy_label).
+    opportunity: Private-by-design processing — local LLM, local safety models and local voice, no message logging.
+    requirement: Keep processing local by default, never log message text, and state plainly what is stored.
+
+  - id: F6
+    title: Accessibility is rarely declared
+    evidence: Only Replika declares accessibility features (Benchmark, accessibility_declared).
+    opportunity: Accessibility and voice as a differentiator.
+    requirement: Natural voice input and output, plus WCAG basics such as labels, focus handling and live regions.
+
+  - id: F7
+    title: Crisis features are rare
+    evidence: >-
+      Of the apps with store pages, only Earkick's vendor text claims a crisis or SOS feature
+      (Benchmark, crisis_features).
+    opportunity: A visible, evaluated crisis layer is a differentiator.
+    requirement: >-
+      Crisis help is always one tap away. Risk detection runs before every reply, as built and measured
+      in the Safety section.
+
+segmentation_note: >-
+  Clustering the review evidence gave no robust need-based segments. Text clusters show almost no
+  structure (silhouette ≈ 0.05). Theme-profile clusters are stable, but they mostly separate satisfied
+  reviewers from dissatisfied ones. The codebook themes are therefore used as need categories:
+  emotional support, conversation quality, therapeutic tools, pricing, access, privacy, safety and
+  human support. They are not demographic segments, and the data supports no claims about shares of users.

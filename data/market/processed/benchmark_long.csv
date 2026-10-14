@@ -1,0 +1,121 @@
+app,criterion,evidence_type,score,evidence,source,human_verified
+wysa,availability,observed,2,"available in: us,gb,ca,au",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,privacy_label,observed,1,DATA_NOT_LINKED_TO_YOU:IDENTIFIERS/USAGE_DATA/DIAGNOSTICS,https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,maintenance,observed,2,"v7.2.0, 2 days before collection",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,conversational_ai,vendor_claimed,2,"Talking to Wysa is empathetic, helpful, and will never judge. Your identity will remain anonymous and your conversations are privacy protected.",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,evidence_based_approach,vendor_claimed,1,"Self-help techniques, inspired from research-backed and widely used approaches like CBT (cognitive behavioral) and DBT (dialectical behavior), alongside meditation, are employed to support you with everyday wellbeing challenges like low mood, stress, anxiety, sleep and a whole range of other wellbei",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,human_support,vendor_claimed,1,"For extra support, take guidance from qualified mental health professional.",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,crisis_features,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,tracking_journaling,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,personalization_memory,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,voice,vendor_claimed,1,"Prefer listening over reading? Tap the speaker on any message to hear it read aloud, with easy play and pause controls.",https://apps.apple.com/us/app/wysa-mental-wellbeing-ai/id1166585565,False
+wysa,conversation_quality_complaints,review_inferred,0.115,"56/485 newest iOS reviews (v0), 95% CI 0.09–0.15",data/market/processed/reviews.jsonl,False
+wysa,pricing_complaints,review_inferred,0.06,"29/485 newest iOS reviews (v0), 95% CI 0.04–0.08",data/market/processed/reviews.jsonl,False
+wysa,access_complaints,review_inferred,0.027,"13/485 newest iOS reviews (v0), 95% CI 0.02–0.05",data/market/processed/reviews.jsonl,False
+wysa,emotional_support_praise,review_inferred,0.674,"327/485 newest iOS reviews (v0), 95% CI 0.63–0.71",data/market/processed/reviews.jsonl,False
+woebot,availability,observed,1,available in: us,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,privacy_label,observed,0,DATA_LINKED_TO_YOU:HEALTH_AND_FITNESS/CONTACT_INFO/USER_CONTENT/IDENTIFIERS/SENSITIVE_INFO; DATA_NOT_LINKED_TO_YOU:IDENTIFIERS/USAGE_DATA/DIAGNOSTICS,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,maintenance,observed,1,"v6.6.1, 298 days before collection",https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,conversational_ai,vendor_claimed,1,"What can you expect from Woebot? A chat-based mental health tool that’s available on your schedule, when you need it day or night, between doctor visits or when the office is closed.",https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,evidence_based_approach,vendor_claimed,1,"Woebot will check in with you every day and guide you through practical techniques informed by concepts of Cognitive Behavioral Therapy (CBT), with some elements of Interpersonal Psychotherapy (IPT) and Dialectical Behavior Therapy (DBT) concepts.",https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,human_support,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,crisis_features,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,tracking_journaling,vendor_claimed,2,"Woebot offers a private, supportive space with tools like mood tracking, progress reflection, gratitude journaling, and mindfulness practice.",https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,personalization_memory,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,voice,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/woebot-the-mental-health-ally/id1305375832,False
+woebot,conversation_quality_complaints,review_inferred,0.116,"57/492 newest iOS reviews (v0), 95% CI 0.09–0.15",data/market/processed/reviews.jsonl,False
+woebot,pricing_complaints,review_inferred,0.071,"35/492 newest iOS reviews (v0), 95% CI 0.05–0.10",data/market/processed/reviews.jsonl,False
+woebot,access_complaints,review_inferred,0.203,"100/492 newest iOS reviews (v0), 95% CI 0.17–0.24",data/market/processed/reviews.jsonl,False
+woebot,emotional_support_praise,review_inferred,0.453,"223/492 newest iOS reviews (v0), 95% CI 0.41–0.50",data/market/processed/reviews.jsonl,False
+youper,availability,observed,0,available in: none,,False
+youper,privacy_label,observed,unknown,no store page,,False
+youper,accessibility_declared,observed,unknown,no store page,,False
+youper,maintenance,observed,unknown,no store page,,False
+youper,conversational_ai,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,evidence_based_approach,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,human_support,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,crisis_features,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,tracking_journaling,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,personalization_memory,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,voice,vendor_claimed,unknown,no store page in collected storefronts,,False
+youper,conversation_quality_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+youper,pricing_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+youper,access_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+youper,emotional_support_praise,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+ash,availability,observed,1,"available in: us,ca,au",https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,privacy_label,observed,1,DATA_NOT_LINKED_TO_YOU:IDENTIFIERS/USAGE_DATA/DIAGNOSTICS,https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,maintenance,observed,2,"v2.8.2, 6 days before collection",https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,conversational_ai,vendor_claimed,unknown,quote not found verbatim in source (model proposed 2),https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,evidence_based_approach,vendor_claimed,1,"Ash is built by a team of therapists, mental health leaders, AI researchers, engineers, and designers.",https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,human_support,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,crisis_features,vendor_claimed,0,"Ash is not designed to be used in crisis. If you are in crisis, please seek out professional help, or a crisis line.",https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,tracking_journaling,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,personalization_memory,vendor_claimed,unknown,quote not found verbatim in source (model proposed 2),https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,voice,vendor_claimed,unknown,quote not found verbatim in source (model proposed 2),https://apps.apple.com/us/app/ash-ai-for-mental-health/id6474862947,False
+ash,conversation_quality_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+ash,pricing_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+ash,access_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+ash,emotional_support_praise,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+earkick,availability,observed,1,"available in: us,gb,ca",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,privacy_label,observed,0,DATA_USED_TO_TRACK_YOU:USAGE_DATA; DATA_NOT_LINKED_TO_YOU:HEALTH_AND_FITNESS/CONTACT_INFO/CONTACTS/USER_CONTENT/USAGE_DATA/DIAGNOSTICS,https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,maintenance,observed,1,"v2.13.8, 241 days before collection",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,conversational_ai,vendor_claimed,2,"Your intelligent AI companion is ready when you are. Whether you need to talk, breathe, reflect, or reset, Earkick is here.",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,evidence_based_approach,vendor_claimed,1,"Built with clinical-grade tools, advanced AI, and privacy at its core, Earkick offers real results with zero judgment and zero friction.",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,human_support,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,crisis_features,vendor_claimed,2,"INSTANT TOOLS Access on-demand support with the panic button, soundscapes, daily stats, and CBT-based tools—all designed to help you stay grounded in the moment.",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,tracking_journaling,vendor_claimed,2,"MOOD & ANXIETY TRACKING Log how you feel with voice, video, or text. Your entries are enriched with context like location, weather, and moon phases.",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,personalization_memory,vendor_claimed,2,PERSONALIZED EXPERIENCE Shape your support system. Choose how your Earkick companion responds—whether as a calm listener or a motivational coach.,https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,voice,vendor_claimed,1,"MOOD & ANXIETY TRACKING Log how you feel with voice, video, or text.",https://apps.apple.com/us/app/earkick-self-care-ai-coach/id1584854531,False
+earkick,conversation_quality_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+earkick,pricing_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+earkick,access_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+earkick,emotional_support_praise,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+replika,availability,observed,2,"available in: us,gb,ca,au",https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,privacy_label,observed,0,DATA_USED_TO_TRACK_YOU:IDENTIFIERS/USAGE_DATA; DATA_LINKED_TO_YOU:LOCATION/CONTACT_INFO/IDENTIFIERS/USAGE_DATA; DATA_NOT_LINKED_TO_YOU:IDENTIFIERS/USAGE_DATA/DIAGNOSTICS,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,accessibility_declared,observed,2,The developer indicated that this app supports the following accessibility features. Learn More,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,maintenance,observed,2,"v12.4.0, 6 days before collection",https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,conversational_ai,vendor_claimed,2,"Replika is the AI companion that’s been here since 2017 — available 24/7 for whatever’s on your mind by text, voice calls, and video.",https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,evidence_based_approach,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,human_support,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,crisis_features,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,tracking_journaling,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,personalization_memory,vendor_claimed,2,Replika remembers what matters to you — and shows up when it counts.,https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,voice,vendor_claimed,2,"Replika is the AI companion that’s been here since 2017 — available 24/7 for whatever’s on your mind by text, voice calls, and video.",https://apps.apple.com/us/app/replika-ai-companion-chat/id1158555867,False
+replika,conversation_quality_complaints,review_inferred,0.304,"143/471 newest iOS reviews (v0), 95% CI 0.26–0.35",data/market/processed/reviews.jsonl,False
+replika,pricing_complaints,review_inferred,0.397,"187/471 newest iOS reviews (v0), 95% CI 0.35–0.44",data/market/processed/reviews.jsonl,False
+replika,access_complaints,review_inferred,0.159,"75/471 newest iOS reviews (v0), 95% CI 0.13–0.20",data/market/processed/reviews.jsonl,False
+replika,emotional_support_praise,review_inferred,0.083,"39/471 newest iOS reviews (v0), 95% CI 0.06–0.11",data/market/processed/reviews.jsonl,False
+seven_cups,availability,observed,2,"available in: us,gb,ca,au",https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,privacy_label,observed,0,DATA_LINKED_TO_YOU:HEALTH_AND_FITNESS/PURCHASES/CONTACT_INFO/USER_CONTENT/IDENTIFIERS/USAGE_DATA; DATA_NOT_LINKED_TO_YOU:DIAGNOSTICS,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,maintenance,observed,0,"v5.72.18, 416 days before collection",https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,conversational_ai,vendor_claimed,2,"24/7 emotional support through 1-on-1 text, chats and video with trained listener hotlines—for free.",https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,evidence_based_approach,vendor_claimed,1,"Recognized & Trusted Treatments: An award-winning mental health app, acknowledged by Stanford MedicineX for innovation in healthcare.",https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,human_support,vendor_claimed,2,"Connect with Licensed Therapists & Trained Listeners • 24/7 emotional support through 1-on-1 text, chats and video with trained listener hotlines—for free.",https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,crisis_features,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,tracking_journaling,vendor_claimed,1,Manage anxiety and panic attacks with guided mindfulness and therapeutic breathing exercises.,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,personalization_memory,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,voice,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/7-cups-online-therapy-chat/id921814681,False
+seven_cups,conversation_quality_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+seven_cups,pricing_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+seven_cups,access_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+seven_cups,emotional_support_praise,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+minddoc,availability,observed,2,"available in: us,gb,ca,au",https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,privacy_label,observed,0,DATA_USED_TO_TRACK_YOU:IDENTIFIERS/USAGE_DATA; DATA_LINKED_TO_YOU:HEALTH_AND_FITNESS/PURCHASES/CONTACT_INFO/USER_CONTENT/IDENTIFIERS/USAGE_DATA/SENSITIVE_INFO/DIAGNOSTICS; DATA_NOT_LINKED_TO_YOU:DIAGNOSTICS/OTHER,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,accessibility_declared,observed,0,The developer has not yet indicated which accessibility features this app supports. Learn More,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,maintenance,observed,2,"v4.18.32, 34 days before collection",https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,conversational_ai,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,evidence_based_approach,vendor_claimed,2,A COMPREHENSIVE COURSE LIBRARY BASED ON COGNITIVE BEHAVIORAL THERAPY (CBT),https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,human_support,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,crisis_features,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,tracking_journaling,vendor_claimed,2,TRACK YOUR MOOD AND JOURNAL YOUR THOUGHTS,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,personalization_memory,vendor_claimed,1,"Receive personalized course recommendations, become an expert in your own mental health, and learn and practice actionable strategies for taking charge of your mental health.",https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,voice,vendor_claimed,0,not mentioned in vendor text,https://apps.apple.com/us/app/minddoc-mental-health-support/id1052216403,False
+minddoc,conversation_quality_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+minddoc,pricing_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+minddoc,access_complaints,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False
+minddoc,emotional_support_praise,review_inferred,unknown,no non-curated review sample,data/market/processed/reviews.jsonl,False

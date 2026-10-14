@@ -1,0 +1,11 @@
+app,store,package,rating,rating_count,installs,reviews_count,current_version,last_updated,developer,free,category
+replika,google_play,ai.replika.app,4.28,523594,"10,000,000+",80078,12.8.0,"May 1, 2026","Luka, Inc",True,Health & Fitness
+woebot,google_play,com.woebot,3.44,12463,"500,000+",2604,6.6.0,"Oct 31, 2024",Woebot Health Inc,True,Medical
+woebot,app_store,io.woebot.alpha0,4.64,6240,,6240,6.6.1,2025-12-17T09:54:02Z,Woebot Labs Inc,True,Health & Fitness
+wysa,app_store,bot.touchkin,4.85,24152,,24152,6.11.4,2026-04-30T07:54:16Z,Touchkin,True,Health & Fitness
+kindroid,app_store,com.kindroid.app,4.78,5913,,5913,1.54,2026-03-26T23:10:41Z,Beautifully Incorporated,True,Entertainment
+nomi,app_store,ai.nomi.app,4.6,2292,,2292,1.12.1,2026-03-31T22:47:53Z,Nomi.ai,True,Lifestyle
+perplexity,app_store,ai.perplexity.app,4.83,453931,,453931,26.16,2026-04-23T22:38:10Z,"Perplexity AI, Inc.",True,Productivity
+bevel,app_store,com.supersethealth.superset,4.84,8384,,8384,3.0.1,2026-04-29T02:12:10Z,"Finerpoint, Inc",True,Health & Fitness
+function-health,app_store,com.functionhealth.functionhealth,4.93,19550,,19550,1.24.0,2026-04-28T17:49:48Z,Function Health,True,Health & Fitness
+perplexity,app_store,ai.perplexity.app,4.83,453931,,453931,26.16,2026-04-23T22:38:10Z,"Perplexity AI, Inc.",True,Productivity

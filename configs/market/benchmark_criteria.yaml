@@ -1,0 +1,65 @@
+# Competitive benchmark — criteria, operational definitions and scoring rules.
+# Scores: 2 / 1 / 0, or "unknown" (never imputed).  Every score records its evidence type and evidence:
+#   observed        computed from structured App Store page data (deterministic, see benchmark.py)
+#   vendor_claimed  stated by the vendor in the store description / release notes; an LLM proposes the
+#                   score and MUST quote the supporting sentence, which is verified verbatim against the
+#                   source text (unverifiable quote → unknown).  Claims are not checked for truth.
+#   review_inferred share of reviews raising the theme (validated annotator), only when the app has a
+#                   non-curated review sample of >= 100 (v0 newest reviews); otherwise unknown.
+version: 1
+min_reviews_for_inference: 100
+
+observed:
+  availability:
+    definition: "Sold in the English App Store storefronts collected (us, gb, ca, au)."
+    rule: "2 = all four; 1 = one to three; 0 = none."
+  privacy_label:
+    definition: "Apple privacy nutrition label declared by the developer."
+    rule: "2 = Data Not Collected; 1 = only Data Not Linked to You; 0 = any Data Linked to You or Used to Track You."
+  accessibility_declared:
+    definition: "Developer declared supported accessibility features on the store page."
+    rule: "2 = features declared; 0 = 'has not yet indicated'."
+  maintenance:
+    definition: "Recency of the current version at collection time."
+    rule: "2 = updated within 90 days; 1 = within 365 days; 0 = older than 365 days."
+
+vendor_claimed:
+  conversational_ai:
+    definition: "Conversation with an AI the user can type to freely."
+    rule: "2 = open-ended AI conversation; 1 = guided or scripted chat (predefined replies); 0 = no chat."
+  evidence_based_approach:
+    definition: "Named therapeutic approach (CBT, DBT, ACT, mindfulness-based ...) and research backing."
+    rule: "2 = approach named AND research/clinical validation claimed; 1 = approach named; 0 = none."
+  human_support:
+    definition: "Access to humans through the app."
+    rule: "2 = licensed therapists/clinicians; 1 = coaches or peer listeners; 0 = none."
+  crisis_features:
+    definition: "Features for crisis or emergency situations."
+    rule: "2 = in-app crisis/SOS feature or crisis resources described; 1 = only a disclaimer that it is not for emergencies; 0 = not mentioned."
+  tracking_journaling:
+    definition: "Self-monitoring tools."
+    rule: "2 = both mood tracking and journaling; 1 = one of them; 0 = neither."
+  personalization_memory:
+    definition: "Experience adapts to the user."
+    rule: "2 = remembers past conversations or builds a personalised plan; 1 = some tailoring; 0 = none."
+  voice:
+    definition: "Voice interaction."
+    rule: "2 = spoken conversation with the assistant; 1 = audio content only (meditations, read-aloud); 0 = none."
+
+review_inferred:
+  conversation_quality_complaints:
+    theme: conversation_quality
+    polarity: complaint
+    rule: "Share of reviews with this complaint (lower is better); reported with a Wilson 95% CI, not scored."
+  pricing_complaints:
+    theme: pricing_paywall
+    polarity: complaint
+    rule: "Share of reviews with this complaint, Wilson 95% CI."
+  access_complaints:
+    theme: access_barriers
+    polarity: complaint
+    rule: "Share of reviews with this complaint, Wilson 95% CI."
+  emotional_support_praise:
+    theme: emotional_support
+    polarity: praise
+    rule: "Share of reviews praising emotional support, Wilson 95% CI."
