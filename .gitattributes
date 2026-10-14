@@ -1,0 +1,12 @@
+* text=auto eol=lf
+
+*.jsonl  -text
+*.csv    -text
+*.parquet binary
+*.sqlite3 binary
+*.bin    binary
+*.pickle binary
+*.png    binary
+*.jpg    binary
+*.glb    binary
+*.ipynb  text eol=lf
