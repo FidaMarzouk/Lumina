@@ -1,0 +1,32 @@
+# Review theme codebook (multi-label).  Definitions, not keyword lists: each theme describes what
+# a reviewer is talking about, so an annotator (human or model) can apply it to unseen wording.
+# A review gets every theme it substantively discusses; "none" only when no theme applies.
+# polarity is recorded per theme: praise | complaint | neutral.
+#
+# Used by: src/lumina/market/review_themes.py (LLM annotation), eval gold set (human/Claude).
+version: 1
+themes:
+  emotional_support:
+    definition: "Whether the app makes the person feel heard, comforted, understood or less alone (or fails to)."
+  conversation_quality:
+    definition: "Quality of the chatbot's conversation itself: understanding, relevance, repetitiveness, scripted or robotic replies, memory of past chats, personality."
+  therapeutic_tools:
+    definition: "Structured exercises and techniques: CBT/DBT exercises, mood tracking, journaling, meditation, breathing, sleep tools, psychoeducation content."
+  pricing_paywall:
+    definition: "Cost, subscriptions, free vs paid features, paywalls, trials, refunds or billing."
+  access_barriers:
+    definition: "Being unable to use the app: required access codes or employer/insurer eligibility, sign-up/login problems, regional unavailability, account locks."
+  reliability_bugs:
+    definition: "Crashes, bugs, lost data, slowness, broken features or updates that broke things."
+  safety_crisis:
+    definition: "How the app handles suicidal thoughts, self-harm or crisis moments, including scripted crisis responses, hotline redirects, or feeling unsafe."
+  human_support:
+    definition: "Access to or desire for real humans: therapists, coaches, peer listeners, response times of human support."
+  privacy_trust:
+    definition: "Concerns or reassurance about data privacy, confidentiality, data selling, or trust in the company."
+  personalization:
+    definition: "Whether the experience adapts to the person: tailored content, remembering preferences, customization of the companion."
+  relationship_companionship:
+    definition: "The app as a friend, partner or romantic companion; attachment to the AI; changes to the companion's personality or role."
+  clinical_effectiveness:
+    definition: "Claims that the app did or did not improve mental health outcomes (anxiety, depression, coping) over time, or comparisons with therapy."

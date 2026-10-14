@@ -1,0 +1,53 @@
+# Competitor set for the Phase 1 benchmark (focused set, chosen 2026-10-11).
+#
+# Inclusion rationale: Lumina's direct rivals (AI conversational mental-health support) plus one
+# reference app per adjacent category.  Candidates were cross-checked against Apple's
+# "You Might Also Like" graph (data/raw/market/app_store_discovery/*), which also lists apps not
+# included here (e.g. Elomia, Sonia, Noah, Clarity, Rosebud) — see docs/market_methodology.md.
+#
+# name_must_contain: the collector flags the run if the fetched page title does not contain it
+# (protects against a wrong App Store id).
+
+apps:
+  - key: wysa
+    name: Wysa
+    category: ai_support_chat
+    app_store_id: 1166585565
+    name_must_contain: Wysa
+  - key: woebot
+    name: Woebot
+    category: ai_support_chat
+    app_store_id: 1305375832
+    name_must_contain: Woebot
+    status_note: "Consumer availability to verify (reports of a 2025 shutdown); the page date and version history are recorded."
+  - key: youper
+    name: Youper
+    category: ai_support_chat
+    app_store_id: 1060691513
+    name_must_contain: Youper
+    status_note: "ID verified via web search (Youper, Inc.); returns HTTP 404 in the US, GB, CA and AU storefronts on 2026-10-11."
+  - key: ash
+    name: Ash
+    category: ai_support_chat
+    app_store_id: 6474862947
+    name_must_contain: Ash
+  - key: earkick
+    name: Earkick
+    category: ai_support_chat
+    app_store_id: 1584854531
+    name_must_contain: Earkick
+  - key: replika
+    name: Replika
+    category: ai_companion
+    app_store_id: 1158555867
+    name_must_contain: Replika
+  - key: seven_cups
+    name: 7 Cups
+    category: human_peer_and_therapy
+    app_store_id: 921814681
+    name_must_contain: 7 Cups
+  - key: minddoc
+    name: MindDoc
+    category: self_guided_cbt_mood
+    app_store_id: 1052216403
+    name_must_contain: MindDoc
