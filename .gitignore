@@ -54,3 +54,4 @@ data/eval/cache/
 docs/design/concept-board.html
 
 .claude/
+.vite/
