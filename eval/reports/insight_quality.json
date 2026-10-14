@@ -1,0 +1,145 @@
+{
+  "n_users": 12,
+  "llm": "ollama:llama3.1",
+  "produced": 1.0,
+  "echo_found": 8,
+  "names_the_past": 1.0,
+  "invents_the_past": 0.0,
+  "grounded": 1.0,
+  "ends_with_question": 1.0,
+  "length_ok": 0.583,
+  "rows": [
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "It seems this week's conversations circled around the challenges you're facing in your relationships and academic life. One pattern I noticed is that when you feel hurt or angry, you tend to go quiet and avoid the situation, rather than expressing your feelings.\n\nIt looks like your recent story about avoiding your notes because of study pressure is connected to the theme of academic pressure that's been building up for a while. I noticed that this week's conversations seem to be a continuation of the struggles you faced last year, when you felt overwhelmed and anxious about exams.\n\nIt appears that some things haven't changed since last year - the feeling of being overwhelmed and anxious about exams is still present. However, it's also clear that you're facing similar challenges in your relationships, particularly with your close friend.\n\nWhat do you think is the most important thing for you to focus on right now, to help you navigate these challenges and find a sense of control and calm?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": false,
+      "chars": 1002
+    },
+    {
+      "status": "ready",
+      "echo_found": false,
+      "text": "This week's conversations have circled around feelings of loneliness and isolation, as well as struggles in your relationships and at work. It seems that when you're feeling lonely, it can lead to you staying home alone, and when you're feeling sad, it can also make you want to be alone. I noticed that when you feel frustrated, it can cause you to leave situations early or feel like you're not good enough.\n\nIt's clear that these feelings are affecting many areas of your life, and it's understandable that you're struggling to cope. Can you tell me more about what feels most overwhelming or challenging for you right now?",
+      "names_the_past": false,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 626
+    },
+    {
+      "status": "ready",
+      "echo_found": false,
+      "text": "This week's conversations revolved around feeling overwhelmed and uncertain about your abilities in both your work and academic life. You expressed concerns about meeting deadlines and performing well in exams, which left you feeling anxious and fearful. \n\nIt seems that when you're faced with challenges and doubts, you tend to take on more responsibilities and work late into the night, trying to compensate for your perceived shortcomings. \n\nWhat do you think might help you break this cycle and find a more balanced approach to tackling your responsibilities?",
+      "names_the_past": false,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 563
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "It seems this week's conversations have circled around feeling overwhelmed and struggling with pressure from various aspects of your life. I noticed that a sense of inadequacy tends to follow when you're facing deadlines or feeling anxious about your abilities. It's as if the fear of not meeting expectations leads to a cycle of self-doubt and tension.\n\nYour recent story about feeling like a fraud and staying up late to work on a project reminds me of our conversation in March when you felt hurt and angry after a friend cancelled plans. It seems that since then, you've been carrying a sense of quietness and isolation, even when it comes to meeting up with others. This quietness has been present since the move, making free time feel empty and lonely.\n\nWhat do you think might be the first step in breaking this cycle of self-doubt and isolation, and finding a way to move forward that feels more authentic and connected to others?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": false,
+      "chars": 938
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "This week, our conversations circled around your relationships, academic stress, and sleep problems. You've been dealing with hurt feelings from an argument with a close friend, and feeling exhausted and flat from lying awake at night.\n\nIt seems that when you feel hurt or angry, you tend to go quiet and avoid the situation, rather than addressing your emotions directly. I noticed that this pattern is similar to what happened last year when you were also struggling with study pressure and the fear of failing. Since then, it seems that your avoidance behaviors have carried over to other areas of your life, such as putting off studying when exams are coming up.\n\nYour most recent story about feeling overwhelmed and panicky about exams seems to be connected to the argument with your friend, which happened just a few days ago. It's as if the emotional residue from that argument has spilled over into your academic stress.\n\nWhat do you think might happen if you were to address your emotions directly, rather than avoiding them, when you feel hurt or angry?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": false,
+      "chars": 1063
+    },
+    {
+      "status": "ready",
+      "echo_found": false,
+      "text": "This week's conversations have circled around feelings of being let down, overwhelmed, and not good enough. It seems that situations where you feel hurt or angry tend to lead to you pulling back and avoiding the issue.\n\nI noticed that when you're feeling anxious or uncertain, you tend to put things off or try to compensate by working harder. For example, after talking about a big deadline at work, you ended up working late into the night.\n\nWhat do you think is the most pressing issue for you right now, and how can I support you in addressing it?",
+      "names_the_past": false,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 551
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "This week's conversations have circled around feelings of deflation, hurt, and anger, particularly in relation to relationships and sleep problems.\n\nIt seems that when you feel frustrated or small, you tend to retreat or leave the situation early, rather than addressing the issue. I noticed this pattern in both Thursday's conversation about feeling deflated at home and Monday's conversation about the argument with your friend.\n\nLooking back to your conversation in June, it seems that you've been dealing with similar feelings of anxiety and self-doubt, but this time they're connected to relationships. Your argument with your friend echoes the voice of self-doubt you experienced earlier, where you felt like you're not good enough.\n\nWhat do you think is driving this pattern of feeling hurt and angry in your relationships, and how can you start to break free from it?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 875
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "This week's conversations have circled around feelings of hurt and anger in your relationships, struggles with sleep and exhaustion, and stress related to a project deadline. It seems that when you feel hurt, you tend to go quiet and avoid the situation, which might lead to more anger and frustration.\n\nYour most recent story about the argument with a close friend seems to have some similarities with the conversation from June, when a visit to your parents brought back old criticism. In both situations, you felt hurt and small, and thought that others didn't value you. However, it seems that you're still struggling with expressing your feelings and setting boundaries in your relationships.\n\nI wonder, what do you think would happen if you were to express your feelings and concerns to your friend, rather than going quiet?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 830
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "This week's conversations have circled around your struggles with sleep, academic pressure, and difficult relationships. It seems that when you're feeling exhausted or restless, you often turn to scrolling on your phone in bed to pass the time.\n\nI noticed that the pattern of avoiding important tasks, like studying, seems to be linked to feelings of fear and anxiety about not doing well. This is similar to what happened last year when you had an argument with a close friend. You felt hurt and angry, and instead of talking it through, you went quiet. It seems that this pattern of avoidance might be repeating itself in your relationships, as well as in your academic pursuits.\n\nYour most recent story about plans falling through with a friend feels similar to the situation from last year. However, this time you acknowledged feeling dismissed and frustrated, and avoided responding to their messages. It's unclear what's changed since then, but it's possible that you're still struggling to communicate your feelings and needs in these situations.\n\nCan you tell me more about what's been going on with this friend, and what you're hoping to get out of your relationships?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": false,
+      "chars": 1177
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "This week's conversations have circled around feelings of overwhelm, hurt, and anger. It's been a challenging time, with academic pressure, relationship issues, and sleep problems all weighing on you.\n\nIt seems that when you feel anxious or hurt, you tend to put things off or go quiet instead of addressing the issue directly. This pattern has been noticeable in your conversations about exams and your friend's cancelled plans. \n\nYour recent argument with your friend about cancelled plans brings to mind a similar situation from May, when a visit to your parents left you feeling small and frustrated. While the situation is different, the emotions and reactions seem similar. Have you noticed any changes in how you respond to similar situations, or is there something that's making it harder for you to speak up this time?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": false,
+      "chars": 827
+    },
+    {
+      "status": "ready",
+      "echo_found": true,
+      "text": "It's been a tough week, with feelings of hurt and anger surfacing in your relationships. It seems that when you feel judged or criticized, you tend to pull back and avoid the situation, rather than addressing the issue directly.\n\nYour most recent story about cutting short a family visit due to feeling judged and criticized seems to echo a pattern from last year, when a similar visit left you feeling small and frustrated. This time, you cut the visit short, but it's unclear whether this was a step forward in setting boundaries or a way to avoid further discomfort.\n\nWhat does it mean for you to prioritize your own needs and feelings in these situations, and how can you find a way to communicate your boundaries without feeling like you're walking on eggshells?",
+      "names_the_past": true,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 767
+    },
+    {
+      "status": "ready",
+      "echo_found": false,
+      "text": "This week, our conversations have revolved around feeling let down, overwhelmed, and lonely. It seems you've been struggling with hurt and anger when relationships don't go as planned, and this has led you to pull back and avoid reaching out to others. I've noticed that when you feel overwhelmed or uncertain, you tend to procrastinate and put things off, which can create more stress in the long run.\n\nIt's understandable to feel this way, especially with the exam date looming. I'm here to listen and support you. Can you tell me more about what's been going through your mind when you feel like you're going to fail?",
+      "names_the_past": false,
+      "invents_the_past": false,
+      "grounded": true,
+      "ends_with_question": true,
+      "length_ok": true,
+      "chars": 620
+    }
+  ]
+}

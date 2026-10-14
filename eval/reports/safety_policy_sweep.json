@@ -1,0 +1,47 @@
+{
+  "n_clinical_subsample": 298,
+  "n_counselling": 150,
+  "guard_flag_rate_counselling": 0.06,
+  "policies": [
+    {
+      "policy": "current: floor|guard|p>=.45",
+      "clinical_recall_crisis": 0.964,
+      "clinical_recall_crisis_or_elevated": 0.971,
+      "flag_rate_counselling_posts": 0.213,
+      "flag_rate_everyday": 0.05,
+      "flag_rate_hard_negatives": 0.61
+    },
+    {
+      "policy": "floor|guard|p>=.90",
+      "clinical_recall_crisis": 0.92,
+      "clinical_recall_crisis_or_elevated": 0.971,
+      "flag_rate_counselling_posts": 0.107,
+      "flag_rate_everyday": 0.0,
+      "flag_rate_hard_negatives": 0.475
+    },
+    {
+      "policy": "floor|guard|p>=.98",
+      "clinical_recall_crisis": 0.841,
+      "clinical_recall_crisis_or_elevated": 0.971,
+      "flag_rate_counselling_posts": 0.06,
+      "flag_rate_everyday": 0.0,
+      "flag_rate_hard_negatives": 0.322
+    },
+    {
+      "policy": "floor|(guard&p>=.10)|p>=.98",
+      "clinical_recall_crisis": 0.819,
+      "clinical_recall_crisis_or_elevated": 0.949,
+      "flag_rate_counselling_posts": 0.04,
+      "flag_rate_everyday": 0.0,
+      "flag_rate_hard_negatives": 0.305
+    },
+    {
+      "policy": "floor|(guard&p>=.10)|p>=.90",
+      "clinical_recall_crisis": 0.899,
+      "clinical_recall_crisis_or_elevated": 0.949,
+      "flag_rate_counselling_posts": 0.087,
+      "flag_rate_everyday": 0.0,
+      "flag_rate_hard_negatives": 0.458
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "n_reviews": 1558,
+  "apps": {
+    "wysa": 495,
+    "woebot": 492,
+    "replika": 465,
+    "seven_cups": 31,
+    "minddoc": 31,
+    "ash": 23,
+    "earkick": 21
+  },
+  "approaches": {
+    "A_theme_categories": {
+      "distribution": {
+        "emotional_support": 0.356,
+        "conversation_quality": 0.157,
+        "therapeutic_tools": 0.134,
+        "pricing_paywall": 0.104,
+        "access_barriers": 0.08,
+        "relationship_companionship": 0.074,
+        "reliability_bugs": 0.035,
+        "human_support": 0.03,
+        "personalization": 0.013,
+        "safety_crisis": 0.012,
+        "privacy_trust": 0.004,
+        "clinical_effectiveness": 0.002
+      },
+      "cramers_v_with_app": 0.326,
+      "stability_ari": "n/a (deterministic given annotation; annotator validity in review_themes.json)"
+    },
+    "B_text_clusters": {
+      "by_k": {
+        "3": {
+          "silhouette": 0.056,
+          "stability_ari": 0.534,
+          "cramers_v_with_app": 0.37
+        },
+        "4": {
+          "silhouette": 0.051,
+          "stability_ari": 0.711,
+          "cramers_v_with_app": 0.493
+        },
+        "5": {
+          "silhouette": 0.046,
+          "stability_ari": 0.895,
+          "cramers_v_with_app": 0.411
+        },
+        "6": {
+          "silhouette": 0.051,
+          "stability_ari": 0.839,
+          "cramers_v_with_app": 0.379
+        },
+        "7": {
+          "silhouette": 0.047,
+          "stability_ari": 0.702,
+          "cramers_v_with_app": 0.367
+        },
+        "8": {
+          "silhouette": 0.048,
+          "stability_ari": 0.652,
+          "cramers_v_with_app": 0.378
+        },
+        "9": {
+          "silhouette": 0.033,
+          "stability_ari": 0.552,
+          "cramers_v_with_app": 0.395
+        },
+        "10": {
+          "silhouette": 0.038,
+          "stability_ari": 0.577,
+          "cramers_v_with_app": 0.41
+        }
+      },
+      "selected_k": 6
+    },
+    "C_hybrid_theme_profiles": {
+      "by_k": {
+        "3": {
+          "silhouette": 0.192,
+          "stability_ari": 0.956,
+          "cramers_v_with_app": 0.353
+        },
+        "4": {
+          "silhouette": 0.17,
+          "stability_ari": 0.71,
+          "cramers_v_with_app": 0.294
+        },
+        "5": {
+          "silhouette": 0.179,
+          "stability_ari": 0.76,
+          "cramers_v_with_app": 0.264
+        },
+        "6": {
+          "silhouette": 0.182,
+          "stability_ari": 0.554,
+          "cramers_v_with_app": 0.263
+        },
+        "7": {
+          "silhouette": 0.187,
+          "stability_ari": 0.622,
+          "cramers_v_with_app": 0.266
+        },
+        "8": {
+          "silhouette": 0.195,
+          "stability_ari": 0.607,
+          "cramers_v_with_app": 0.272
+        },
+        "9": {
+          "silhouette": 0.206,
+          "stability_ari": 0.589,
+          "cramers_v_with_app": 0.272
+        },
+        "10": {
+          "silhouette": 0.222,
+          "stability_ari": 0.619,
+          "cramers_v_with_app": 0.289
+        }
+      },
+      "selected_k": 3
+    }
+  },
+  "hybrid_segment_profiles": {
+    "0": {
+      "share": 0.392,
+      "n": 611,
+      "top_features": [
+        [
+          "conversation_quality:complaint",
+          0.42
+        ],
+        [
+          "pricing_paywall:complaint",
+          0.42
+        ],
+        [
+          "access_barriers:complaint",
+          0.29
+        ],
+        [
+          "reliability_bugs:complaint",
+          0.26
+        ]
+      ],
+      "mean_rating": 2.15,
+      "apps": {
+        "replika": 0.56,
+        "woebot": 0.22,
+        "wysa": 0.13,
+        "seven_cups": 0.03,
+        "minddoc": 0.03,
+        "ash": 0.01,
+        "earkick": 0.01
+      }
+    },
+    "1": {
+      "share": 0.532,
+      "n": 829,
+      "top_features": [
+        [
+          "emotional_support:praise_or_neutral",
+          0.72
+        ],
+        [
+          "therapeutic_tools:praise_or_neutral",
+          0.49
+        ],
+        [
+          "conversation_quality:praise_or_neutral",
+          0.4
+        ],
+        [
+          "human_support:praise_or_neutral",
+          0.28
+        ]
+      ],
+      "mean_rating": 4.84,
+      "apps": {
+        "wysa": 0.45,
+        "woebot": 0.37,
+        "replika": 0.13,
+        "earkick": 0.02,
+        "ash": 0.01,
+        "minddoc": 0.01,
+        "seven_cups": 0.01
+      }
+    },
+    "2": {
+      "share": 0.076,
+      "n": 118,
+      "top_features": [
+        [
+          "clinical_effectiveness:praise_or_neutral",
+          0.99
+        ],
+        [
+          "pricing_paywall:praise_or_neutral",
+          0.96
+        ],
+        [
+          "personalization:praise_or_neutral",
+          0.96
+        ],
+        [
+          "human_support:praise_or_neutral",
+          0.93
+        ]
+      ],
+      "mean_rating": 4.47,
+      "apps": {
+        "woebot": 0.41,
+        "wysa": 0.37,
+        "replika": 0.13,
+        "seven_cups": 0.03,
+        "minddoc": 0.03,
+        "ash": 0.02,
+        "earkick": 0.02
+      }
+    }
+  }
+}

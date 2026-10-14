@@ -1,0 +1,84 @@
+{
+  "annotator": "llama3.1",
+  "n_gold": 120,
+  "annotation_failures": 0,
+  "micro_f1": 0.62,
+  "micro_precision": 0.631,
+  "micro_recall": 0.61,
+  "macro_f1": 0.546,
+  "polarity_agreement_on_shared_themes": 0.936,
+  "per_theme": {
+    "emotional_support": {
+      "precision": 0.414,
+      "recall": 0.571,
+      "f1": 0.48,
+      "support": 21
+    },
+    "conversation_quality": {
+      "precision": 0.66,
+      "recall": 0.868,
+      "f1": 0.75,
+      "support": 38
+    },
+    "therapeutic_tools": {
+      "precision": 0.71,
+      "recall": 0.733,
+      "f1": 0.721,
+      "support": 30
+    },
+    "pricing_paywall": {
+      "precision": 0.826,
+      "recall": 0.76,
+      "f1": 0.792,
+      "support": 25
+    },
+    "access_barriers": {
+      "precision": 0.417,
+      "recall": 0.714,
+      "f1": 0.526,
+      "support": 7
+    },
+    "reliability_bugs": {
+      "precision": 0.556,
+      "recall": 0.625,
+      "f1": 0.588,
+      "support": 8
+    },
+    "safety_crisis": {
+      "precision": 0.5,
+      "recall": 0.25,
+      "f1": 0.333,
+      "support": 4
+    },
+    "human_support": {
+      "precision": 0.615,
+      "recall": 0.444,
+      "f1": 0.516,
+      "support": 18
+    },
+    "privacy_trust": {
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "support": 4
+    },
+    "personalization": {
+      "precision": 0.7,
+      "recall": 0.5,
+      "f1": 0.583,
+      "support": 14
+    },
+    "relationship_companionship": {
+      "precision": 0.733,
+      "recall": 0.846,
+      "f1": 0.786,
+      "support": 13
+    },
+    "clinical_effectiveness": {
+      "precision": 0.333,
+      "recall": 0.043,
+      "f1": 0.077,
+      "support": 23
+    }
+  }
+}
