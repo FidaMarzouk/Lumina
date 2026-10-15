@@ -1,0 +1,63 @@
+# Lumina: UI + API + local Ollama.   docker compose up -d --build   →   http://localhost:8080
+# See "Run with Docker" in README.md.
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434   # the ollama service below (overrides .env, where it is localhost)
+    volumes:
+      - user-data:/app/data/user      # accounts + memory (SQLite); stays on this machine, survives rebuilds
+      - index:/app/data/index         # knowledge index, built on first start
+      - hf-cache:/cache/hf            # HuggingFace models + Kokoro voice, downloaded once
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_KEEP_ALIVE: 30m          # keep the chat model loaded between messages
+    volumes:
+      - ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # One-shot: pulls the chat model (when LLM_PROVIDER=ollama) and the safety model into the ollama volume
+  # (instant once they are there)
+  ollama-pull:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until ollama list >/dev/null 2>&1; do sleep 1; done
+        if [ "${LLM_PROVIDER:-ollama}" = "ollama" ]; then ollama pull ${LLM_MODEL:-llama3.1}; fi
+        ollama pull ${SAFETY_GUARD_MODEL:-llama-guard3:1b}
+    depends_on:
+      - ollama
+    restart: "no"
+
+volumes:
+  user-data:
+  index:
+  hf-cache:
+  ollama:

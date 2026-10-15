@@ -71,6 +71,28 @@ python -m lumina.memory.seed_demo           # optional: demo@lumina.local / lumi
 UI; nothing is sent to a speech service. It renders about 4× faster than real time on CPU, one sentence at a time.
 Without the `voice` extra the UI falls back to the browser's built-in voices.
 
+## Run with Docker
+Needs Docker Desktop only (on Windows: WSL 2 backend, and an NVIDIA driver for the GPU). No Python, Node or Ollama on the host.
+```bash
+cp .env.example .env                         # optional; the defaults work (OLLAMA_BASE_URL is set by compose)
+docker compose up -d --build                 # UI on http://localhost:8080
+docker compose logs -f backend               # first start: pulls the models, builds the knowledge index
+docker compose exec backend python -m lumina.memory.seed_demo   # optional demo account
+docker compose down                          # stop (data is kept; `down -v` deletes it)
+```
+
+| Service | What it runs | Data (named volume) |
+|---|---|---|
+| `frontend` | nginx: the built UI, and the API routes proxied to `backend` | — |
+| `backend` | `uvicorn lumina.api:app`, CPU torch | `user-data` (accounts SQLite), `index` (ChromaDB), `hf-cache` (HF models, Kokoro) |
+| `ollama` | chat model + Llama Guard, on the GPU | `ollama` |
+| `ollama-pull` | one-shot: pulls the models, then exits | — |
+
+The first start downloads ~5 GB of Ollama models and ~2 GB of HuggingFace models, and builds the knowledge
+index from `data/knowledge/processed`; later starts take seconds. Accounts live in the `user-data` volume, not in
+`data/user/`. After a code change, run `docker compose up -d --build` again. Without an NVIDIA GPU, delete the
+`deploy:` block of the `ollama` service (it then runs on CPU, slowly) or set `LLM_PROVIDER=groq` in `.env`.
+
 ## Test, evaluate, report
 ```bash
 pytest                                     # fast offline suite (no models)

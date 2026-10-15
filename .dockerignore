@@ -1,0 +1,34 @@
+# Keep the build context small and keep private data out of images
+.git
+.env
+.env.*
+!.env.example
+.claude
+.vscode
+.idea
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+.pytest_cache
+.ruff_cache
+.ipynb_checkpoints
+**/node_modules
+frontend/dist
+frontend/.vite
+
+# Only data/knowledge/processed is copied into the image; everything else stays out
+data/user
+data/index
+data/cache
+data/raw
+data/snapshots
+data/market
+data/eval
+data/knowledge/raw
+
+notebooks
+eval
+reports
+tests
+docs
+logs
