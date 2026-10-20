@@ -112,26 +112,19 @@ python eval/runners/cbt_extraction.py      # CBT-note extraction vs hand labels 
 python eval/runners/insight_quality.py     # weekly insights for synthetic users (live LLM + guards)
 python -m lumina.reporting                 # re-render reports/lumina_report.html after any of the above
 ```
-
 ## Accounts, memory and insights
-Guests chat exactly as before: nothing is stored. With an account, each conversation is a **session**:
+
+Guests chat exactly as before: nothing is stored. With an account, each conversation is a **session**.
 
 | Feature | How it works |
 |---|---|
-| **Insights from day one** | After each turn, the LLM writes a short CBT note in the background: the situation, thoughts, feelings and behaviours stated in the message, validated and checked by the injection classifier. Once a conversation has enough of these, Lumina offers **one** tentative reflection linking them, and the UI shows the link. |
-| **A journey** | Start an *open* session (your own agenda) or a *guided* one, which works through a step of a journey in `configs/journeys/`. When a session ends, the step counts as done, the planner picks the next step (the current journey, or one recommended from recurring themes), and the LLM words the invitation. It is waiting at the next visit. |
-| **Patterns** | Each finished session becomes an *episode*: an LLM summary of the notes, with an embedding. `GET /insights/weekly` mines the week (recurring themes, feeling → behaviour links) and links today's story to the most similar earlier episode, preferring one from about a year ago. The LLM writes it up from that evidence only. |
-| **Inner weather** | An optional check-in (clear, partly cloudy, foggy, rainy, stormy) at the start of a conversation. It tunes Lumina's opening line and is passed to the reply prompt as context on ordinary turns. It is not stored. |
-| **Things that helped** | The per-message extraction also notes what the person says helped them. At the end of a session these are *offered* for their jar; nothing is kept until they choose to, and they can add their own. On a rainy or stormy day, Talk shows what is in the jar. |
-**Privacy.** Memory is opt-in (the consent box at sign-up, or the switch in *Your account*). Lumina stores labels,
-short paraphrased notes and summaries, **never the messages themselves**, in `data/user/lumina.db`.
-People can download everything (`GET /users/me/export`) or delete their account and all of its data
-(`DELETE /users/me`). Logs still contain no text.
-**Safety.** The safety assessment still runs first. Crisis, elevated-risk and injection turns get no memory, no
-reflection and no journey step in the prompt. A session that contained a crisis turn gets no summary and no
-journey push, only an open check-in. Every summary, next step and weekly insight goes through the output guard;
-weekly insights also go through Llama Guard. If one is rejected, nothing is shown.
-
+| **Insights from day one** | After each turn, the LLM writes a short CBT note in the background, capturing the situation, thoughts, feelings and behaviours stated in the message. The note is validated and checked by the injection classifier. Once enough notes are available, Lumina offers **one** tentative reflection linking them, which is displayed in the UI. |
+| **A journey** | Start an *open* session (your own agenda) or a *guided* one, which follows a step from a journey defined in `configs/journeys/`. When a session ends, the step is marked complete. The planner selects the next step from the current journey or recommends one based on recurring themes, and the LLM writes the invitation. It waits for the next visit. |
+| **Patterns** | Each completed session becomes an *episode*: an LLM-generated summary of the notes, stored with an embedding. `GET /insights/weekly` analyses the week for recurring themes and feeling-to-behaviour links, then connects today's story to the most similar earlier episode, favouring one from approximately a year ago. The LLM generates the reflection using only this evidence. |
+| **Inner weather** | An optional check-in (clear, partly cloudy, foggy, rainy or stormy) at the start of a conversation. It shapes Lumina's opening line and is passed to the reply prompt as context during ordinary turns. It is not stored. |
+| **Things that helped** | Per-message extraction also identifies what the person says helped them. At the end of a session, these items are *offered* for their jar; nothing is saved until they choose to keep it. They can also add their own items. On rainy or stormy days, Talk displays what's in the jar. |
+| **Privacy** | Memory is opt-in, through the consent box at sign-up or the switch in *Your account*. Lumina stores labels, short paraphrased notes and summaries, **never the messages themselves**, in `data/user/lumina.db`. Users can export their data (`GET /users/me/export`) or delete their account and all associated data (`DELETE /users/me`). Logs contain no text. |
+| **Safety** | Safety assessment always runs first. Crisis, elevated-risk and injection turns receive no memory, reflection or journey step in the prompt. A session containing a crisis turn receives no summary or journey progression, only an open check-in. Every summary, next step and weekly insight passes through the output guard; weekly insights also pass through Llama Guard. If an output is rejected, nothing is shown. |
 ## Knowledge base
 ```bash
 python -m lumina.knowledge.build_knowledge_base     # clean data/knowledge/raw → processed → data/index/v1 (+ manifest.json)
