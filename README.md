@@ -119,20 +119,14 @@ Guests chat exactly as before: nothing is stored. With an account, each conversa
 | Feature | How it works |
 |---|---|
 | **Insights from day one** | After each turn, the LLM writes a short CBT note in the background: the situation, thoughts, feelings and behaviours stated in the message, validated and checked by the injection classifier. Once a conversation has enough of these, Lumina offers **one** tentative reflection linking them, and the UI shows the link. |
-
 | **A journey** | Start an *open* session (your own agenda) or a *guided* one, which works through a step of a journey in `configs/journeys/`. When a session ends, the step counts as done, the planner picks the next step (the current journey, or one recommended from recurring themes), and the LLM words the invitation. It is waiting at the next visit. |
-
 | **Patterns** | Each finished session becomes an *episode*: an LLM summary of the notes, with an embedding. `GET /insights/weekly` mines the week (recurring themes, feeling → behaviour links) and links today's story to the most similar earlier episode, preferring one from about a year ago. The LLM writes it up from that evidence only. |
-
 | **Inner weather** | An optional check-in (clear, partly cloudy, foggy, rainy, stormy) at the start of a conversation. It tunes Lumina's opening line and is passed to the reply prompt as context on ordinary turns. It is not stored. |
-
 | **Things that helped** | The per-message extraction also notes what the person says helped them. At the end of a session these are *offered* for their jar; nothing is kept until they choose to, and they can add their own. On a rainy or stormy day, Talk shows what is in the jar. |
-
 **Privacy.** Memory is opt-in (the consent box at sign-up, or the switch in *Your account*). Lumina stores labels,
 short paraphrased notes and summaries, **never the messages themselves**, in `data/user/lumina.db`.
 People can download everything (`GET /users/me/export`) or delete their account and all of its data
 (`DELETE /users/me`). Logs still contain no text.
-
 **Safety.** The safety assessment still runs first. Crisis, elevated-risk and injection turns get no memory, no
 reflection and no journey step in the prompt. A session that contained a crisis turn gets no summary and no
 journey push, only an open check-in. Every summary, next step and weekly insight goes through the output guard;
