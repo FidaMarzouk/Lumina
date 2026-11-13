@@ -256,7 +256,9 @@ def _prompt_crisis() -> str:
         "is in immediate danger, and to stay with them.\n"
         "- You may end with one gentle, open question inviting them to keep talking.\n"
         "- Never give any information about methods, means, doses, or ways to self-harm.\n"
-        "- Never write phone numbers. Do not use clinical language.\n"
+        "- Never write phone numbers or emergency numbers of any length, and never name a specific hotline or "
+        "country's service: say \"the support lines shown on screen\". Avoid digits altogether.\n"
+        "- Do not use clinical language.\n"
     ).strip()
 
 

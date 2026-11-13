@@ -4,6 +4,7 @@ Checks (structural + model; no phrase lists):
   1. anything shaped like a phone number — contact numbers come only from the frontend help sheet; LLMs
      invent hotlines.  Countdowns, year ranges, dates and clock times are not phone numbers (see
      has_phone_number): the old pattern replaced every reply that named the "5-4-3-2-1" exercise.
+     On crisis turns, emergency short codes too ("988", "15"): the model names another country's line.
   2. medication dosages  (number + dose unit)
   3. Llama Guard on the reply: self-harm content (S11) or specialized medical advice (S6)
 
@@ -55,7 +56,12 @@ def has_phone_number(text: str) -> bool:
     return False
 
 
-_DOSE = re.compile(r"\b\d+(?:[.,]\d+)?\s?(?:mg|milligrams?|mcg|micrograms?|ml|millilit(?:er|re)s?|tablets?|pills?|capsules?)\b",
+# Emergency short codes ("988", "le 15", "112").  Checked on crisis turns only, where a reply has no reason to
+# hold a 2-4 digit number and a wrong country's code is dangerous; "24/7", ranges, times, decimals and
+# percentages are left alone.  On other turns short numbers are ordinary ("7 to 8 hours", "10 minutes").
+_SHORT_CODE = re.compile(r"(?<![\w.,:/+\-])\d{2,4}(?![\w:/%\-]|[.,]\d)")
+
+_DOSE =re.compile(r"\b\d+(?:[.,]\d+)?\s?(?:mg|milligrams?|mcg|micrograms?|ml|millilit(?:er|re)s?|tablets?|pills?|capsules?)\b",
                    re.IGNORECASE)
 _BLOCKING_GUARD = {"suicide_self_harm", "specialized_advice"}
 
@@ -82,6 +88,8 @@ def check(reply: str, *, user_message: str, crisis: bool, crisis_subtype: str,
     reasons: list[str] = []
     if has_phone_number(reply):
         reasons.append("phone_number")
+    elif crisis and _SHORT_CODE.search(reply):
+        reasons.append("short_code")
     if _DOSE.search(reply):
         reasons.append("dosage")
     if response_guard is not None:

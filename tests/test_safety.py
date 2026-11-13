@@ -125,6 +125,34 @@ def test_templates_contain_no_phone_numbers():
 
 
 @pytest.mark.parametrize("reply", [
+    "You can call the 988 Suicide & Crisis Lifeline.",
+    "Tu peux appeler le 15 ou te rendre à l'hôpital.",
+    "Please dial 112 now.",
+    "Call 190.",
+    "Le 3114 est joignable jour et nuit.",
+])
+def test_short_codes_are_replaced_on_crisis_turns_only(reply):
+    g = output_guard.check(reply, user_message="x", crisis=True, crisis_subtype="ideation")
+    assert g.replaced and g.reasons == ("short_code",) and g.text == templates.ideation_fallback()
+    assert not output_guard.check(reply, user_message="x", crisis=False, crisis_subtype="none").replaced
+
+
+@pytest.mark.parametrize("reply", [
+    "I'm here with you. The support lines on screen are open 24/7.",
+    "You are not alone. Take one slow breath with me, then tell me what happened.",
+    "Stay with them if you can, even for 5 minutes, and use the lines shown on screen.",
+])
+def test_crisis_replies_without_codes_are_kept(reply):
+    assert not output_guard.check(reply, user_message="x", crisis=True, crisis_subtype="ideation").replaced
+
+
+def test_templates_contain_no_short_codes():
+    for t in (templates.method_reply(), templates.ideation_fallback(), templates.third_party_fallback(),
+              templates.unavailable_reply(True)):
+        assert not output_guard._SHORT_CODE.search(t)
+
+
+@pytest.mark.parametrize("reply", [
     "You can reach the line at 71 391 000.",
     "Call +216 71 391 000 any time.",
     "Try 1-800-273-8255, they are open all night.",
