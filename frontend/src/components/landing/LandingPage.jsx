@@ -1,21 +1,23 @@
 import { LeafScatter, OpenDoor, PottedPlant } from '../art/Illustrations'
+import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
-import { HelpLink, NightToggle } from '../layout/Header'
+import { HelpLink } from '../layout/Header'
+import AppearanceMenu from '../ui/AppearanceMenu'
 import RingButton from '../ui/RingButton'
 import { ArrowIcon } from '../ui/Icons'
 
-function LandingPage({ onStart, onHelp, user, onLogIn, night, onToggleNight }) {
+function LandingPage({ onStart, onHelp, user, onLogIn, appearance }) {
   return (
     <div className="landing">
       <header className="rulebar">
-        <span className="brand">Lumina</span>
-        <Horizon />
+        <span className="brand" role="img" aria-label="Lumina"><Logo /></span>
+        <Horizon slow={appearance.night} />
         <nav className="rulebar-links" aria-label="Page">
           <a href="#how">How it works</a>
           {user
             ? <span className="rulebar-who">Hi{user.display_name ? `, ${user.display_name}` : ''}</span>
             : <button type="button" className="link-quiet" onClick={onLogIn}>Log in</button>}
-          <NightToggle night={night} onToggle={onToggleNight} />
+          <AppearanceMenu appearance={appearance} />
           <HelpLink onHelp={onHelp} />
         </nav>
       </header>

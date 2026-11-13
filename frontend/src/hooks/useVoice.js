@@ -37,7 +37,10 @@ function pickBrowserVoice(gender) {
 }
 
 
-export function useVoice({ gender }) {
+// `soft`: read a little more quietly (in night mode).
+const SOFT_VOLUME = 0.7
+
+export function useVoice({ gender, soft = false }) {
   const [speaking, setSpeaking] = useState(false)
   const [serverVoice, setServerVoice] = useState(null)   // null = unknown, then true / false
 
@@ -52,6 +55,8 @@ export function useVoice({ gender }) {
   const levelRef = useRef(0)
   const sampleRef = useRef(null)
   const genderRef = useRef(gender)
+  const softRef = useRef(soft)
+  useEffect(() => { softRef.current = soft }, [soft])
   const serverRef = useRef(serverVoice)
   useEffect(() => { genderRef.current = gender }, [gender])
   useEffect(() => { serverRef.current = serverVoice }, [serverVoice])
@@ -105,7 +110,9 @@ export function useVoice({ gender }) {
       await new Promise(resolve => {
         const src = ctx.createBufferSource()
         src.buffer = buffer
-        src.connect(outRef.current)
+        const level = ctx.createGain()
+        level.gain.value = softRef.current ? SOFT_VOLUME : 1
+        src.connect(level).connect(outRef.current)
         src.onended = resolve
         srcRef.current = src
         src.start()
@@ -123,6 +130,7 @@ export function useVoice({ gender }) {
       const u = new SpeechSynthesisUtterance(text)
       if (voice) u.voice = voice
       u.rate = 0.95
+      u.volume = softRef.current ? SOFT_VOLUME : 1
       u.onstart = () => { if (run === runRef.current) { browserSpeakingRef.current = true; setSpeaking(true) } }
       if (i === chunks.length - 1) u.onend = u.onerror = () => { browserSpeakingRef.current = false; resolve() }
       window.speechSynthesis.speak(u)

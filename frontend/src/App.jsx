@@ -18,7 +18,7 @@ import { useAuth } from './hooks/useAuth'
 import { useChat } from './hooks/useChat'
 import { useVoice } from './hooks/useVoice'
 import { usePersisted } from './hooks/usePersisted'
-import { useDaylight } from './hooks/useDaylight'
+import { useAppearance } from './hooks/useDaylight'
 import { fetchJar } from './api/personal.js'
 import { styleById } from './components/ui/styles'
 
@@ -46,10 +46,11 @@ function App() {
   const [listening, setListening] = useState(false)
   const pondRef = useRef(null)
 
-  const { paper, night, toggleNight } = useDaylight()
+  const appearance = useAppearance()
+  const { paper, night } = appearance
   const auth = useAuth()
   const chat = useChat(persona, { token: auth.token, active: inside })
-  const voice = useVoice({ gender })
+  const voice = useVoice({ gender, soft: night })
   const { speak, cancel, unlock, startMic, stopMic } = voice
   // What the person has kept in their jar, shown on hard days at the start of a conversation.
   const [helped, setHelped] = useState([])
@@ -111,7 +112,7 @@ function App() {
         <PaperDefs />
         {paper === 'night' && <NightSky />}
         <LandingPage onStart={start} onHelp={() => setHelpOpen(true)} user={auth.user} onLogIn={() => openAuth('login')}
-                     night={night} onToggleNight={toggleNight} />
+                     appearance={appearance} />
         <BreathingPebble />
         {help}
       </>
@@ -124,7 +125,7 @@ function App() {
         {paper === 'night' && <NightSky />}
         <AuthPage key={authMode} initialMode={authMode} auth={auth} onDone={() => setView('app')}
                   onGuest={() => setView('app')} onHome={home} onHelp={() => setHelpOpen(true)}
-                  night={night} onToggleNight={toggleNight} />
+                  appearance={appearance} />
         <BreathingPebble />
         {help}
       </>
@@ -139,7 +140,6 @@ function App() {
       persona={persona} onPersona={setPersona}
       gender={gender} onGender={setGender}
       voiceOn={voiceOn} onVoiceOn={on => { if (!on) cancel(); setVoiceOn(on) }}
-      serverVoice={voice.serverVoice}
     />
   )
 
@@ -149,7 +149,7 @@ function App() {
       {paper === 'night' && <NightSky />}
       <Header view={view} onNavigate={navigate} onHome={home} onNewChat={newChat} onHelp={() => setHelpOpen(true)}
               onSettings={() => setSettingsOpen(true)} user={auth.user} onAccount={() => setAccountOpen(true)}
-              onSignIn={() => openAuth('register')} night={night} onToggleNight={toggleNight} />
+              onSignIn={() => openAuth('register')} appearance={appearance} />
 
       {view === 'journeys' && auth.token && (
         <div className="page-scroll"><JourneysPage token={auth.token} onStartJourney={startJourney} onTalk={() => navigate('app')} /></div>
@@ -174,7 +174,8 @@ function App() {
           <ChatWindow messages={chat.messages} isTyping={chat.isTyping} onListen={listen} session={chat.session}
                       onStarter={send} onSuggest={auth.user ? () => navigate('journeys') : null}
                       onLeaveGuided={() => chat.startWith({ mode: 'open' })}
-                      onWeather={chat.setWeather} onTear={chat.addLuminaLine} helped={auth.token ? helped : []} />
+                      onWeather={chat.setWeather} onTear={chat.addLuminaLine} helped={auth.token ? helped : []}
+                      night={night} />
           {chat.error && <p className="error" role="alert">{chat.error}</p>}
           <InputBar onSend={send} disabled={chat.isTyping || crisisOpen} onListeningChange={onListeningChange}
                     onType={() => pondRef.current?.stir()} />

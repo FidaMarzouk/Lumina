@@ -45,7 +45,7 @@ const SCENES = {
     route: [[20, 142], [80, 128], [140, 132], [196, 110], [244, 96], [272, 92]],
     scene: (
       <>
-        <rect width="320" height="160" fill="#eef1ea" />
+        <rect width="320" height="160" fill="var(--sky, #eef1ea)" />
         <path d="M58 34 a16 16 0 1 0 14 24 a12 12 0 0 1 -14 -24z" fill="var(--peach)" />
         <g fill="var(--forest)" opacity=".7"><circle cx="120" cy="26" r="1.6" /><circle cx="180" cy="40" r="1.4" /><circle cx="230" cy="20" r="1.8" /><circle cx="150" cy="56" r="1.2" /></g>
         <path d="M0 116 C 80 96, 160 112, 240 94 S 300 86, 320 90 V160 H0Z" fill="var(--mint-wash)" />

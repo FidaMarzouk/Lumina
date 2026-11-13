@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 // Fonts are bundled, not loaded from a font CDN, so no request leaves the app.
 import '@fontsource/montserrat/800.css'
 import '@fontsource/montserrat/900.css'
+import '@fontsource-variable/fraunces/full.css'
 import '@fontsource/caveat/500.css'
 import '@fontsource/caveat/700.css'
 import '@fontsource/poppins/400.css'
