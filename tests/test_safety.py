@@ -121,4 +121,39 @@ def test_output_guard_uses_model_verdict_and_keeps_safe_text():
 def test_templates_contain_no_phone_numbers():
     for t in (templates.method_reply(), templates.ideation_fallback(), templates.third_party_fallback(),
               templates.unavailable_reply(True), templates.generic_fallback()):
-        assert not output_guard._PHONE.search(t)
+        assert not output_guard.has_phone_number(t)
+
+
+@pytest.mark.parametrize("reply", [
+    "You can reach the line at 71 391 000.",
+    "Call +216 71 391 000 any time.",
+    "Try 1-800-273-8255, they are open all night.",
+    "Their number is (555) 123-4567.",
+    "Ring 555-1234 and ask for the duty nurse.",
+    "Samaritans are on 116 123.",
+    "Text HOME to 741741.",
+    "The number is 555.123.4567",
+    "Call 0800 123 456 right now.",
+])
+def test_phone_shaped_numbers_are_caught(reply):
+    assert output_guard.has_phone_number(reply)
+
+
+@pytest.mark.parametrize("reply", [
+    "Let's try the 5-4-3-2-1 exercise: name five things you can see.",
+    "Breathe in for 4, hold for 7, out for 8 (the 4-7-8 pattern).",
+    "Studies from 2019-2021 suggest this is common.",
+    "Between 2019 and 2021 a lot changed for many people.",
+    "Try going to bed at 22:30 - 23:00 for a week.",
+    "Lights out between 22:30-23:00, up at 07:00.",
+    "You could set aside 10-15 minutes for worry time.",
+    "Adults are advised 150-300 minutes of movement a week.",
+    "We first talked about this on 2026-11-13.",
+    "About 1 in 5 people, more than 1,000,000 adults, feel this each year.",
+    "Count back from 100 in sevens: 100, 93, 86, 79.",
+    "That was 3 weeks and 2 days ago.",
+])
+def test_ordinary_numbers_are_not_phone_numbers(reply):
+    assert not output_guard.has_phone_number(reply)
+    g = output_guard.check(reply, user_message="x", crisis=False, crisis_subtype="none")
+    assert not g.replaced and g.text == reply

@@ -1,7 +1,9 @@
 """Output guard — checks every LLM reply before it reaches the user.
 
 Checks (structural + model; no phrase lists):
-  1. any phone number  — contact numbers come only from the frontend banner; LLMs invent hotlines
+  1. anything shaped like a phone number — contact numbers come only from the frontend help sheet; LLMs
+     invent hotlines.  Countdowns, year ranges, dates and clock times are not phone numbers (see
+     has_phone_number): the old pattern replaced every reply that named the "5-4-3-2-1" exercise.
   2. medication dosages  (number + dose unit)
   3. Llama Guard on the reply: self-harm content (S11) or specialized medical advice (S6)
 
@@ -17,7 +19,42 @@ from typing import Callable
 
 from . import templates
 
-_PHONE = re.compile(r"(?<![\w.])\+?\d[\d \-().]{4,16}\d(?![\w.])")
+# A run of digit groups joined by single spaces, dots or hyphens (optionally "+" and bracketed groups).
+# Whether a run is shaped like a phone number is decided in has_phone_number().
+_DIGIT_RUN = re.compile(r"(?<![\w.,:/])\+?(?:\(\d{1,4}\)|\d+)(?:[ .\-]?(?:\(\d{1,4}\)|\d+))*(?![\w:/])")
+_PHONE_MIN_DIGITS, _PHONE_MAX_DIGITS = 6, 15       # 116 123 … the E.164 maximum
+
+
+def _is_year(group: str) -> bool:
+    return len(group) == 4 and 1900 <= int(group) <= 2099
+
+
+def has_phone_number(text: str) -> bool:
+    """True when `text` holds something shaped like a phone number.
+
+    Shape only, no word lists.  A digit run counts unless it is one of the things supportive replies
+    legitimately write: a countdown of single digits ("5-4-3-2-1"), a range of years ("2019-2021"), an ISO
+    date, or a short hyphenated range ("150-300 minutes").  Clock times never form a run (":" breaks it).
+    """
+    for m in _DIGIT_RUN.finditer(text):
+        run = m.group()
+        groups = re.findall(r"\d+", run)
+        digits = sum(len(g) for g in groups)
+        if not _PHONE_MIN_DIGITS <= digits <= _PHONE_MAX_DIGITS:
+            continue
+        if max(len(g) for g in groups) < 3:                       # 5-4-3-2-1, 10 20 30
+            continue
+        if len(groups) == 2 and all(_is_year(g) for g in groups):  # 2019-2021
+            continue
+        if (len(groups) == 3 and _is_year(groups[0]) and len(groups[1]) == len(groups[2]) == 2
+                and 1 <= int(groups[1]) <= 12 and 1 <= int(groups[2]) <= 31):   # 2026-11-13
+            continue
+        if len(groups) == 2 and "-" in run and digits < 7:          # 150-300; "116 123" (a space) still counts
+            continue
+        return True
+    return False
+
+
 _DOSE = re.compile(r"\b\d+(?:[.,]\d+)?\s?(?:mg|milligrams?|mcg|micrograms?|ml|millilit(?:er|re)s?|tablets?|pills?|capsules?)\b",
                    re.IGNORECASE)
 _BLOCKING_GUARD = {"suicide_self_harm", "specialized_advice"}
@@ -43,7 +80,7 @@ def _fallback(crisis_subtype: str, crisis: bool) -> str:
 def check(reply: str, *, user_message: str, crisis: bool, crisis_subtype: str,
           response_guard: Callable[[list[dict]], object] | None = None) -> GuardedReply:
     reasons: list[str] = []
-    if _PHONE.search(reply):
+    if has_phone_number(reply):
         reasons.append("phone_number")
     if _DOSE.search(reply):
         reasons.append("dosage")
