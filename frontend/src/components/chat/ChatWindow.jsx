@@ -11,6 +11,12 @@ const STARTERS = [
   { label: 'Something happened today', text: "Something happened today and I can't stop thinking about it." },
   { label: 'Help me understand a feeling', text: "I'd like help understanding a feeling I keep having." },
 ]
+// In the night garden the ways in are written for late nights.
+const NIGHT_STARTERS = [
+  { label: "I can't switch off", text: "It's late and I can't switch off." },
+  { label: 'Help me wind down', text: 'Can you help me wind down before sleep?' },
+  { label: 'Just keep me company', text: "I don't need anything in particular, just some company for a bit." },
+]
 
 // The optional check-in before a conversation: it sets the tone of Lumina's opening line.
 function WeatherCheck({ value, onChange }) {
@@ -40,13 +46,13 @@ function JarTip({ items }) {
 }
 
 // Starters as slips of paper taped down at slight angles, beside the question of the day.
-function Starters({ onStarter, onSuggest, onTear }) {
+function Starters({ onStarter, onSuggest, onTear, night }) {
   return (
     <div className="starters">
       <div className="starters-main">
         <p className="starters-title hand">Not sure where to start?</p>
         <div className="slips">
-          {STARTERS.map(s => (
+          {(night ? NIGHT_STARTERS : STARTERS).map(s => (
             <button key={s.label} type="button" className="slip" onClick={() => onStarter(s.text)}>{s.label}</button>
           ))}
           {onSuggest && <button type="button" className="slip" onClick={onSuggest}>Suggest something to work on</button>}
@@ -75,7 +81,7 @@ function GuidedBar({ step, onLeave }) {
   )
 }
 
-function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSuggest, onLeaveGuided, onWeather, onTear, helped = [] }) {
+function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSuggest, onLeaveGuided, onWeather, onTear, helped = [], night = false }) {
   const end = useRef(null)
   const guided = session?.mode === 'guided' && session.step
   const notStarted = messages.length === 1 && !isTyping
@@ -97,7 +103,7 @@ function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSugges
           {messages.map((m, i) => <MessageBubble key={m.id} message={m} onListen={onListen} signed={i === 0} />)}
           {notStarted && HARD_DAYS.includes(messages[0].weather) && helped.length > 0 && <JarTip items={helped} />}
           {isTyping && <TypingIndicator />}
-          {fresh && onStarter && <Starters onStarter={onStarter} onSuggest={onSuggest} onTear={onTear} />}
+          {fresh && onStarter && <Starters onStarter={onStarter} onSuggest={onSuggest} onTear={onTear} night={night} />}
           <div ref={end} />
         </div>
       </div>

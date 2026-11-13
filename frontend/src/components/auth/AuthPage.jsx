@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
+import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
-import { HelpLink, NightToggle } from '../layout/Header'
+import { HelpLink } from '../layout/Header'
+import AppearanceMenu from '../ui/AppearanceMenu'
 import { LeafScatter } from '../art/Illustrations'
 import { ArrowIcon } from '../ui/Icons'
 
@@ -11,7 +13,7 @@ const PERKS = [
 ]
 
 // Sign up / log in. Memory is opt-in: without consent the account works, but Lumina keeps no notes.
-function AuthPage({ initialMode = 'register', auth, onDone, onGuest, onHome, onHelp, night, onToggleNight }) {
+function AuthPage({ initialMode = 'register', auth, onDone, onGuest, onHome, onHelp, appearance }) {
   const [mode, setMode] = useState(initialMode)
   const [fields, setFields] = useState({ displayName: '', email: '', password: '', confirm: '', consent: false })
   const [error, setError] = useState(null)
@@ -44,10 +46,10 @@ function AuthPage({ initialMode = 'register', auth, onDone, onGuest, onHome, onH
   return (
     <div className="landing auth">
       <header className="rulebar">
-        <button type="button" className="brand" onClick={onHome} aria-label="Lumina, back to the start page">Lumina</button>
-        <Horizon />
+        <button type="button" className="brand" onClick={onHome} aria-label="Lumina, back to the start page"><Logo /></button>
+        <Horizon slow={appearance.night} />
         <nav className="rulebar-links" aria-label="Page">
-          <NightToggle night={night} onToggle={onToggleNight} />
+          <AppearanceMenu appearance={appearance} />
           <HelpLink onHelp={onHelp} />
         </nav>
       </header>

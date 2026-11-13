@@ -1,5 +1,7 @@
+import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
-import { ChatIcon, CompassIcon, DaySunIcon, LighthouseIcon, MoonIcon, NewChatIcon, SlidersIcon, SparkIcon, UserIcon } from '../ui/Icons'
+import AppearanceMenu from '../ui/AppearanceMenu'
+import { ChatIcon, CompassIcon, LighthouseIcon, NewChatIcon, SlidersIcon, SparkIcon, UserIcon } from '../ui/Icons'
 
 // Signed-in people move between talking, their journeys and their insights; the open conversation carries on.
 const PAGES = [
@@ -13,19 +15,11 @@ export const HelpLink = ({ onHelp }) => (
   <button type="button" className="link-help" onClick={onHelp}><LighthouseIcon />Get help</button>
 )
 
-// Night mode on or off (it follows the clock until the person chooses).
-export const NightToggle = ({ night, onToggle }) => (
-  <button type="button" className="link-quiet night-toggle" onClick={onToggle} aria-pressed={night}
-          aria-label="Night mode" title={night ? 'Turn night mode off' : 'Turn night mode on'}>
-    {night ? <DaySunIcon /> : <MoonIcon />}
-  </button>
-)
-
-function Header({ view = 'app', onNavigate, onHome, onNewChat, onHelp, onSettings, user, onAccount, onSignIn, night, onToggleNight }) {
+function Header({ view = 'app', onNavigate, onHome, onNewChat, onHelp, onSettings, user, onAccount, onSignIn, appearance }) {
   return (
     <header className="rulebar rulebar-app">
-      <button type="button" className="brand" onClick={onHome} aria-label="Lumina, back to the start page">Lumina</button>
-      <Horizon />
+      <button type="button" className="brand" onClick={onHome} aria-label="Lumina, back to the start page"><Logo /></button>
+      <Horizon slow={appearance.night} />
       <HelpLink onHelp={onHelp} />
       {/* On phones these wrap onto their own row under the header. */}
       {user && (
@@ -39,7 +33,7 @@ function Header({ view = 'app', onNavigate, onHome, onNewChat, onHelp, onSetting
         </nav>
       )}
       <div className="rulebar-links">
-        <NightToggle night={night} onToggle={onToggleNight} />
+        <AppearanceMenu appearance={appearance} />
         {view === 'app' && (
           <button type="button" className="link-quiet" onClick={onNewChat} aria-label="New chat">
             <NewChatIcon /><span className="label-wide">New chat</span>
