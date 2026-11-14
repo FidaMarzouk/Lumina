@@ -337,6 +337,25 @@ summarises recent real traffic; `eval/runners/latency.py` sends 19 fixed message
   set is small and scripted.
 - Text analysis finishes inside the safety assessment, so it adds no wait.
 
+**P2: streaming.** `POST /chat/stream` sends the reply sentence by sentence (one JSON event per line); `/chat` is
+unchanged and the frontend falls back to it. Only ordinary turns stream (risk "none", no injection). Each
+sentence passes the same structural output guard as a whole reply, run on everything written so far, before it
+is sent. If one fails, the stream stops and the client replaces all text shown with the safe fallback.
+Elevated and crisis replies need Llama Guard's check of the whole reply, so they still arrive complete. Measured
+against the running API (6 messages, live models):
+
+| Turn | First text | Reply complete |
+|---|---|---|
+| Ordinary, streamed (median of 3) | 3.0 s | 5.5 s |
+| Elevated (whole) | 3.1-6.2 s | same |
+| Method request (fixed template) | 1.0 s | same |
+
+- Tests cover a phone number split across two pieces of the stream and a dosage split mid-sentence: neither is
+  ever sent (`tests/test_dialogue_and_api.py`).
+- Found on the way: the knowledge base opened on first use, so the first question after a restart waited ~4 s
+  for it. It now opens at start-up, in the background.
+- Turn traces gain `first_text`, the time to the first streamed sentence.
+
 ## Not yet evaluated
 - Memory and insights with real users: whether reflections and weekly insights feel accurate. Feedback is collected with `POST /insights/{id}/feedback`.
 - Emotion and sentiment models on held-out benchmarks (Stage 6).

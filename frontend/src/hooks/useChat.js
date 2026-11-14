@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { endSession, sendMessage, startSession } from '../api/chat.js'
+import { endSession, sendMessage, startSession, streamMessage } from '../api/chat.js'
 import { withWeather } from '../components/chat/weather.js'
 import { moreUrgent } from '../components/ui/helpLines.js'
 
@@ -88,7 +88,24 @@ export function useChat(persona = 'listener', { token = null, active = false } =
     setIsTyping(true)
     setError(null)
 
-    const send = s => sendMessage(clean, history, persona, s && { token: s.token, sessionId: s.id }, weatherRef.current)
+    // The reply streams into one bubble, sentence by sentence (ordinary turns only; risky replies arrive whole).
+    const replyId = crypto.randomUUID()
+    let shown = ''
+    const show = text => setMessages(prev => (prev.some(m => m.id === replyId)
+      ? prev.map(m => (m.id === replyId ? { ...m, text } : m))
+      : [...prev, message('ai', text, { id: replyId, streaming: true })]))
+    const onEvent = event => {
+      shown = event.type === 'replace' ? event.text : shown + event.text
+      show(shown)
+    }
+    const sessionOf = s => s && { token: s.token, sessionId: s.id }
+    const viaChat = s => sendMessage(clean, history, persona, sessionOf(s), weatherRef.current)
+    // Streaming, or the whole reply at once if streaming is unavailable before anything arrived.
+    const send = s => streamMessage(clean, history, persona, sessionOf(s), weatherRef.current, onEvent).catch(err => {
+      const noEndpoint = err.status === 404 && err.detail === 'Not Found'
+      if (!err.started && (noEndpoint || !err.status || err.status >= 500)) return viaChat(s)
+      throw err
+    })
     try {
       let response
       try {
@@ -102,9 +119,12 @@ export function useChat(persona = 'listener', { token = null, active = false } =
       if (typeof response.reply !== 'string' || !response.reply) throw new Error('Empty reply from server')
 
       if (response.crisis_flag) setCrisis(c => moreUrgent(c, response.crisis_subtype || 'ideation'))
-      setMessages(prev => [...prev, message('ai', response.reply,
-        { isCrisis: response.crisis_flag, insight: response.insight ?? null })])
+      const final = { text: response.reply, streaming: false, isCrisis: response.crisis_flag, insight: response.insight ?? null }
+      setMessages(prev => (prev.some(m => m.id === replyId)
+        ? prev.map(m => (m.id === replyId ? { ...m, ...final } : m))
+        : [...prev, message('ai', response.reply, { id: replyId, ...final })]))
     } catch (err) {
+      setMessages(prev => prev.filter(m => m.id !== replyId))        // no half-written reply is left behind
       setError(err?.message?.startsWith('Server:') ? err.message.slice(8)
                : "Lumina couldn't be reached. Check that the server is running, then send your message again.")
     } finally {

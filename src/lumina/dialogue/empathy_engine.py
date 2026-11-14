@@ -16,6 +16,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 
 import logging
+import threading
 
 from ..config import TOP_K_RESULTS
 from ..nlp.feeling_engine import analyze_feeling
@@ -54,6 +55,27 @@ _NO_NUMBERS_RULE = (
 
 # Lazy-loaded retriever singleton.
 _RETRIEVER = None
+_RETRIEVER_LOCK = threading.Lock()
+
+
+def _retriever():
+    """The knowledge-base retriever, opened once (thread-safe).  Raises if the vector store is missing."""
+    global _RETRIEVER
+    if _RETRIEVER is None:
+        with _RETRIEVER_LOCK:
+            if _RETRIEVER is None:
+                from ..rag.retriever import MentalHealthRetriever
+                _RETRIEVER = MentalHealthRetriever()
+    return _RETRIEVER
+
+
+def warm_up_retrieval() -> None:
+    """Open the knowledge base and run one query, so the first person who asks something does not wait for it
+    (it took ~4 s on first use: P2, docs/evaluation.md §5).  Never raises."""
+    try:
+        _retriever().query("warm up", top_k=1)
+    except Exception as exc:
+        log.warning("Knowledge base not warmed up: %s", type(exc).__name__)
 
 
 # ── Intent categorisation ─────────────────────────────────────────────────────
@@ -94,14 +116,9 @@ def _retrieve_rag_context(text: str, intent: str, safety: SafetyAssessment) -> l
     if not query_text:
         return []
 
-    global _RETRIEVER
-
     try:
         # Built inside the try so a missing / unreadable vector store degrades to "no RAG context".
-        if _RETRIEVER is None:
-            from ..rag.retriever import MentalHealthRetriever
-            _RETRIEVER = MentalHealthRetriever()
-        results = _RETRIEVER.query(query_text, top_k=TOP_K_RESULTS)
+        results = _retriever().query(query_text, top_k=TOP_K_RESULTS)
     except FileNotFoundError as exc:
         log.warning("RAG retriever unavailable: %s", exc)
         return []

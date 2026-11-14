@@ -31,7 +31,7 @@ from .config import PROJECT_ROOT, TRACE_DB_PATH, TRACE_RETENTION_DAYS, TRACES_EN
 
 log = logging.getLogger(__name__)
 
-STAGES = ("safety", "analysis", "memory", "prompt", "llm", "output_guard", "total")
+STAGES = ("safety", "analysis", "memory", "prompt", "first_text", "llm", "output_guard", "total")
 
 # Every column is a label, a number or a list of labels.  Adding a free-text column would break the
 # promise above: `test_traces_hold_no_text` checks the schema.
@@ -68,7 +68,7 @@ class Stopwatch:
 
     def __init__(self):
         self.ms: dict[str, float] = {}
-        self._start = time.perf_counter()
+        self.started = time.perf_counter()
 
     @contextmanager
     def stage(self, name: str):
@@ -79,7 +79,7 @@ class Stopwatch:
             self.ms[name] = self.ms.get(name, 0.0) + (time.perf_counter() - t) * 1000
 
     def finish(self) -> dict[str, float]:
-        self.ms["total"] = (time.perf_counter() - self._start) * 1000
+        self.ms["total"] = (time.perf_counter() - self.started) * 1000
         return {k: round(v, 1) for k, v in self.ms.items()}
 
 

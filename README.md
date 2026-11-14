@@ -42,7 +42,7 @@ src/lumina/            the Python package
 
   orchestrator.py      the fixed turn flow (safety first)
 
-  api.py               FastAPI app: /chat, /tts, plus the routes/ above
+  api.py               FastAPI app: /chat, /chat/stream (sentence by sentence), /tts, plus the routes/ above
 
 frontend/              React + Vite UI: chat, voice orb, voice input/output, crisis help, sign-up / account
 

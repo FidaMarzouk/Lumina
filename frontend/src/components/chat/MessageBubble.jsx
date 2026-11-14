@@ -6,12 +6,14 @@ import { SpeakerIcon } from '../ui/Icons'
 function MessageBubble({ message, onListen, signed = false }) {
   const isUser = message.role === 'user'
   return (
-    <article className={`msg ${isUser ? 'msg-user' : 'msg-ai'} ${message.isCrisis ? 'msg-crisis' : ''}`}>
+    // aria-busy while a reply streams in: screen readers read it once, when it is complete.
+    <article className={`msg ${isUser ? 'msg-user' : 'msg-ai'} ${message.isCrisis ? 'msg-crisis' : ''}`}
+             aria-busy={message.streaming ? 'true' : undefined}>
       <span className="sr-only">{isUser ? 'You said:' : 'Lumina said:'}</span>
       {signed && !isUser && <span className="hand msg-who" aria-hidden="true">Lumina</span>}
       <div className="msg-text">{message.text}</div>
       {!isUser && message.insight && <InsightChain insight={message.insight} />}
-      {!isUser && onListen && (
+      {!isUser && onListen && !message.streaming && (
         <button type="button" className="msg-listen" onClick={() => onListen(message.text)}>
           <SpeakerIcon /><span>Listen</span>
         </button>

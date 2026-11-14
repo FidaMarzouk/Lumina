@@ -339,3 +339,203 @@ def test_action_requests_get_an_honest_cannot_yet_reply_without_retrieval_or_mem
 def test_safety_still_wins_over_an_action_request(engines):
     engines(_nlp(intent="action_request"))
     assert ee.build_prompt("x", CRISIS)["intent_category"] == "crisis"
+
+
+# ─────────────────────────── streaming (P2) ───────────────────────────
+ELEVATED = SafetyAssessment("elevated", "none", False, {})
+
+
+@pytest.fixture
+def streaming(pipeline, monkeypatch):
+    """`install(safety, pieces)`: the LLM streams `pieces`; an exception among them is raised mid-stream."""
+    def install(safety, pieces):
+        calls = pipeline(safety, reply="Whole reply, written at once.")
+        def stream(messages, **kw):
+            for piece in pieces:
+                if isinstance(piece, Exception):
+                    raise piece
+                yield piece
+        monkeypatch.setattr(orch.llm_client, "stream", stream)
+        return calls
+    return install
+
+
+def _events(**kw):
+    return list(orch.respond_stream("x", [], **kw))
+
+
+def test_split_sentences_keeps_decimals_and_quotes_together():
+    assert orch.split_sentences("It was 4.5 hours. Then") == (["It was 4.5 hours. "], "Then")
+    assert orch.split_sentences('She said "stop." Ok! Next') == (['She said "stop." ', "Ok! "], "Next")
+    assert orch.split_sentences("one\ntwo") == (["one\n"], "two")
+    assert orch.split_sentences("no end yet") == ([], "no end yet")
+
+
+def test_ordinary_turn_streams_checked_sentences(streaming):
+    calls = streaming(SAFE, ["That sounds ", "hard. You ", "carried a lot", " today. What ", "helped?"])
+    events = _events()
+    assert [e["text"] for e in events if e["type"] == "delta"] == ["That sounds hard. ", "You carried a lot today. ", "What helped?"]
+    done = events[-1]["result"]
+    assert events[-1]["type"] == "done" and done.reply == "That sounds hard. You carried a lot today. What helped?"
+    assert done.debug["path"] == "llm_stream" and calls == []           # the whole-reply call was never made
+
+
+def test_a_failing_sentence_stops_the_stream_and_replaces_what_was_shown(streaming):
+    from lumina.safety import templates
+    streaming(SAFE, ["You could talk to someone. ", "Call 0800 ", "123 456 tonight. ", "More text."])
+    events = _events()
+    kinds = [e["type"] for e in events]
+    assert kinds == ["delta", "replace", "done"]
+    assert "0800" not in "".join(e.get("text", "") for e in events)       # the number never left the server
+    done = events[-1]["result"]
+    assert done.reply == templates.generic_fallback() == events[1]["text"]
+    assert done.debug["guard_reasons"] == ["phone_number"]
+
+
+def test_a_number_split_across_pieces_or_sentences_is_still_caught(streaming):
+    streaming(SAFE, ["Try 50", " mg of it. ", "Fine."])
+    events = _events()
+    assert [e["type"] for e in events] == ["replace", "done"] and events[-1]["result"].debug["guard_reasons"] == ["dosage"]
+
+
+@pytest.mark.parametrize("safety", [ELEVATED, CRISIS, SafetyAssessment("none", "none", True, {})])
+def test_risky_and_injection_turns_never_stream(streaming, safety):
+    calls = streaming(safety, ["Must not be streamed. "])
+    events = _events()
+    assert [e["type"] for e in events] == ["done"] and len(calls) == 1
+    assert events[0]["result"].debug["path"] in ("llm", "fallback")
+
+
+def test_method_requests_stay_templated(streaming):
+    from lumina.safety import templates
+    streaming(SafetyAssessment("crisis", "method", False, {}), ["never"])
+    events = _events()
+    assert [e["type"] for e in events] == ["done"] and events[0]["result"].reply == templates.method_reply()
+
+
+def test_llm_failure_mid_stream_replaces_with_the_unavailable_reply(streaming):
+    from lumina.safety import templates
+    streaming(SAFE, ["Half a sentence. ", lc.LLMUnavailable("down")])
+    events = _events()
+    assert [e["type"] for e in events] == ["delta", "replace", "done"]
+    assert events[-1]["result"].reply == templates.unavailable_reply(crisis=False)
+    assert events[-1]["result"].debug["path"] == "fallback"
+    streaming(SAFE, [])                                                      # nothing written at all
+    assert _events()[-1]["result"].debug["path"] == "fallback"
+
+
+def test_streamed_turn_is_traced_with_time_to_first_text(streaming, trace_store):
+    streaming(SAFE, ["First. ", "Second."])
+    _events()
+    row = trace_store.rows()[-1]
+    assert row["path"] == "llm_stream" and "first_text" in row["ms"] and row["ms"]["first_text"] <= row["ms"]["total"]
+
+
+def test_api_streams_ndjson_and_ends_with_the_chat_response(client, monkeypatch):
+    c, api = client
+    def fake_stream(message, history, persona="listener", **kw):
+        yield {"type": "delta", "text": "Hello there. "}
+        yield {"type": "done", "result": orch.TurnResult("Hello there.", "casual", "joy", "positive", False, "none",
+                                                        "none", False, {"safety": {}, "path": "llm_stream"})}
+    monkeypatch.setattr(api, "respond_stream", fake_stream)
+    r = c.post("/chat/stream", json={"message": "hi"})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("application/x-ndjson")
+    lines = [__import__("json").loads(l) for l in r.text.splitlines()]
+    assert lines[0] == {"type": "delta", "text": "Hello there. "}
+    assert lines[-1]["type"] == "done" and lines[-1]["response"]["reply"] == "Hello there."
+    assert "debug" not in lines[-1]["response"]
+    assert c.post("/chat/stream", json={"message": "  "}).status_code == 400
+
+
+def test_api_stream_reports_a_late_failure_as_an_event(client, monkeypatch):
+    c, api = client
+    def broken(*a, **k):
+        yield {"type": "delta", "text": "Hi. "}
+        raise RuntimeError("secret detail")
+    monkeypatch.setattr(api, "respond_stream", broken)
+    lines = c.post("/chat/stream", json={"message": "hi"}).text.splitlines()
+    assert '"type": "error"' in lines[-1] and "secret" not in lines[-1]
+
+
+# ─────────────────────────── golden turns (A1) ───────────────────────────
+# Every kind of turn, through both respond() and respond_stream(): which route it takes, whether the LLM writes
+# the reply, whether memory is read and the turn recorded, and whether it streams.  A change to any stage of the
+# orchestrator shows up here as a changed row.  (signed-in session with memory on; detectors and LLM stubbed)
+from lumina.memory.service import SessionContext  # noqa: E402
+
+METHOD = SafetyAssessment("crisis", "method", False, {})
+THIRD = SafetyAssessment("crisis", "third_party", False, {})
+INJECTION = SafetyAssessment("none", "none", True, {})
+UNREADABLE = SafetyAssessment("elevated", "none", False, {}, language="arabizi", understood=False)
+
+GOLDEN = [
+    # name              safety      intent            route                llm    memory streams path_whole           category
+    ("ordinary venting", SAFE,      "venting",        "talk",              True,  True,  True,  "llm",               "emotional"),
+    ("small talk",       SAFE,      "casual",         "talk",              True,  True,  True,  "llm",               "light"),
+    ("information",      SAFE,      "information",    "talk",              True,  True,  True,  "llm",               "informational"),
+    ("action request",   SAFE,      "action_request", "act",               True,  True,  True,  "llm",               "action"),
+    ("elevated",         ELEVATED,  "venting",        "talk",              True,  False, False, "llm",               "emotional"),
+    ("crisis",           CRISIS,    "venting",        "crisis",            True,  False, False, "llm",               "crisis"),
+    ("crisis, other",    THIRD,     "venting",        "crisis",            True,  False, False, "llm",               "crisis"),
+    ("crisis + action",  CRISIS,    "action_request", "crisis",            True,  False, False, "llm",               "crisis"),
+    ("injection",        INJECTION, "venting",        "injection",         True,  False, False, "llm",               "injection"),
+    ("injection+action", INJECTION, "action_request", "injection",         True,  False, False, "llm",               "injection"),
+    ("method request",   METHOD,    "venting",        "method_template",   False, False, False, "template",          None),
+    ("unreadable",       UNREADABLE,"venting",        "language_template", False, False, False, "template_language", None),
+]
+
+
+@pytest.fixture
+def golden(streaming, engines, monkeypatch, caplog):
+    class _NoRag:
+        def query(self, q, top_k): return []
+    monkeypatch.setattr(ee, "_RETRIEVER", _NoRag())
+    seen = {"memory": 0, "remembered": 0}
+
+    def load_context(store, session, message):
+        seen["memory"] += 1
+        return {}, None
+    monkeypatch.setattr(orch.memory, "load_context", load_context)
+    monkeypatch.setattr(orch, "_remember", lambda *a, **k: seen.__setitem__("remembered", seen["remembered"] + 1))
+
+    def run(safety, intent, stream):
+        seen.update(memory=0, remembered=0)
+        calls = streaming(safety, ["First sentence. ", "Second one."])
+        calls.clear()                                   # the fixture's call list is shared between runs
+        engines(_nlp(intent=intent))
+        session = SessionContext(user_id="u", session_id="s", memory_enabled=True)
+        if stream:
+            events = list(orch.respond_stream("msg", [], session=session))
+            result, deltas = events[-1]["result"], sum(e["type"] == "delta" for e in events)
+        else:
+            result, deltas = orch.respond("msg", [], session=session), 0
+        return result, deltas, calls, dict(seen)
+    return run
+
+
+@pytest.mark.parametrize("name,safety,intent,route,llm,memory_read,streams,path,category", GOLDEN,
+                         ids=[g[0] for g in GOLDEN])
+def test_golden_turns(golden, caplog, name, safety, intent, route, llm, memory_read, streams, path, category):
+    for stream in (False, True):
+        result, deltas, whole_calls, seen = golden(safety, intent, stream)
+        assert result.debug["route"] == route, (name, stream)
+        assert result.debug.get("intent_category") == category, (name, stream)
+        assert seen["memory"] == int(memory_read), (name, stream)
+        assert seen["remembered"] == 1, (name, stream)                 # every signed-in turn is recorded once
+        if stream and streams:
+            assert deltas == 2 and result.debug["path"] == "llm_stream" and whole_calls == [], name
+        else:
+            assert deltas == 0 and result.debug["path"] == path, (name, stream)
+            assert len(whole_calls) == int(llm), (name, stream)        # the whole-reply LLM call, or none
+        assert result.crisis_flag == safety.is_crisis and result.risk_level == safety.risk_level, name
+    assert "disagrees with prompt category" not in caplog.text
+
+
+def test_route_is_safety_first():
+    assert orch.route(METHOD) == "method_template" and orch.route(UNREADABLE) == "language_template"
+    assert orch.route(SAFE) is None                                    # wait for the intent
+    assert orch.route(CRISIS, "action_request") == "crisis"
+    assert orch.route(INJECTION, "action_request") == "injection"
+    assert orch.route(SAFE, "action_request") == "act" and orch.route(ELEVATED, "casual") == "talk"
+    # an unreadable message that is also a crisis follows the crisis path, never the language template
+    assert orch.route(SafetyAssessment("crisis", "ideation", False, {}, language="arabizi", understood=False)) is None

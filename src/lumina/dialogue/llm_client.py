@@ -10,6 +10,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 
 import logging
+from collections.abc import Iterator
 
 from openai import APIConnectionError, APIStatusError, APITimeoutError, OpenAI, RateLimitError
 
@@ -60,6 +61,35 @@ def complete(messages: list[dict], *, json_mode: bool = False, max_tokens: int |
         if not text:
             raise LLMUnavailable("empty completion")
         return text
+    except RateLimitError as exc:
+        log.error("LLM rate limit hit (%s)", LLM_PROVIDER)
+        raise LLMUnavailable("rate limit") from exc
+    except (APIConnectionError, APITimeoutError) as exc:
+        log.error("Could not reach the LLM (%s at %s)", LLM_PROVIDER, LLM_BASE_URL)
+        raise LLMUnavailable("connection") from exc
+    except APIStatusError as exc:
+        log.error("LLM provider error: %s", exc.status_code)
+        raise LLMUnavailable(f"status {exc.status_code}") from exc
+
+
+def stream(messages: list[dict], *, max_tokens: int | None = None, temperature: float | None = None,
+           usage: dict | None = None) -> Iterator[str]:
+    """Yield the assistant text in pieces as the model writes it, or raise LLMUnavailable (also mid-stream).
+
+    Used for ordinary replies only (lumina/orchestrator.respond_stream); the caller checks every sentence
+    before it reaches the person.
+    """
+    try:
+        chunks = _get_client().chat.completions.create(
+            model=LLM_MODEL, messages=messages, stream=True, stream_options={"include_usage": True},
+            temperature=LLM_TEMPERATURE if temperature is None else temperature,
+            max_tokens=max_tokens or LLM_MAX_TOKENS,
+        )
+        for chunk in chunks:
+            if usage is not None and getattr(chunk, "usage", None) is not None:
+                usage.update({"in": chunk.usage.prompt_tokens, "out": chunk.usage.completion_tokens})
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
     except RateLimitError as exc:
         log.error("LLM rate limit hit (%s)", LLM_PROVIDER)
         raise LLMUnavailable("rate limit") from exc

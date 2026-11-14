@@ -102,7 +102,8 @@ function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSugges
           {notStarted && onWeather && <WeatherCheck value={messages[0].weather ?? null} onChange={onWeather} />}
           {messages.map((m, i) => <MessageBubble key={m.id} message={m} onListen={onListen} signed={i === 0} />)}
           {notStarted && HARD_DAYS.includes(messages[0].weather) && helped.length > 0 && <JarTip items={helped} />}
-          {isTyping && <TypingIndicator />}
+          {/* "Thinking" until the first sentence of the reply arrives */}
+          {isTyping && !messages[messages.length - 1]?.streaming && <TypingIndicator />}
           {fresh && onStarter && <Starters onStarter={onStarter} onSuggest={onSuggest} onTear={onTear} night={night} />}
           <div ref={end} />
         </div>

@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 from contextlib import asynccontextmanager
@@ -5,6 +6,7 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from .auth.deps import get_store, optional_user
@@ -25,7 +27,7 @@ from .memory.service import SessionContext
 from .memory.store import Store
 from .nlp.models import warm_up
 from .observability import default_traces
-from .orchestrator import respond
+from .orchestrator import respond, respond_stream
 from .ratelimit import RateLimiter, client_key, retry_after
 from .routes import account, personal
 from .voice import tts
@@ -56,6 +58,9 @@ async def lifespan(app: FastAPI):
     warm_up()                 # load spaCy + HuggingFace models once, before the first request
     if tts.available():         # voice loads in the background; chat works while it does
         threading.Thread(target=tts.warm_up, name="tts-warm-up", daemon=True).start()
+    # The knowledge base opens in the background too (a question arriving meanwhile waits for it, as before).
+    from .dialogue.empathy_engine import warm_up_retrieval
+    threading.Thread(target=warm_up_retrieval, name="rag-warm-up", daemon=True).start()
     stop = threading.Event()
     threading.Thread(target=_sweep_idle_sessions, args=(stop,), name="session-sweep", daemon=True).start()
     yield
@@ -183,6 +188,44 @@ def chat(request: ChatRequest, user: dict | None = Depends(optional_user), store
         raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
 
     return ChatResponse(**{k: v for k, v in result.as_dict().items() if k != "debug"})
+
+
+@app.post("/chat/stream", dependencies=[Depends(chat_rate_limit)],
+          responses={200: {"content": {"application/x-ndjson": {}}}})
+def chat_stream(request: ChatRequest, user: dict | None = Depends(optional_user), store: Store = Depends(get_store)):
+    """The same turn as /chat, one JSON event per line, so the reply appears sentence by sentence:
+
+        {"type": "delta", "text": …}      add this checked sentence to the reply
+        {"type": "replace", "text": …}    replace the reply shown so far with this text
+        {"type": "done", "response": …}   the full /chat response (its reply is final); always last
+        {"type": "error", "detail": …}    something failed after the stream began
+
+    Only ordinary turns stream; risky and templated replies arrive whole in "done" (lumina/orchestrator).
+    Problems found before the first event (empty message, ended session) are normal HTTP errors.
+    """
+    if not request.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    session = _session_context(request.session_id, user, store) if request.session_id else None
+    history = [t.model_dump() for t in request.history]
+    extra = {"weather": request.weather} if request.weather else {}
+    if session is not None:
+        extra["session"] = session
+
+    def events():
+        try:
+            for event in respond_stream(request.message, history, request.persona, **extra):
+                if event["type"] == "done":
+                    fields = {k: v for k, v in event["result"].as_dict().items() if k != "debug"}
+                    event = {"type": "done",
+                             "response": ChatResponse(**fields).model_dump(mode="json", exclude_none=True)}
+                yield json.dumps(event, ensure_ascii=False) + "\n"
+        except Exception as e:
+            log.error("Error processing a streamed message: %s", type(e).__name__)
+            yield json.dumps({"type": "error", "detail": "Something went wrong. Please try again."}) + "\n"
+
+    # X-Accel-Buffering: nginx would otherwise hold the sentences back until the reply is complete.
+    return StreamingResponse(events(), media_type="application/x-ndjson",
+                             headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
 
 
 class SpeechRequest(BaseModel):
