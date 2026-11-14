@@ -53,7 +53,7 @@ def seed(store: Store, email: str, password: str, name: str, embed=None, seed_va
         for i in range(rng.randint(3, 5)):
             tid = store.add_turn(session["id"], user["id"], intent="venting" if sc["pain"] else "sharing_experience",
                                  emotion=sc["emotion"], sentiment="positive" if key == "good_week" else "negative",
-                                 pain_points=sc["pain"], macro=sc["macro"], risk_level="none",
+                                 pain_points=[], macro=None, risk_level="none",
                                  now=when + timedelta(minutes=3 * i))
             store.set_turn_elements(tid, sc["elements"])
         store.end_session(session["id"], now=when + timedelta(minutes=20))

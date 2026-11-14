@@ -59,7 +59,7 @@ def api_client(monkeypatch):
     from fastapi.testclient import TestClient
 
     from lumina import api
-    result = orch.TurnResult("hi", "casual", "neutral", "neutral", False, "none", "none", False, [], {"safety": {}})
+    result = orch.TurnResult("hi", "casual", "neutral", "neutral", False, "none", "none", False, {"safety": {}})
     monkeypatch.setattr(api, "respond", lambda *a, **k: result)
     monkeypatch.setattr(api, "chat_limiter", RateLimiter([(3, 60)]))
     monkeypatch.setattr(api, "tts_limiter", RateLimiter([(2, 60)]))

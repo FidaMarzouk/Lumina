@@ -7,8 +7,9 @@ What is stored (derived data only — never the messages themselves):
     users            account, password hash (scrypt), memory switch, consent time
     auth_tokens      SHA-256 of each login token (the token itself is never stored)
     sessions         one row per conversation: mode (open | guided) and journey step
-    turn_signals     per user turn: intent, emotion, sentiment, pain points, risk level and the
-                     paraphrased CBT elements (situation / thoughts / feelings / behaviours)
+    turn_signals     per user turn: intent, emotion, sentiment, risk level and the paraphrased CBT
+                     elements (situation / thoughts / feelings / behaviours).  The pain_points and macro
+                     columns are no longer written (Q1); older rows may still hold them.
     episodes         per finished session: LLM-written summary, themes, embedding
     insights         session reflections and weekly insights, with their evidence and feedback
     journey_progress the user's position in each journey

@@ -162,15 +162,9 @@ def _prompt_light(tone: str, avoid: str) -> str:
 
 def _prompt_emotional(nlp: dict, feeling: dict, sentiment: str, tone: str, avoid: str,
                       rag_context: list[str], elevated: bool) -> str:
+    # No "possible themes" block: the zero-shot labels it carried were noise and made the LLM invent context
+    # (Q1).  The LLM reads the message itself.
     prompt = _IDENTITY + "Respond as a warm, understanding person — never clinical or robotic.\n\n"
-
-    # Only describe the situation when the analysis found real signal; otherwise the LLM
-    # invents context the user never mentioned.
-    if nlp["pain_points"]:
-        prompt += (
-            "SITUATION (automatic analysis — may be imperfect, do not state it as fact):\n"
-            f"Possible themes: {', '.join(nlp['pain_points'])}.\n\n"
-        )
 
     prompt += "EMOTIONAL CONTEXT (automatic analysis — may be imperfect):\n"
     prompt += f"Sentiment: {sentiment}. Dominant emotion: {feeling['emotion']}.\n"

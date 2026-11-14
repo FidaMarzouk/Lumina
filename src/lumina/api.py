@@ -122,7 +122,6 @@ class ChatResponse(BaseModel):
     crisis_subtype     : Literal["none", "ideation", "method", "third_party"]
     risk_level         : Literal["none", "elevated", "crisis"]
     injection_detected : bool
-    pain_points        : list[str]
     insight            : Insight | None = None     # omitted when there is none (and always for guests)
 
 

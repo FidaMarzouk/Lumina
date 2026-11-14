@@ -1,0 +1,296 @@
+{
+  "pain_points_retired": {
+    "n_gold": 300,
+    "n_small_talk": 98,
+    "deployed_threshold": 0.12,
+    "sweep": [
+      {
+        "threshold": 0.12,
+        "small_talk_labelled": 0.908,
+        "personal_labelled": 0.985
+      },
+      {
+        "threshold": 0.3,
+        "small_talk_labelled": 0.653,
+        "personal_labelled": 0.911
+      },
+      {
+        "threshold": 0.5,
+        "small_talk_labelled": 0.449,
+        "personal_labelled": 0.837
+      },
+      {
+        "threshold": 0.7,
+        "small_talk_labelled": 0.204,
+        "personal_labelled": 0.663
+      },
+      {
+        "threshold": 0.9,
+        "small_talk_labelled": 0.071,
+        "personal_labelled": 0.441
+      }
+    ],
+    "median_score_per_label": {
+      "anxiety and panic attacks": 0.098,
+      "depression and hopelessness": 0.101,
+      "loneliness and social isolation": 0.067,
+      "trauma and abuse": 0.15,
+      "relationship and family issues": 0.356,
+      "low self-worth and self-esteem": 0.201,
+      "suicidal thoughts and self-harm": 0.093,
+      "sleep problems and exhaustion": 0.046,
+      "work stress and burnout": 0.1,
+      "academic pressure and school stress": 0.133,
+      "anger and emotional dysregulation": 0.124,
+      "intrusive thoughts and paranoia": 0.166,
+      "mood disorders and emotional instability": 0.138,
+      "physical symptoms of stress": 0.452,
+      "seeking therapy and professional help": 0.177
+    }
+  },
+  "journey_recommendation": {
+    "n_scenarios": 7,
+    "n_with_a_fit": 6,
+    "fits_judged_by": "Claude, 2026-11-14; pending user review",
+    "fits": {
+      "work_deadline": [
+        "thought_record",
+        "self_compassion",
+        "grounding_anxiety"
+      ],
+      "sleep": [
+        "sleep_reset"
+      ],
+      "friend_conflict": [
+        "thought_record",
+        "reconnecting",
+        "self_compassion"
+      ],
+      "loneliness": [
+        "reconnecting",
+        "behavioural_activation"
+      ],
+      "family_visit": [
+        "self_compassion",
+        "thought_record"
+      ],
+      "good_week": [],
+      "exam_pressure": [
+        "thought_record",
+        "grounding_anxiety",
+        "behavioural_activation"
+      ]
+    },
+    "methods": {
+      "title + summary": {
+        "fits": 6,
+        "rows": [
+          {
+            "scenario": "work_deadline",
+            "picked": "thought_record",
+            "similarity": 0.237,
+            "runner_up": "grounding_anxiety",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "sleep",
+            "picked": "sleep_reset",
+            "similarity": 0.443,
+            "runner_up": "grounding_anxiety",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "friend_conflict",
+            "picked": "thought_record",
+            "similarity": 0.367,
+            "runner_up": "self_compassion",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "loneliness",
+            "picked": "behavioural_activation",
+            "similarity": 0.232,
+            "runner_up": "reconnecting",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "family_visit",
+            "picked": "thought_record",
+            "similarity": 0.335,
+            "runner_up": "values_and_direction",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "good_week",
+            "picked": "thought_record",
+            "similarity": 0.398,
+            "runner_up": "behavioural_activation",
+            "verdict": "no fit defined"
+          },
+          {
+            "scenario": "exam_pressure",
+            "picked": "grounding_anxiety",
+            "similarity": 0.314,
+            "runner_up": "thought_record",
+            "verdict": "fits"
+          }
+        ]
+      },
+      "title + summary + step goals (deployed)": {
+        "fits": 6,
+        "rows": [
+          {
+            "scenario": "work_deadline",
+            "picked": "thought_record",
+            "similarity": 0.219,
+            "runner_up": "behavioural_activation",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "sleep",
+            "picked": "sleep_reset",
+            "similarity": 0.363,
+            "runner_up": "thought_record",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "friend_conflict",
+            "picked": "thought_record",
+            "similarity": 0.321,
+            "runner_up": "self_compassion",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "loneliness",
+            "picked": "reconnecting",
+            "similarity": 0.298,
+            "runner_up": "values_and_direction",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "family_visit",
+            "picked": "thought_record",
+            "similarity": 0.311,
+            "runner_up": "behavioural_activation",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "good_week",
+            "picked": "behavioural_activation",
+            "similarity": 0.441,
+            "runner_up": "thought_record",
+            "verdict": "no fit defined"
+          },
+          {
+            "scenario": "exam_pressure",
+            "picked": "behavioural_activation",
+            "similarity": 0.204,
+            "runner_up": "thought_record",
+            "verdict": "fits"
+          }
+        ]
+      },
+      "title + summary + step goals + openers": {
+        "fits": 5,
+        "rows": [
+          {
+            "scenario": "work_deadline",
+            "picked": "thought_record",
+            "similarity": 0.196,
+            "runner_up": "reconnecting",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "sleep",
+            "picked": "sleep_reset",
+            "similarity": 0.348,
+            "runner_up": "thought_record",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "friend_conflict",
+            "picked": "thought_record",
+            "similarity": 0.337,
+            "runner_up": "reconnecting",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "loneliness",
+            "picked": "reconnecting",
+            "similarity": 0.393,
+            "runner_up": "values_and_direction",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "family_visit",
+            "picked": "values_and_direction",
+            "similarity": 0.304,
+            "runner_up": "thought_record",
+            "verdict": "does not fit"
+          },
+          {
+            "scenario": "good_week",
+            "picked": "behavioural_activation",
+            "similarity": 0.461,
+            "runner_up": "thought_record",
+            "verdict": "no fit defined"
+          },
+          {
+            "scenario": "exam_pressure",
+            "picked": "grounding_anxiety",
+            "similarity": 0.227,
+            "runner_up": "thought_record",
+            "verdict": "fits"
+          }
+        ]
+      },
+      "old: pain-point macro": {
+        "fits": 4,
+        "rows": [
+          {
+            "scenario": "work_deadline",
+            "macro": "anxiety & fear",
+            "picked": "thought_record",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "sleep",
+            "macro": "anxiety & fear",
+            "picked": "thought_record",
+            "verdict": "does not fit"
+          },
+          {
+            "scenario": "friend_conflict",
+            "macro": "anxiety & fear",
+            "picked": "thought_record",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "loneliness",
+            "macro": "emotional distress",
+            "picked": "thought_record",
+            "verdict": "does not fit"
+          },
+          {
+            "scenario": "family_visit",
+            "macro": "emotional distress",
+            "picked": "thought_record",
+            "verdict": "fits"
+          },
+          {
+            "scenario": "good_week",
+            "macro": "anxiety & fear",
+            "picked": "thought_record",
+            "verdict": "no fit defined"
+          },
+          {
+            "scenario": "exam_pressure",
+            "macro": "emotional distress",
+            "picked": "thought_record",
+            "verdict": "fits"
+          }
+        ]
+      }
+    }
+  }
+}

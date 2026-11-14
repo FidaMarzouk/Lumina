@@ -46,7 +46,7 @@ def _build(store, rng, embed, now, planted: bool):
         s = store.create_session(user["id"], "open", now=when)
         for i in range(3):
             tid = store.add_turn(s["id"], user["id"], intent="venting", emotion=sc["emotion"], sentiment="negative",
-                                 pain_points=sc["pain"], macro=sc["macro"], risk_level="none",
+                                 pain_points=[], macro=None, risk_level="none",
                                  now=when + timedelta(minutes=i))
             store.set_turn_elements(tid, sc["elements"])
         summary = sc["summaries"][variant]

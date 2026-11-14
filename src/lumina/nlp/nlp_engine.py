@@ -3,8 +3,11 @@
 #
 # Describes WHAT the user wrote:
 #   - mental health entities mentioned (spaCy EntityRuler + biomedical NER fallback)
-#   - pain points (zero-shot NLI over the pain-point taxonomy)
 #   - intent — WHY they are writing (trained classifier, see nlp/intent.py)
+#
+# Pain points are no longer classified here (Q1, docs/evaluation.md): the zero-shot NLI labels were noise —
+# 91% of small talk got one, and "physical symptoms of stress" scored a median 0.45 on every message.  The
+# themes of a conversation now come from the LLM-written session summary (lumina/memory/episodes.py).
 #   - clean tokens for downstream use
 #
 # Public function:
@@ -21,16 +24,12 @@ import string
 from spacy.lang.en.stop_words import STOP_WORDS as _SPACY_STOP_WORDS
 
 from ..config import (
-    PAIN_MODEL,
     NER_MODEL,
     NER_CONFIDENCE,
-    PAIN_THRESHOLD,
-    PAIN_TOP_K,
 )
 
 from .lexicons import (
     MH_PATTERNS,
-    PAIN_POINT_LABELS, MACRO_MAP, MACRO_PRIORITY, SYMPTOM_BOOST,
     NER_FALSE_POSITIVES,
 )
 from . import intent as _intent
@@ -42,8 +41,6 @@ from .models import lazy_pipeline, lazy_spacy
 # the API server loads them at start-up through models.warm_up().
 
 nlp_spacy         = lazy_spacy("en_core_web_sm", MH_PATTERNS)      # + EntityRuler(MH_PATTERNS)
-
-pain_classifier   = lazy_pipeline("zero-shot-classification", model=PAIN_MODEL)
 
 ner_model         = lazy_pipeline("ner", model=NER_MODEL, aggregation_strategy="first")
 
@@ -147,41 +144,6 @@ def extract_entities(text: str) -> dict[str, list[str]]:
     return result
 
 
-# ── Pain point classification ─────────────────────────────────────────────────
-
-def classify_pain_points(text: str) -> tuple[list[str], str]:
-    """
-    Zero-shot classification into 15 mental health pain point labels.
-    Returns (pain_points, primary_macro).
-    """
-    classification = pain_classifier(
-        text[:512],
-        candidate_labels=PAIN_POINT_LABELS,
-        multi_label=True,
-    )
-
-    pairs  = list(zip(classification["labels"], classification["scores"]))
-    picked = [
-        label for label, score in pairs
-        if score >= PAIN_THRESHOLD
-    ][:PAIN_TOP_K]
-
-    # An empty result is a valid answer: forcing the top label onto every message (as before)
-    # made "hi" look like it had a pain point, so the RAG gate and the SITUATION block always fired.
-    text_lower = text.lower()
-    for label, phrases in SYMPTOM_BOOST.items():
-        if label not in picked and any(p in text_lower for p in phrases):
-            picked.insert(0, label)
-            picked = picked[:PAIN_TOP_K]
-
-    if not picked:
-        return [], "none"
-    macros  = list(set(MACRO_MAP.get(pp, "help seeking") for pp in picked))
-    primary = next((m for m in MACRO_PRIORITY if m in macros), macros[0])
-
-    return picked, primary
-
-
 # ── Intent classification ─────────────────────────────────────────────────────
 
 def classify_intent(text: str) -> tuple[str, float, list | None]:
@@ -207,8 +169,6 @@ def analyze_message(text: str) -> dict:
         cleaned_text       (str)
         tokens             (list[str])
         entities           (dict[str, list[str]])
-        pain_points        (list[str])
-        primary_macro      (str)
         intent             (str)
             One of lumina/nlp/intent_taxonomy.INTENT_NAMES.
         intent_confidence  (float)
@@ -218,17 +178,14 @@ def analyze_message(text: str) -> dict:
     """
     cleaned = clean_text(text)
 
-    entities             = extract_entities(cleaned)
-    pain_points, primary = classify_pain_points(cleaned)
-    intent, conf, top2   = classify_intent(cleaned)
-    tokens               = tokenize(cleaned)
+    entities           = extract_entities(cleaned)
+    intent, conf, top2 = classify_intent(cleaned)
+    tokens             = tokenize(cleaned)
 
     return {
         "cleaned_text"     : cleaned,
         "tokens"           : tokens,
         "entities"         : entities,
-        "pain_points"      : pain_points,
-        "primary_macro"    : primary,
         "intent"           : intent,
         "intent_confidence": conf,
         "intent_ambiguous" : top2,

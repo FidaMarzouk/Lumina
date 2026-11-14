@@ -64,12 +64,9 @@ def _passes_guard(text: str) -> bool:
 
 
 def session_notes(turns: list[dict]) -> str:
-    themes = Counter(p for t in turns for p in t.get("pain_points") or [])
     emotions = Counter(t["emotion"] for t in turns if t.get("emotion") and t["emotion"] != "neutral")
     conn = in_session.build(turns)
     lines = []
-    if themes:
-        lines.append("Themes detected: " + ", ".join(t for t, _ in themes.most_common(4)))
     if emotions:
         lines.append("Emotions detected: " + ", ".join(e for e, _ in emotions.most_common(3)))
     for label, items in (("Situations", conn.situations), ("Thoughts", conn.thoughts),
@@ -141,7 +138,7 @@ def close_session(store: Store, user: dict, session: dict, *, now: datetime | No
         existing = next((i for i in store.list_insights(uid, kind="session", limit=100) if i["session_id"] == sid),
                         None)
         return {"reflection": public_insight(existing),
-                "next_step": store.get_next_step(uid) or planner.next_step(store, uid, now)}
+                "next_step": store.get_next_step(uid) or planner.next_step(store, uid, now, embed=embed)}
 
     store.end_session(sid, now)
     turns = store.session_turns(sid)
@@ -183,7 +180,7 @@ def close_session(store: Store, user: dict, session: dict, *, now: datetime | No
         else:
             draft = None
 
-    step = planner.next_step(store, uid, now)
+    step = planner.next_step(store, uid, now, embed=embed)
     if draft and step["kind"] != "check_in":
         text = personalise_step(step, draft.summary, complete, name=user.get("display_name") or "")
         if text:

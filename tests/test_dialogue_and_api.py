@@ -15,8 +15,7 @@ def _nlp(intent="venting", entities=None, pain=None):
     ents = {k: [] for k in ("SYMPTOM", "DISORDER", "MEDICATION", "THERAPY", "CRISIS_SIGNAL",
                             "EMOTION_STATE", "COPING_STRATEGY", "SUPPORT_RESOURCE")}
     ents.update(entities or {})
-    return {"cleaned_text": "msg", "tokens": [], "entities": ents, "pain_points": pain or [],
-            "primary_macro": "none", "intent": intent, "intent_confidence": 0.9, "intent_ambiguous": None}
+    return {"cleaned_text": "msg", "tokens": [], "entities": ents, "intent": intent, "intent_confidence": 0.9, "intent_ambiguous": None}
 
 
 FEELING = {"emotion": "sadness", "emotion_score": 0.9, "sentiment": "negative", "sentiment_score": 0.9,
@@ -192,7 +191,7 @@ def test_groq_requires_key(monkeypatch):
 def client(monkeypatch):
     from fastapi.testclient import TestClient
     from lumina import api
-    result = orch.TurnResult("hi there", "venting", "joy", "positive", False, "none", "none", True, ["x"],
+    result = orch.TurnResult("hi there", "venting", "joy", "positive", False, "none", "none", True,
                              {"safety": {}})
     monkeypatch.setattr(api, "respond", lambda m, h, p="listener": result)
     return TestClient(api.app), api
@@ -204,7 +203,7 @@ def test_api_chat_contract(client):
     assert r.status_code == 200
     assert r.json() == {"reply": "hi there", "intent": "venting", "emotion": "joy", "sentiment": "positive",
                         "crisis_flag": False, "crisis_subtype": "none", "risk_level": "none",
-                        "injection_detected": True, "pain_points": ["x"]}
+                        "injection_detected": True}
 
 
 def test_api_rejects_empty_and_oversized_messages_and_hides_errors(client, monkeypatch):
@@ -271,7 +270,7 @@ def test_api_passes_persona_and_rejects_unknown(client, monkeypatch):
     seen = {}
     def fake(m, h, p="listener"):
         seen["persona"] = p
-        return orch.TurnResult("ok", "venting", "joy", "positive", False, "none", "none", False, [], {})
+        return orch.TurnResult("ok", "venting", "joy", "positive", False, "none", "none", False, {})
     monkeypatch.setattr(api, "respond", fake)
     assert c.post("/chat", json={"message": "hi", "persona": "coach"}).status_code == 200 and seen["persona"] == "coach"
     assert c.post("/chat", json={"message": "hi", "persona": "pirate"}).status_code == 422

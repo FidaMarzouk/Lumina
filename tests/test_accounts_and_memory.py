@@ -36,8 +36,7 @@ def _user(store, email="a@x.io", consent=True, name="Sam"):
 def _nlp(intent="venting", pain=None, macro="anxiety & fear"):
     ents = {k: [] for k in ("SYMPTOM", "DISORDER", "MEDICATION", "THERAPY", "CRISIS_SIGNAL",
                             "EMOTION_STATE", "COPING_STRATEGY", "SUPPORT_RESOURCE")}
-    return {"cleaned_text": "msg", "tokens": [], "entities": ents, "pain_points": pain or ["anxiety and panic attacks"],
-            "primary_macro": macro, "intent": intent, "intent_confidence": 0.9, "intent_ambiguous": None}
+    return {"cleaned_text": "msg", "tokens": [], "entities": ents, "intent": intent, "intent_confidence": 0.9, "intent_ambiguous": None}
 
 
 FEELING = {"emotion": "fear", "emotion_score": 0.9, "sentiment": "negative", "sentiment_score": 0.9,
@@ -180,7 +179,7 @@ def test_users_cannot_reach_each_others_data(api_client, user_store, monkeypatch
     tb, _ = _register(c, "b@x.io")
     sid = c.post("/sessions", headers=_auth(ta), json={}).json()["session_id"]
     insight = user_store.add_insight(ua["id"], "session", "private reflection", {})
-    result = orch.TurnResult("ok", "venting", "joy", "positive", False, "none", "none", False, [], {})
+    result = orch.TurnResult("ok", "venting", "joy", "positive", False, "none", "none", False, {})
     monkeypatch.setattr(api, "respond", lambda m, h, p="listener", session=None: result)
     assert c.post("/chat", headers=_auth(tb), json={"message": "hi", "session_id": sid}).status_code == 404
     assert c.post("/chat", json={"message": "hi", "session_id": sid}).status_code == 401
@@ -208,7 +207,7 @@ def test_chat_with_session_passes_context_and_returns_insight(api_client, monkey
 
     def fake(m, h, p="listener", session=None):
         seen["session"] = session
-        return orch.TurnResult("ok", "venting", "fear", "negative", False, "none", "none", False, [], {},
+        return orch.TurnResult("ok", "venting", "fear", "negative", False, "none", "none", False, {},
                                insight={"thought": "I'm not good enough", "feeling": "anxious"})
     monkeypatch.setattr(api, "respond", fake)
     r = c.post("/chat", headers=_auth(token), json={"message": "hi", "session_id": start["session_id"]})
@@ -314,7 +313,7 @@ def test_ordinary_turn_records_labels_only_and_queues_extraction(turn):
     run, ctx, store, queued, _ = turn
     out = run(SAFE)
     rows = store.session_turns(ctx.session_id)
-    assert len(rows) == 1 and rows[0]["intent"] == "venting" and rows[0]["macro"] == "anxiety & fear"
+    assert len(rows) == 1 and rows[0]["intent"] == "venting" and rows[0]["macro"] is None and rows[0]["pain_points"] == []
     assert queued == [rows[0]["id"]] and out.insight is None
     with store._conn() as c:
         dump = json.dumps([dict(r) for r in c.execute("SELECT * FROM turn_signals")])
@@ -374,16 +373,47 @@ def test_catalog_loads_with_valid_themes_and_unique_steps():
         assert len({s.id for s in j.steps}) == len(j.steps) and all(s.opener and s.goal for s in j.steps)
 
 
+def _journey_space():
+    """A fake embedder: each journey's profile is its own axis, so an episode can be pointed at one journey."""
+    ids = list(catalog.load_catalog())
+    axis = {planner.profile_text(j): i for i, j in enumerate(catalog.load_catalog().values())}
+    def embed(text):
+        v = np.zeros(len(ids), dtype=np.float32)
+        v[axis[text]] = 1.0
+        return v
+    def toward(journey_id, weight=1.0):
+        v = np.full(len(ids), 0.1, dtype=np.float32)
+        v[ids.index(journey_id)] = weight
+        return v
+    return embed, toward
+
+
 def test_planner_prefers_active_journey_then_recommendation_then_check_in(user_store):
+    embed, toward = _journey_space()
     u = _user(user_store)
-    assert planner.next_step(user_store, u["id"], NOW)["kind"] == "check_in"
-    s = user_store.create_session(u["id"], "open")
-    for _ in range(3):
-        _turn(user_store, s["id"], u["id"], macro="social & relationships", when=NOW - timedelta(days=1))
-    rec = planner.next_step(user_store, u["id"], NOW)
-    assert rec["kind"] == "journey_suggestion" and "social & relationships" in catalog.get(rec["journey_id"]).themes
+    assert planner.next_step(user_store, u["id"], NOW, embed=embed)["kind"] == "check_in"     # no summaries yet
+    _episode(user_store, u["id"], 2, toward("reconnecting"))
+    _episode(user_store, u["id"], 5, toward("reconnecting", 0.8) + toward("sleep_reset", 0.5))
+    rec = planner.next_step(user_store, u["id"], NOW, embed=embed)
+    assert rec["kind"] == "journey_suggestion" and rec["journey_id"] == "reconnecting"
     planner.start(user_store, u["id"], "sleep_reset")
-    assert planner.next_step(user_store, u["id"], NOW)["journey_id"] == "sleep_reset"
+    assert planner.next_step(user_store, u["id"], NOW, embed=embed)["journey_id"] == "sleep_reset"
+
+
+def test_recommendation_skips_crisis_old_and_finished_and_never_fails(user_store):
+    embed, toward = _journey_space()
+    u = _user(user_store)
+    _episode(user_store, u["id"], 1, toward("sleep_reset"), crisis=True)            # never used
+    _episode(user_store, u["id"], 60, toward("sleep_reset"))                         # older than 30 days
+    assert planner.recommend(user_store, u["id"], NOW, embed=embed) is None
+    _episode(user_store, u["id"], 3, toward("grounding_anxiety"))
+    assert planner.recommend(user_store, u["id"], NOW, embed=embed).id == "grounding_anxiety"
+    user_store.set_progress(u["id"], "grounding_anxiety", 4, "completed", NOW)
+    assert planner.recommend(user_store, u["id"], NOW, embed=embed).id != "grounding_anxiety"
+    assert planner.recommend(user_store, u["id"], NOW, embed=lambda t: np.ones(3, dtype=np.float32)) is None
+    def broken(text):
+        raise RuntimeError("no embedder")
+    assert planner.recommend(user_store, u["id"], NOW, embed=broken) is None
 
 
 def test_completing_steps_advances_and_finishes_a_journey(user_store):
@@ -662,7 +692,7 @@ def test_chat_passes_the_weather_through(api_client, monkeypatch):
 
     def fake(m, h, p="listener", session=None, weather=None):
         seen["weather"] = weather
-        return orch.TurnResult("ok", "venting", "fear", "negative", False, "none", "none", False, [], {})
+        return orch.TurnResult("ok", "venting", "fear", "negative", False, "none", "none", False, {})
     monkeypatch.setattr(api, "respond", fake)
     assert c.post("/chat", json={"message": "hi", "weather": "storm"}).status_code == 200
     assert seen["weather"] == "storm"

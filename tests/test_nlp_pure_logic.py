@@ -7,7 +7,7 @@ from lumina.nlp import nlp_engine as ne
 
 
 def test_import_does_not_load_models():
-    for h in (ne.nlp_spacy, ne.pain_classifier, ne.ner_model, ne._intent.intent_classifier, ne._intent.intent_embedder):
+    for h in (ne.nlp_spacy, ne.ner_model, ne._intent.intent_classifier, ne._intent.intent_embedder):
         assert not h.loaded
 
 

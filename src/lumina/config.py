@@ -39,12 +39,6 @@ load_dotenv(PROJECT_ROOT / ".env")
 # (measured: ~17 s/turn with swapping vs ~1.2 s LLM latency when resident).  "auto" = GPU if available.
 NLP_DEVICE = os.getenv("NLP_DEVICE", "cpu").lower()
 
-# Pain point zero-shot classifier
-# Proven on the Reddit mental health dataset during testing
-PAIN_MODEL      = "cross-encoder/nli-MiniLM2-L6-H768"
-PAIN_THRESHOLD  = 0.12   # minimum score to include a pain point label
-PAIN_TOP_K      = 3      # maximum number of pain points returned per message
-
 # Intent classifier — trained (embeddings + logistic regression); see eval/runners/intent_classifier.py
 INTENT_MODEL_DIR      = MODELS_DIR / "intent" / "v1"
 INTENT_AMBIGUOUS_BELOW = 0.45   # top-class probability below this → reported as ambiguous (top-2)

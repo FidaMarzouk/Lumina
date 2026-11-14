@@ -1,9 +1,9 @@
 """Next-step planner — there is always a thoughtful next step waiting.
 
     1. a journey in progress            → its current step
-    2. otherwise a journey that fits    → recommended from the dominant pain-point macro of the
-                                          user's recent turns (crisis turns excluded), skipping
-                                          finished journeys
+    2. otherwise a journey that fits    → the journey whose description is closest in meaning to the
+                                          user's recent session summaries (episodes of the last 30 days,
+                                          crisis sessions excluded), skipping finished journeys
     3. otherwise                        → an open check-in ("bring your own agenda")
 
 Each step is a dict the API returns as is:
@@ -13,15 +13,20 @@ Each step is a dict the API returns as is:
 
 from __future__ import annotations
 
-from collections import Counter
+import logging
+from collections.abc import Callable
 from datetime import datetime, timedelta
+
+import numpy as np
 
 from ..memory.store import Store, utcnow
 from . import catalog
 from .catalog import Journey
 
+log = logging.getLogger(__name__)
+
 _RECENT_DAYS = 30
-_NOT_A_THEME = {None, "", "none", "trauma & crisis"}
+_PROFILES: dict[str, np.ndarray] = {}      # journey id → embedding of its description (computed once)
 
 
 def step_payload(journey: Journey, index: int, kind: str = "journey_step") -> dict:
@@ -43,24 +48,59 @@ def active_step(store: Store, user_id: str) -> dict | None:
     return None
 
 
-def recommend(store: Store, user_id: str, now: datetime | None = None) -> Journey | None:
+def profile_text(journey: Journey) -> str:
+    """What a journey is about, for matching: title, summary and each step's goal.
+    (eval/runners/journey_recommendation.py compared three profiles; this one fitted best.)"""
+    return f"{journey.title}. {journey.summary} " + " ".join(step.goal for step in journey.steps)
+
+
+def _profile(journey: Journey, embed: Callable) -> np.ndarray:
+    if embed is not _default_embed:
+        return embed(profile_text(journey))
+    if journey.id not in _PROFILES:
+        _PROFILES[journey.id] = embed(profile_text(journey))
+    return _PROFILES[journey.id]
+
+
+def _default_embed(text: str) -> np.ndarray:
+    from ..memory.embeddings import embed
+    return embed(text)
+
+
+def recommend(store: Store, user_id: str, now: datetime | None = None,
+              embed: Callable | None = None) -> Journey | None:
+    """The unfinished journey closest in meaning to the person's recent conversations, or None.
+
+    Uses the embeddings already stored with each session summary.  Needs memory on (no summaries otherwise),
+    so without it the planner offers the open check-in, as before.
+    """
     now = now or utcnow()
-    turns = store.user_turns(user_id, since=now - timedelta(days=_RECENT_DAYS))
-    macros = Counter(t["macro"] for t in turns if t["risk_level"] == "none" and t["macro"] not in _NOT_A_THEME)
+    episodes = [e for e in store.user_episodes(user_id, since=now - timedelta(days=_RECENT_DAYS))
+                if not e["had_crisis"] and e["embedding"] is not None]
+    if not episodes:
+        return None
     finished = {jid for jid, row in store.journey_progress(user_id).items() if row["status"] == "completed"}
     candidates = [j for j in catalog.load_catalog().values() if j.id not in finished]
-    for macro, _ in macros.most_common():
-        for journey in candidates:
-            if macro in journey.themes:
-                return journey
-    return None
+    if not candidates:
+        return None
+    embed = embed or _default_embed
+    try:
+        recent = np.stack([np.asarray(e["embedding"], dtype=np.float32) for e in episodes])
+        recent /= np.linalg.norm(recent, axis=1, keepdims=True) + 1e-9
+        profiles = np.stack([_profile(j, embed) for j in candidates])
+        profiles /= np.linalg.norm(profiles, axis=1, keepdims=True) + 1e-9
+        fit = (recent @ profiles.T).mean(axis=0)
+    except Exception as exc:     # no embedder, or summaries embedded by another model: suggest nothing
+        log.warning("Journey recommendation unavailable: %s", type(exc).__name__)
+        return None
+    return candidates[int(np.argmax(fit))]
 
 
-def next_step(store: Store, user_id: str, now: datetime | None = None) -> dict:
+def next_step(store: Store, user_id: str, now: datetime | None = None, embed: Callable | None = None) -> dict:
     step = active_step(store, user_id)
     if step:
         return step
-    journey = recommend(store, user_id, now)
+    journey = recommend(store, user_id, now, embed=embed)
     if journey:
         payload = step_payload(journey, 0, kind="journey_suggestion")
         payload["text"] = f"{journey.summary} {journey.steps[0].opener}"

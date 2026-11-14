@@ -16,7 +16,7 @@ what the numbers mean and what they do not show.
 src/lumina/            the Python package
   safety/              crisis risk (floor + Llama Guard + risk classifier), injection, output guard, templates
 
-  nlp/                 intent (trained classifier), entities, pain points, emotion, sentiment
+  nlp/                 intent (trained classifier), entities, emotion, sentiment
 
   rag/                 knowledge-base retrieval (ChromaDB)
 
@@ -111,6 +111,7 @@ python eval/runners/intent_classifier.py   # retrain + evaluate intent → model
 python eval/runners/pattern_recall.py      # threshold for linking today's story to an earlier one (synthetic)
 python eval/runners/cbt_extraction.py      # CBT-note extraction vs hand labels (live LLM)
 python eval/runners/insight_quality.py     # weekly insights for synthetic users (live LLM + guards)
+python eval/runners/journey_recommendation.py  # why pain-point labels were retired; journey matching on synthetic histories
 python eval/runners/latency.py             # time per stage of a turn, scripted messages (live LLM) → turn_traces.json
 python -m lumina.observability             # the same summary from real traffic (last 7 days of traces)
 python -m lumina.reporting                 # re-render reports/lumina_report.html after any of the above

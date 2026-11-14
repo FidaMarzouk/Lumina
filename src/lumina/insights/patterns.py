@@ -2,7 +2,8 @@
 
 No LLM here: the weekly insight writer only puts into words what this module found.
 
-    themes     pain points of the period, and which of them also came up in earlier weeks
+    themes     the themes the LLM wrote into this period's session summaries, and which of them also came
+               up in earlier weeks' summaries
     emotions   dominant emotions of the period vs the previous four weeks
     links      feeling → behaviour and thought → feeling pairs that recur across turns
     echo       the earlier episode most similar to one of this period's (embedding cosine
@@ -138,14 +139,12 @@ def mine(store: Store, user_id: str, now: datetime | None = None,
     report.episodes = [{"date": parse_iso(e["created_at"]).strftime("%A %d %B"), "summary": e["summary"],
                         "themes": e["themes"]} for e in current]
 
-    counts = Counter(p for t in turns for p in t["pain_points"])
-    for e in current:
-        counts.update(e["themes"])
+    counts = Counter(th for e in current for th in e["themes"])
     weeks_seen: dict[str, set] = {}
-    for t in all_turns:
-        if parse_iso(t["ts"]) < start:
-            for p in t["pain_points"]:
-                weeks_seen.setdefault(p, set()).add(parse_iso(t["ts"]).isocalendar()[:2])
+    for e in episodes:
+        if parse_iso(e["created_at"]) < start:
+            for th in e["themes"]:
+                weeks_seen.setdefault(th, set()).add(parse_iso(e["created_at"]).isocalendar()[:2])
     report.themes = [{"theme": th, "count": n, "earlier_weeks": len(weeks_seen.get(th, ()))}
                      for th, n in counts.most_common(4)]
 

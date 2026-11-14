@@ -228,6 +228,26 @@ All three runners use invented data (`src/lumina/memory/synthetic.py`, `data/eva
 - 100% were closer to the user's own week than to another user's week.
 - 58% kept to the requested 4–6 sentences.
 
+**Pain-point labels retired; journeys matched by meaning (Q1)** (`journey_recommendation.py`).
+- Every message used to get pain-point labels from a zero-shot NLI model over 15 fixed labels. On the 300 gold
+  messages, at the threshold in use (0.12), **91% of small talk got a label** and 98% of personal messages did.
+  One label, "physical symptoms of stress", scored a median 0.45 on every message. Raising the threshold does
+  not rescue it: at 0.9 small talk still gets a label 7% of the time and personal messages only 44%, with wrong
+  labels ("i do not like dogs since they chased me" → physical symptoms of stress). It also cost ~0.5 s of CPU
+  per message.
+- The labels went into the reply prompt as "possible themes" (the LLM then invented context), into stored turn
+  signals, into the weekly insight's themes and into the journey recommender. All four uses are gone:
+  - the prompt has no themes block: the LLM reads the message;
+  - weekly themes come from the themes the LLM writes into each session summary;
+  - journeys are recommended by meaning: the unfinished journey whose description (title, summary and step
+    goals) is closest to the person's session summaries of the last 30 days, using the embeddings already stored
+    with them.
+- On the 7 synthetic histories, the old route recommended "Thought record" for every one, sleep and loneliness
+  included (4 of 6 fit). Matching by meaning gave a fitting journey for all 6 (sleep → sleep reset, loneliness →
+  reconnecting). The fits are a judgement written for this test, pending the user's review, and 7 stories prove
+  little; there is also no similarity floor that separates "no journey needed" (the good-week story still gets a
+  suggestion). Suggestions are only offered in the opening line, so that costs little.
+
 ## 5. Speed and routing (turn traces)
 Every turn leaves a trace (`src/lumina/observability.py`) in its own SQLite file, `data/user/traces.db`: time
 per stage, the safety outcome, the reply path, the output guard's reasons and the reply's token counts. Traces

@@ -124,8 +124,8 @@ def record_turn(store: Store, ctx: SessionContext, *, safety, nlp: dict | None, 
         return store.add_turn(ctx.session_id, ctx.user_id, intent=None, emotion=None, sentiment=None,
                               pain_points=[], macro=None, risk_level=safety.risk_level)
     return store.add_turn(ctx.session_id, ctx.user_id, intent=nlp.get("intent"), emotion=feeling.get("emotion"),
-                          sentiment=feeling.get("sentiment"), pain_points=list(nlp.get("pain_points", [])),
-                          macro=nlp.get("primary_macro"), risk_level=safety.risk_level)
+                          sentiment=feeling.get("sentiment"), pain_points=[], macro=None,
+                          risk_level=safety.risk_level)
 
 
 def should_extract(safety, nlp: dict | None) -> bool:

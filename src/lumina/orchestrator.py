@@ -48,7 +48,6 @@ class TurnResult:
     crisis_subtype: str
     risk_level: str
     injection_detected: bool
-    pain_points: list = field(default_factory=list)
     debug: dict = field(default_factory=dict)        # never sent to the client
     insight: dict | None = None                      # in-session thought → feeling → behaviour link, when offered
 
@@ -137,7 +136,7 @@ def _turn(message: str, history: list | None, persona: str, session: SessionCont
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.method_reply(), "crisis", "neutral", "neutral", True, "method",
-                          "crisis", safety.injection, [], {"safety": safety.signals, "path": "template"})
+                          "crisis", safety.injection, {"safety": safety.signals, "path": "template"})
 
     # Written in a way neither the safety models nor the LLM can read (Arabizi): say so, don't guess.
     if not safety.understood and not safety.is_crisis:
@@ -146,7 +145,7 @@ def _turn(message: str, history: list | None, persona: str, session: SessionCont
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.unsupported_language_reply(), "unsupported_language", "neutral", "neutral",
-                          False, "none", safety.risk_level, safety.injection, [],
+                          False, "none", safety.risk_level, safety.injection,
                           {"safety": safety.signals, "path": "template_language"})
 
     context, connections = None, None
@@ -198,7 +197,7 @@ def _turn(message: str, history: list | None, persona: str, session: SessionCont
     if session is not None:
         _remember(session, message, safety, analysis, insight is not None)
 
-    nlp, feeling = prompt["debug"]["nlp"], prompt["debug"]["feeling"]
+    feeling = prompt["debug"]["feeling"]
     return TurnResult(
         reply=reply,
         intent="crisis" if safety.is_crisis else prompt["intent"],
@@ -208,7 +207,6 @@ def _turn(message: str, history: list | None, persona: str, session: SessionCont
         crisis_subtype=safety.crisis_subtype,
         risk_level=safety.risk_level,
         injection_detected=safety.injection,
-        pain_points=nlp.get("pain_points", []),
         debug={"safety": safety.signals, "path": path, "guard_reasons": list(reasons),
                "intent_category": prompt["intent_category"], "rag_hits": prompt["rag_hits"],
                "memory": sorted(context) if context else []},
