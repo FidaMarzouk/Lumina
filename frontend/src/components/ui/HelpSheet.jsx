@@ -1,18 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { CloseIcon, PhoneIcon } from './Icons'
-
-// Crisis lines are kept here only (the backend refers to "the lines shown on screen").
-const LINES = [
-  { where: 'Tunisia', number: '71 391 000', tel: '71391000' },
-  { where: 'United States and Canada', number: '988', tel: '988' },
-]
+import { LINES } from './helpLines'
 
 /**
- * Crisis help, as a modal dialog.
- * crisis=true: opened by the safety layer; the person confirms they are safe to continue.
- * crisis=false: opened from "Get help now" at any time.
+ * "Get help": the crisis lines as a dialog, opened by the person at any time.
+ * When the safety layer flags a turn, the lines appear in the conversation instead (CrisisPanel).
  */
-function HelpSheet({ open, crisis, onClose }) {
+function HelpSheet({ open, onClose }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -25,8 +19,7 @@ function HelpSheet({ open, crisis, onClose }) {
   return (
     <dialog
       ref={ref}
-      className={`help ${crisis ? 'help-crisis' : ''}`}
-      role={crisis ? 'alertdialog' : 'dialog'}
+      className="help"
       aria-labelledby="help-title"
       aria-describedby="help-text"
       onCancel={e => { e.preventDefault(); onClose() }}
@@ -36,11 +29,10 @@ function HelpSheet({ open, crisis, onClose }) {
         <button type="button" className="help-x" onClick={onClose} aria-label="Close">
           <CloseIcon />
         </button>
-        <h2 id="help-title">{crisis ? "You don't have to carry this alone" : 'Talk to someone now'}</h2>
+        <h2 id="help-title">Talk to someone now</h2>
         <p id="help-text">
-          {crisis
-            ? "I'm still here with you. If you are in danger or thinking about ending your life, please reach out to one of these lines now."
-            : 'If you are in danger or thinking about ending your life, please reach out to one of these lines now. Lumina is not a crisis service.'}
+          If you or someone else is in danger or thinking about ending their life, please reach out to one of these
+          lines now. Lumina is not a crisis service.
         </p>
         <ul className="help-lines">
           {LINES.map(l => (
@@ -54,7 +46,7 @@ function HelpSheet({ open, crisis, onClose }) {
           ))}
         </ul>
         <button type="button" className="btn-primary help-continue" onClick={onClose} autoFocus>
-          {crisis ? "I'm safe, continue" : 'Back to the conversation'}
+          Back to the conversation
         </button>
       </div>
     </dialog>

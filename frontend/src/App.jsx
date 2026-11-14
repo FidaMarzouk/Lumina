@@ -11,6 +11,7 @@ import PaperDefs from './components/paper/PaperDefs'
 import NightSky from './components/paper/NightSky'
 import BreathingPebble from './components/ui/BreathingPebble'
 import HelpSheet from './components/ui/HelpSheet'
+import CrisisPanel from './components/ui/CrisisPanel'
 import Preferences from './components/ui/Preferences'
 import SettingsSheet from './components/ui/SettingsSheet'
 import AccountSheet from './components/ui/AccountSheet'
@@ -97,14 +98,7 @@ function App() {
   const startJourney = journeyId => { cancel(); chat.startWith({ mode: 'guided', journeyId }); setView('app') }
   const newChat = () => { cancel(); chat.resetSession() }
 
-  const crisisOpen = chat.crisisActive
-  const help = (
-    <HelpSheet
-      open={crisisOpen || helpOpen}
-      crisis={crisisOpen}
-      onClose={() => { if (crisisOpen) chat.dismissCrisis(); setHelpOpen(false) }}
-    />
-  )
+  const help = <HelpSheet open={helpOpen} onClose={() => setHelpOpen(false)} />
 
   if (view === 'landing') {
     return (
@@ -177,7 +171,8 @@ function App() {
                       onWeather={chat.setWeather} onTear={chat.addLuminaLine} helped={auth.token ? helped : []}
                       night={night} />
           {chat.error && <p className="error" role="alert">{chat.error}</p>}
-          <InputBar onSend={send} disabled={chat.isTyping || crisisOpen} onListeningChange={onListeningChange}
+          {chat.crisis && <CrisisPanel key={chat.crisis} subtype={chat.crisis} />}
+          <InputBar onSend={send} disabled={chat.isTyping} onListeningChange={onListeningChange}
                     onType={() => pondRef.current?.stir()} />
         </section>
       </main>

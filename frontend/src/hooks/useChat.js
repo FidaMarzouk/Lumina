@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { endSession, sendMessage, startSession } from '../api/chat.js'
 import { withWeather } from '../components/chat/weather.js'
+import { moreUrgent } from '../components/ui/helpLines.js'
 
 const message = (role, text, extra = {}) => ({ id: crypto.randomUUID(), role, text, isCrisis: false, ...extra })
 
@@ -13,7 +14,8 @@ const greeting = () =>
 export function useChat(persona = 'listener', { token = null, active = false } = {}) {
   const [messages, setMessages]         = useState(() => [greeting()])
   const [isTyping, setIsTyping]         = useState(false)
-  const [crisisActive, setCrisisActive] = useState(false)
+  // The crisis panel's wording ('ideation' | 'method' | 'third_party') once a turn is flagged, until a new chat.
+  const [crisis, setCrisis]             = useState(null)
   const [error, setError]               = useState(null)
   // The open signed-in conversation: { mode: 'open' | 'guided', step } (step = the journey step for guided ones).
   const [session, setSession]           = useState(null)
@@ -21,7 +23,6 @@ export function useChat(persona = 'listener', { token = null, active = false } =
   // Refs mirror state so callbacks always see current values (voice input can fire late).
   const messagesRef = useRef(messages)
   const busyRef     = useRef(false)
-  const crisisRef   = useRef(false)
   const sessionRef  = useRef(null)        // { id, token } of the open server session
   const weatherRef  = useRef(null)        // the inner weather picked before the conversation started
   useEffect(() => { messagesRef.current = messages }, [messages])
@@ -78,8 +79,8 @@ export function useChat(persona = 'listener', { token = null, active = false } =
 
   const sendUserMessage = useCallback(async (text) => {
     const clean = text.trim()
-    // Never send while a reply is pending or the crisis sheet is open (also guards voice input).
-    if (!clean || busyRef.current || crisisRef.current) return
+    // Never send while a reply is pending (also guards voice input).  A crisis never blocks writing.
+    if (!clean || busyRef.current) return
 
     const history = messagesRef.current
     setMessages(prev => [...prev, message('user', clean)])
@@ -100,10 +101,7 @@ export function useChat(persona = 'listener', { token = null, active = false } =
       }
       if (typeof response.reply !== 'string' || !response.reply) throw new Error('Empty reply from server')
 
-      if (response.crisis_flag) {
-        crisisRef.current = true
-        setCrisisActive(true)
-      }
+      if (response.crisis_flag) setCrisis(c => moreUrgent(c, response.crisis_subtype || 'ideation'))
       setMessages(prev => [...prev, message('ai', response.reply,
         { isCrisis: response.crisis_flag, insight: response.insight ?? null })])
     } catch (err) {
@@ -127,20 +125,13 @@ export function useChat(persona = 'listener', { token = null, active = false } =
 
   // A line from Lumina that needs no reply from the model (the torn-off question of the day).
   const addLuminaLine = useCallback(text => {
-    if (busyRef.current || crisisRef.current) return
+    if (busyRef.current) return
     setMessages(prev => [...prev, message('ai', text)])
   }, [])
 
-  // Closes the crisis sheet only; the crisis reply stays visible in the chat.
-  const dismissCrisis = useCallback(() => {
-    crisisRef.current = false
-    setCrisisActive(false)
-  }, [])
-
-  // Start a fresh conversation (history, crisis sheet and errors reset; a signed-in session is closed and reopened).
+  // Start a fresh conversation (history, crisis panel and errors reset; a signed-in session is closed and reopened).
   const resetSession = useCallback(() => {
-    crisisRef.current = false
-    setCrisisActive(false)
+    setCrisis(null)
     setError(null)
     weatherRef.current = null
     setMessages([greeting()])
@@ -154,6 +145,6 @@ export function useChat(persona = 'listener', { token = null, active = false } =
     resetSession()
   }, [resetSession])
 
-  return { messages, isTyping, crisisActive, error, session, sendUserMessage, dismissCrisis, resetSession, startWith,
+  return { messages, isTyping, crisis, error, session, sendUserMessage, resetSession, startWith,
            setWeather, addLuminaLine, endConversation: closeSession }
 }
