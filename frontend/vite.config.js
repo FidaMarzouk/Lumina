@@ -2,7 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // Dev server proxies the API; LUMINA_API points it at a backend other than :8000.
-const api = process.env.LUMINA_API ?? 'http://localhost:8000'
+// 127.0.0.1, not "localhost": Node tries IPv6 (::1) first, uvicorn listens on IPv4, and anything else holding
+// [::]:8000 (e.g. a Docker container) would silently receive the requests instead.
+const api = process.env.LUMINA_API ?? 'http://127.0.0.1:8000'
 
 export default defineConfig({
   plugins: [react()],
