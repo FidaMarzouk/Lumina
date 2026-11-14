@@ -14,7 +14,8 @@ Memory (lumina/memory) is used only on turns with no risk and no injection: cris
 injection turns get no remembered context, no reflection and no journey step in the prompt.  A
 memory failure never affects the reply.
 
-Logs contain labels and scores only — never message text.
+Logs contain labels and scores only — never message text.  Each turn also leaves a trace (lumina/observability:
+stage timings, safety outcome, reply path, guard reasons; no text, no user or session id).
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, field
 
+from . import observability
 from .config import HISTORY_WINDOW, MAX_HISTORY_CHARS, MAX_HISTORY_TURNS
 from .dialogue import llm_client
 from .dialogue.empathy_engine import analyze, build_prompt
@@ -99,17 +101,39 @@ def _settle(future) -> None:
 
 def respond(message: str, history: list | None = None, persona: str = "listener",
             session: SessionContext | None = None, weather: str | None = None) -> TurnResult:
+    sw, usage = observability.Stopwatch(), {}
+    result = _turn(message, history, persona, session, weather, sw, usage)
+    observability.record(_trace(result, session, usage), sw.finish())
+    return result
+
+
+def _trace(result: TurnResult, session: SessionContext | None, usage: dict) -> dict:
+    """The trace of one turn: labels and numbers only."""
+    signals, debug = result.debug.get("safety", {}), result.debug
+    reasons = debug.get("guard_reasons", [])
+    return {"signed_in": session is not None, "path": debug.get("path", "unknown"), "risk_level": result.risk_level,
+            "crisis_subtype": result.crisis_subtype, "injection": result.injection_detected,
+            "language": signals.get("language"), "reader": signals.get("reader"), "intent": result.intent,
+            "intent_category": debug.get("intent_category"), "rag_hits": debug.get("rag_hits"),
+            "replaced": debug.get("path") == "llm" and bool(reasons), "guard_reasons": reasons,
+            "degraded": signals.get("degraded", []), "tokens_in": usage.get("in"), "tokens_out": usage.get("out")}
+
+
+def _turn(message: str, history: list | None, persona: str, session: SessionContext | None, weather: str | None,
+          sw: observability.Stopwatch, usage: dict) -> TurnResult:
     turns = normalize_history(history)
     # Text analysis does not depend on the safety outcome: run it alongside the assessment.
     analysis_future = _POOL.submit(analyze, message)
-    safety: SafetyAssessment = assess(message, turns)
+    with sw.stage("safety"):
+        safety: SafetyAssessment = assess(message, turns)
     log.info("Safety — risk=%s subtype=%s injection=%s degraded=%s",
              safety.risk_level, safety.crisis_subtype, safety.injection, safety.signals.get("degraded"))
 
     # Method requests never reach the LLM.  Templated turns still let the analysis finish (it is done long
     # before the ~2 s assessment), so no work is left running after the reply.
     if safety.crisis_subtype == "method":
-        _settle(analysis_future)
+        with sw.stage("analysis"):
+            _settle(analysis_future)
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.method_reply(), "crisis", "neutral", "neutral", True, "method",
@@ -117,7 +141,8 @@ def respond(message: str, history: list | None = None, persona: str = "listener"
 
     # Written in a way neither the safety models nor the LLM can read (Arabizi): say so, don't guess.
     if not safety.understood and not safety.is_crisis:
-        _settle(analysis_future)
+        with sw.stage("analysis"):
+            _settle(analysis_future)
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.unsupported_language_reply(), "unsupported_language", "neutral", "neutral",
@@ -127,26 +152,31 @@ def respond(message: str, history: list | None = None, persona: str = "listener"
     context, connections = None, None
     if session is not None and safety.risk_level == "none" and not safety.injection:
         try:
-            context, connections = memory.load_context(default_store(), session, message)
+            with sw.stage("memory"):
+                context, connections = memory.load_context(default_store(), session, message)
         except Exception as exc:
             log.warning("Memory context unavailable: %s", type(exc).__name__)
     # The inner-weather check-in (guests too) sets the tone on ordinary turns only, like memory.
     if weather and safety.risk_level == "none" and not safety.injection:
         context = {**(context or {}), "weather": weather}
 
-    analysis = analysis_future.result()
-    prompt = build_prompt(message, safety, analysis, persona=persona, memory=context)
+    with sw.stage("analysis"):          # only the wait left after the assessment
+        analysis = analysis_future.result()
+    with sw.stage("prompt"):            # includes knowledge retrieval
+        prompt = build_prompt(message, safety, analysis, persona=persona, memory=context)
     messages = [{"role": "system", "content": prompt["system_prompt"]}]
     messages += turns[-HISTORY_WINDOW:]
     messages.append({"role": "user", "content": prompt["user_message"]})
 
     replaced = False
     try:
-        reply = llm_client.complete(messages)
+        with sw.stage("llm"):
+            reply = llm_client.complete(messages, usage=usage)
         # Structural checks run on every reply; the Llama Guard reply check (~2 s) on risky turns only.
         model_check = _response_guard() if safety.risk_level != "none" else None
-        guarded = output_guard.check(reply, user_message=message, crisis=safety.is_crisis,
-                                     crisis_subtype=safety.crisis_subtype, response_guard=model_check)
+        with sw.stage("output_guard"):
+            guarded = output_guard.check(reply, user_message=message, crisis=safety.is_crisis,
+                                         crisis_subtype=safety.crisis_subtype, response_guard=model_check)
         if guarded.replaced:
             log.warning("Output guard replaced the reply — reasons=%s", ",".join(guarded.reasons))
         reply, path, reasons, replaced = guarded.text, "llm", guarded.reasons, guarded.replaced

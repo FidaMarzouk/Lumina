@@ -121,7 +121,7 @@ def pipeline(monkeypatch, engines):
     def install(safety, reply="That sounds hard. I'm here."):
         monkeypatch.setattr(orch, "assess", lambda m, h: safety)
 
-        def complete(messages):
+        def complete(messages, **kwargs):
             calls.append(messages)
             if isinstance(reply, Exception):
                 raise reply
@@ -160,6 +160,18 @@ def test_unsafe_llm_reply_is_replaced(pipeline):
     pipeline(CRISIS, reply="Call 0800 000 111 now")
     out = orch.respond("x", [])
     assert "0800" not in out.reply and out.debug["guard_reasons"] == ["phone_number"]
+
+
+def test_every_turn_leaves_a_trace_without_text(pipeline, trace_store):
+    pipeline(CRISIS, reply="Call 0800 000 111 now")
+    orch.respond("my secret sentence", [])
+    pipeline(SafetyAssessment("crisis", "method", False, {}))
+    orch.respond("another secret", [])
+    llm, template = trace_store.rows()
+    assert (llm["path"], llm["risk_level"], llm["replaced"], llm["guard_reasons"]) == ("llm", "crisis", 1, ["phone_number"])
+    assert {"safety", "analysis", "prompt", "llm", "output_guard", "total"} <= set(llm["ms"])
+    assert template["path"] == "template" and template["crisis_subtype"] == "method" and "llm" not in template["ms"]
+    assert "secret" not in repr(trace_store.rows()) and "0800" not in repr(trace_store.rows())
 
 
 def test_llm_outage_falls_back_to_safe_template_during_crisis(pipeline):

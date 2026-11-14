@@ -304,7 +304,7 @@ def turn(monkeypatch, engines, user_store):
 
     def run(safety, reply="That sounds hard.", session=ctx):
         monkeypatch.setattr(orch, "assess", lambda m, h: safety)
-        monkeypatch.setattr(orch.llm_client, "complete", lambda msgs: calls.append(msgs) or reply)
+        monkeypatch.setattr(orch.llm_client, "complete", lambda msgs, **kw: calls.append(msgs) or reply)
         return orch.respond("my message", [], session=session)
     return run, ctx, user_store, queued, calls
 

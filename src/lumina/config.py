@@ -181,5 +181,12 @@ PATTERN_MIN_GAP_DAYS    = 21     # an episode must be at least this old to count
 JOURNEY_STEP_MIN_TURNS  = 3      # user turns in a guided session before its step counts as done
 JOURNEYS_DIR            = PROJECT_ROOT / "configs" / "journeys"
 
+# ── Turn traces (lumina/observability.py) ─────────────────────────────────────
+# Per turn: stage timings, safety outcome, reply path, guard reasons.  No text and no user or session id; a
+# separate file from the accounts database.  Not in git.
+TRACES_ENABLED       = os.getenv("TRACES_ENABLED", "1") != "0"
+TRACE_DB_PATH        = Path(os.getenv("LUMINA_TRACE_DB", str(DATA_DIR / "user" / "traces.db")))
+TRACE_RETENTION_DAYS = 30
+
 # ── HTTP API ──────────────────────────────────────────────────────────────────
 CORS_ORIGINS = ["http://localhost:5173"]   # the Vite dev server

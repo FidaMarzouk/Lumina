@@ -21,6 +21,7 @@ from .memory.schemas import Weather
 from .memory.service import SessionContext
 from .memory.store import Store
 from .nlp.models import warm_up
+from .observability import default_traces
 from .orchestrator import respond
 from .routes import account, personal
 from .voice import tts
@@ -45,6 +46,9 @@ async def lifespan(app: FastAPI):
     except ImportError:
         pass
     get_store().purge_expired_tokens()
+    traces = default_traces()
+    if traces is not None:
+        traces.purge()            # turn traces older than TRACE_RETENTION_DAYS
     warm_up()                 # load spaCy + HuggingFace models once, before the first request
     if tts.available():         # voice loads in the background; chat works while it does
         threading.Thread(target=tts.warm_up, name="tts-warm-up", daemon=True).start()

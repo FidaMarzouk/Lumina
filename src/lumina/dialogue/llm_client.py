@@ -40,11 +40,12 @@ def _get_client() -> OpenAI:
 
 
 def complete(messages: list[dict], *, json_mode: bool = False, max_tokens: int | None = None,
-             temperature: float | None = None) -> str:
+             temperature: float | None = None, usage: dict | None = None) -> str:
     """Return the assistant text for `messages`, or raise LLMUnavailable.
 
     json_mode asks the provider for a single JSON object (Ollama and Groq both support it); it is used
-    for memory extraction and summaries, never for replies.
+    for memory extraction and summaries, never for replies.  `usage`, if given, receives the token counts
+    ({"in": …, "out": …}) for turn traces.
     """
     extra = {"response_format": {"type": "json_object"}} if json_mode else {}
     try:
@@ -53,6 +54,8 @@ def complete(messages: list[dict], *, json_mode: bool = False, max_tokens: int |
             temperature=LLM_TEMPERATURE if temperature is None else temperature,
             max_tokens=max_tokens or LLM_MAX_TOKENS, **extra,
         )
+        if usage is not None and getattr(response, "usage", None) is not None:
+            usage.update({"in": response.usage.prompt_tokens, "out": response.usage.completion_tokens})
         text = (response.choices[0].message.content or "").strip()
         if not text:
             raise LLMUnavailable("empty completion")

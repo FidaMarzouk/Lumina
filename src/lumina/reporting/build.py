@@ -289,6 +289,56 @@ def personal_section() -> str:
                    "earlier one. All data here is synthetic or hand-written; none comes from real users.", "".join(parts))
 
 
+# ── speed and routing (turn traces) ───────────────────────────────────────────
+_STAGE_NAMES = {"safety": "Safety assessment", "analysis": "Text analysis (left after safety)",
+                "memory": "Memory", "prompt": "Prompt and retrieval", "llm": "Reply (LLM)",
+                "output_guard": "Output guard", "total": "Whole turn"}
+
+
+def speed_section() -> str:
+    """From eval/reports/turn_traces.json (eval/runners/latency.py or python -m lumina.observability)."""
+    if not (EVAL / "turn_traces.json").exists():
+        return ""
+    rep = _json("turn_traces")
+    if not rep.get("n_turns"):
+        return ""
+    lat = rep["latency_ms"]
+    secs = lambda v: f"{v / 1000:.1f} s"     # noqa: E731
+    stages = [s for s in _STAGE_NAMES if s in lat and s != "total"]
+    domain = max(lat[s]["p50"] for s in stages) * 1.15
+    chart = charts.hbars(
+        [{"label": _STAGE_NAMES[s], "value": lat[s]["p50"],
+          "tip": f"{_STAGE_NAMES[s]}: median {secs(lat[s]['p50'])}, 90th percentile {secs(lat[s]['p90'])}, "
+                 f"on {lat[s]['n']} turns"} for s in stages],
+        "Median time per stage of a turn", domain=domain, fmt=secs)
+    rows = [[_STAGE_NAMES[s], lat[s]["n"], secs(lat[s]["p50"]), secs(lat[s]["p90"]), secs(lat[s]["max"])]
+            for s in _STAGE_NAMES if s in lat]
+    n = rep["n_turns"]
+    share = lambda d, k: _pct(d.get(k, 0) / n)    # noqa: E731
+    tok = rep.get("tokens_per_reply") or {}
+    body = tiles([
+        ("Median turn", secs(lat["total"]["p50"]), f"90th percentile {secs(lat['total']['p90'])}"),
+        ("Replies written by the LLM", share(rep["path"], "llm"),
+         f"the rest are fixed templates ({share(rep['path'], 'template')} method requests, "
+         f"{share(rep['path'], 'template_language')} unreadable script)"),
+        ("Turns at elevated or crisis risk",
+         _pct((rep["risk_level"].get("elevated", 0) + rep["risk_level"].get("crisis", 0)) / n),
+         "these get the slower Llama Guard check of the reply"),
+        ("Tokens per reply", f"{round(tok['in_p50'])} in, {round(tok['out_p50'])} out" if tok else "–",
+         "median, local model: no cost"),
+    ]) + figure(
+        "Where the time goes",
+        f"{n} traced turns from {escape(rep['source'])}, with {escape(rep['llm'])}. Stages that run alongside "
+        "another are counted where the turn waits for them: text analysis runs during the safety assessment, so only "
+        "the wait left after it shows. The output guard includes Llama Guard's check of the reply on elevated and "
+        f"crisis turns. Output guard replaced {_pct(rep.get('replaced_by_output_guard') or 0)} of LLM replies; "
+        f"{_pct(rep['turns_with_a_degraded_layer'])} of turns ran with a safety layer unavailable.",
+        chart, table(["Stage", "Turns", "Median", "90th percentile", "Slowest"], rows, (1, 2, 3, 4)))
+    return section("speed", "Speed and routing", "Every turn leaves a trace: how long each stage took, how the "
+                   "safety layer assessed it and which path the reply took. Traces hold no text and no user or "
+                   "session id.", body)
+
+
 # ── market ────────────────────────────────────────────────────────────────────
 def _reviews() -> tuple[pd.DataFrame, pd.DataFrame]:
     rev = pd.read_json(MARKET / "reviews.jsonl", lines=True)
@@ -477,6 +527,7 @@ def build() -> str:
     retrieval_html, ret = retrieval_section()
     market_html = market_section()
     personal_html = personal_section()
+    speed_html = speed_section()
     overview = tiles([
         ("Crisis messages caught", _pct(dep_policy["clinical_recall_crisis"]),
          f"by the policy in use, on a clinical test set; {_pct(1 - dep_policy['clinical_recall_crisis'])} are missed"),
@@ -488,6 +539,7 @@ def build() -> str:
     ])
     nav = [("overview", "Overview"), ("safety", "Safety"), ("intent", "Intent"), ("retrieval", "Knowledge retrieval")]
     nav += [("personal", "Memory and insights")] if personal_html else []
+    nav += [("speed", "Speed and routing")] if speed_html else []
     nav += [("market", "Market")]
     css = (HERE / "report.css").read_text(encoding="utf-8")
     js = (HERE / "report.js").read_text(encoding="utf-8")
@@ -503,8 +555,8 @@ def build() -> str:
 <main>
 <section id="overview" aria-labelledby="overview-h"><h2 id="overview-h">Overview</h2>
 <p class="lede">The numbers that matter most for whether Lumina is safe and useful, as measured on held-out data. Each section below shows the evidence and the trade-offs behind them.</p>{overview}
-<p class="note">Not yet evaluated: the emotion and sentiment models on held-out benchmarks, retrieval ranking quality (Recall@k, nDCG), reply quality with a blinded empathy rubric, the output guard's false-replacement rate, and end-to-end latency.</p></section>
-{safety_html}{intent_html}{retrieval_html}{personal_html}{market_html}
+<p class="note">Not yet evaluated: the emotion and sentiment models on held-out benchmarks, retrieval ranking quality (Recall@k, nDCG), reply quality with a blinded empathy rubric{"" if speed_html else ", the output guard's false-replacement rate, and end-to-end latency"}.</p></section>
+{safety_html}{intent_html}{retrieval_html}{personal_html}{speed_html}{market_html}
 </main></div>
 <div id="tip" role="tooltip" hidden></div>
 <script>{js}</script>

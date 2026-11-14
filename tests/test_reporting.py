@@ -16,7 +16,7 @@ def page():
 
 
 def test_report_has_every_section_and_marks_settings_in_use(page):
-    for sid in ("overview", "safety", "intent", "retrieval", "personal", "market"):
+    for sid in ("overview", "safety", "intent", "retrieval", "personal", "speed", "market"):
         assert f'id="{sid}"' in page
     in_use = re.search(r"In use: ([^<\"]+)", page)[1]       # the deployed crisis policy
     assert f"p ≥ {config.RISK_THRESHOLD:.2f}" in in_use and f"p ≥ {config.SAFETY_READER_SELF_MIN_P:.2f}" in in_use

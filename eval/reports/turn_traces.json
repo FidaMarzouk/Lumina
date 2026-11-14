@@ -1,0 +1,87 @@
+{
+  "source": "eval/runners/latency.py (scripted guest turns)",
+  "llm": "ollama:llama3.1",
+  "n_messages": 19,
+  "rounds": 2,
+  "n_turns": 38,
+  "first": "2026-11-14T10:59:08+00:00",
+  "last": "2026-11-14T11:02:42+00:00",
+  "latency_ms": {
+    "safety": {
+      "n": 38,
+      "p50": 2556.1,
+      "p90": 2640.5,
+      "max": 2795.7
+    },
+    "analysis": {
+      "n": 38,
+      "p50": 0.0,
+      "p90": 0.0,
+      "max": 0.0
+    },
+    "prompt": {
+      "n": 34,
+      "p50": 0.0,
+      "p90": 17.4,
+      "max": 3686.4
+    },
+    "llm": {
+      "n": 34,
+      "p50": 1417.8,
+      "p90": 2979.7,
+      "max": 5285.2
+    },
+    "output_guard": {
+      "n": 34,
+      "p50": 2851.3,
+      "p90": 3115.3,
+      "max": 4279.0
+    },
+    "total": {
+      "n": 38,
+      "p50": 6244.1,
+      "p90": 7643.2,
+      "max": 12298.6
+    }
+  },
+  "path": {
+    "llm": 34,
+    "template": 2,
+    "template_language": 2
+  },
+  "risk_level": {
+    "elevated": 16,
+    "none": 14,
+    "crisis": 8
+  },
+  "crisis_subtype": {
+    "ideation": 4,
+    "third_party": 2,
+    "method": 2
+  },
+  "language": {
+    "en": 32,
+    "fr": 2,
+    "ar": 2,
+    "arabizi": 2
+  },
+  "intent": {
+    "venting": 8,
+    "crisis": 8,
+    "casual": 6,
+    "seeking_advice": 6,
+    "information": 4,
+    "seeking_validation": 2,
+    "help_seeking": 2,
+    "unsupported_language": 2
+  },
+  "replaced_by_output_guard": 0.0,
+  "guard_reasons": {},
+  "turns_with_a_degraded_layer": 0.0,
+  "degraded_layers": {},
+  "tokens_per_reply": {
+    "in_p50": 327.0,
+    "out_p50": 68.5
+  },
+  "signed_in_share": 0.0
+}

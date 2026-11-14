@@ -14,6 +14,16 @@ def user_store(tmp_path):
     set_default_store(None)
 
 
+@pytest.fixture(autouse=True)
+def trace_store(tmp_path):
+    """Every test gets its own empty turn-trace database (never data/user/traces.db)."""
+    from lumina.observability import TraceStore, set_default_traces
+    store = TraceStore(tmp_path / "traces.db")
+    set_default_traces(store)
+    yield store
+    set_default_traces(None)
+
+
 @pytest.fixture
 def fake_sentence_transformers(monkeypatch):
     """ingestion / retriever import sentence_transformers at module level; tests never need the real model."""

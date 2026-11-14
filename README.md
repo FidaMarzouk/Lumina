@@ -110,6 +110,8 @@ python eval/runners/intent_classifier.py   # retrain + evaluate intent → model
 python eval/runners/pattern_recall.py      # threshold for linking today's story to an earlier one (synthetic)
 python eval/runners/cbt_extraction.py      # CBT-note extraction vs hand labels (live LLM)
 python eval/runners/insight_quality.py     # weekly insights for synthetic users (live LLM + guards)
+python eval/runners/latency.py             # time per stage of a turn, scripted messages (live LLM) → turn_traces.json
+python -m lumina.observability             # the same summary from real traffic (last 7 days of traces)
 python -m lumina.reporting                 # re-render reports/lumina_report.html after any of the above
 ```
 ## Accounts, memory and insights
@@ -123,7 +125,7 @@ Guests chat exactly as before: nothing is stored. With an account, each conversa
 | **Patterns** | Each completed session becomes an *episode*: an LLM-generated summary of the notes, stored with an embedding. `GET /insights/weekly` analyses the week for recurring themes and feeling-to-behaviour links, then connects today's story to the most similar earlier episode, favouring one from approximately a year ago. The LLM generates the reflection using only this evidence. |
 | **Inner weather** | An optional check-in (clear, partly cloudy, foggy, rainy or stormy) at the start of a conversation. It shapes Lumina's opening line and is passed to the reply prompt as context during ordinary turns. It is not stored. |
 | **Things that helped** | Per-message extraction also identifies what the person says helped them. At the end of a session, these items are *offered* for their jar; nothing is saved until they choose to keep it. They can also add their own items. On rainy or stormy days, Talk displays what's in the jar. |
-| **Privacy** | Memory is opt-in, through the consent box at sign-up or the switch in *Your account*. Lumina stores labels, short paraphrased notes and summaries, **never the messages themselves**, in `data/user/lumina.db`. Users can export their data (`GET /users/me/export`) or delete their account and all associated data (`DELETE /users/me`). Logs contain no text. |
+| **Privacy** | Memory is opt-in, through the consent box at sign-up or the switch in *Your account*. Lumina stores labels, short paraphrased notes and summaries, **never the messages themselves**, in `data/user/lumina.db`. Users can export their data (`GET /users/me/export`) or delete their account and all associated data (`DELETE /users/me`). Logs contain no text. Each turn leaves a trace in `data/user/traces.db` (stage timings, safety outcome, reply path; no text, no user or session id, kept 30 days). |
 | **Safety** | Safety assessment always runs first. Crisis, elevated-risk and injection turns receive no memory, reflection or journey step in the prompt. A session containing a crisis turn receives no summary or journey progression, only an open check-in. Every summary, next step and weekly insight passes through the output guard; weekly insights also pass through Llama Guard. If an output is rejected, nothing is shown. |
 ## Knowledge base
 ```bash

@@ -228,10 +228,33 @@ All three runners use invented data (`src/lumina/memory/synthetic.py`, `data/eva
 - 100% were closer to the user's own week than to another user's week.
 - 58% kept to the requested 4–6 sentences.
 
+## 5. Speed and routing (turn traces)
+Every turn leaves a trace (`src/lumina/observability.py`) in its own SQLite file, `data/user/traces.db`: time
+per stage, the safety outcome, the reply path, the output guard's reasons and the reply's token counts. Traces
+hold **no text and no user or session id**, and are deleted after 30 days. `python -m lumina.observability`
+summarises recent real traffic; `eval/runners/latency.py` sends 19 fixed messages twice through the full stack
+(Llama 3.1 8B on an RTX 5050 laptop GPU, Llama Guard 1B on the CPU). Both write `eval/reports/turn_traces.json`.
+
+| Stage | Median | 90th percentile |
+|---|---|---|
+| Safety assessment (floor, classifiers, Llama Guard, LLM reader or translator, in parallel) | 2.6 s | 2.6 s |
+| Reply (LLM) | 1.4 s | 3.0 s |
+| Output guard (structural checks; Llama Guard on the reply at elevated or crisis risk) | 2.9 s | 3.1 s |
+| **Whole turn** | **6.2 s** | **7.6 s** |
+
+**How to read this:**
+- The LLM writes only a quarter of the wait. Llama Guard runs twice on risky turns, on the CPU, about 2.5 s
+  each time.
+- Since S3 many more turns are "elevated" rather than "none" or "crisis" (63% of these scripted turns were
+  elevated or crisis), and every one of them gets Llama Guard's check of the reply. This is the first target
+  for P1.
+- The output guard replaced none of the 34 LLM replies, so its false-replacement rate on this set is 0. The
+  set is small and scripted.
+- Text analysis finishes inside the safety assessment, so it adds no wait.
+
 ## Not yet evaluated
 - Memory and insights with real users: whether reflections and weekly insights feel accurate. Feedback is collected with `POST /insights/{id}/feedback`.
 - Emotion and sentiment models on held-out benchmarks (Stage 6).
 - Retrieval quality: Recall@k, MRR, nDCG on a gold query set (Stage 6).
 - Generation: empathy rubric with blinded human rating, and faithfulness to the retrieved knowledge (Stage 6).
-- Output guard: its false-replacement rate on real LLM replies.
-- End-to-end latency per stage with the local LLM.
+- Output guard: its false-replacement rate on real (not scripted) LLM replies.
