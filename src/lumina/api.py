@@ -3,18 +3,20 @@ import threading
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .auth.deps import get_store, optional_user
 from .config import (
+    CHAT_RATE_LIMITS,
     CORS_ORIGINS,
     MAX_HISTORY_CHARS,
     MAX_HISTORY_TURNS,
     MAX_MESSAGE_CHARS,
     SESSION_SWEEP_MINUTES,
     TTS_MAX_CHARS,
+    TTS_RATE_LIMITS,
     TTS_VOICES,
 )
 from .dialogue.llm_client import check_llm_configured
@@ -24,6 +26,7 @@ from .memory.store import Store
 from .nlp.models import warm_up
 from .observability import default_traces
 from .orchestrator import respond
+from .ratelimit import RateLimiter, client_key, retry_after
 from .routes import account, personal
 from .voice import tts
 
@@ -140,7 +143,30 @@ def _session_context(session_id: str, user: dict | None, store: Store) -> Sessio
                           display_name=user["display_name"])
 
 
-@app.post("/chat", response_model=ChatResponse, response_model_exclude_none=True)
+chat_limiter = RateLimiter(CHAT_RATE_LIMITS)
+tts_limiter = RateLimiter(TTS_RATE_LIMITS)
+
+
+def chat_rate_limit(request: Request, user: dict | None = Depends(optional_user)) -> None:
+    """Refuses floods of messages.  The refusal still points to help: someone may be writing in distress."""
+    wait = chat_limiter.hit(client_key(request, user))
+    if wait is not None:
+        log.warning("Chat rate limit hit")
+        raise HTTPException(status_code=429, headers={"Retry-After": retry_after(wait)},
+                            detail=f"You're sending messages faster than Lumina can answer. Please wait "
+                                   f"{retry_after(wait)} seconds and send it again. If you need help right now, "
+                                   f"tap \"Get help\" at the top of the screen.")
+
+
+def tts_rate_limit(request: Request, user: dict | None = Depends(optional_user)) -> None:
+    wait = tts_limiter.hit(client_key(request, user))
+    if wait is not None:
+        raise HTTPException(status_code=429, headers={"Retry-After": retry_after(wait)},
+                            detail="Too many voice requests. Please wait a moment.")
+
+
+@app.post("/chat", response_model=ChatResponse, response_model_exclude_none=True,
+          dependencies=[Depends(chat_rate_limit)])
 def chat(request: ChatRequest, user: dict | None = Depends(optional_user), store: Store = Depends(get_store)):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
@@ -170,7 +196,8 @@ def tts_status():
     return {"available": tts.available(), "voices": list(TTS_VOICES)}
 
 
-@app.post("/tts", response_class=Response, responses={200: {"content": {"audio/wav": {}}}})
+@app.post("/tts", response_class=Response, responses={200: {"content": {"audio/wav": {}}}},
+          dependencies=[Depends(tts_rate_limit)])
 def speak(request: SpeechRequest):
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")

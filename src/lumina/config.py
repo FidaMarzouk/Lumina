@@ -115,6 +115,11 @@ SAFETY_READER_SELF_MIN_P = 0.10   # reader "self" → crisis with P(risk) at or 
 # Crisis contact details live only in the frontend banner (frontend/src/components/ui/CrisisBanner.jsx).
 
 # ── Request limits ────────────────────────────────────────────────────────────
+# Rate limits per person (account, or client address for guests): (requests, seconds) windows.  Far above
+# human pace; they stop automated floods (lumina/ratelimit.py).  Spoken replies are fetched one sentence
+# at a time, so /tts allows more.
+CHAT_RATE_LIMITS    = [(12, 60), (200, 3600)]
+TTS_RATE_LIMITS     = [(60, 60), (1500, 3600)]
 MAX_MESSAGE_CHARS   = 2000
 MAX_HISTORY_TURNS   = 40
 MAX_HISTORY_CHARS   = 4000      # per turn

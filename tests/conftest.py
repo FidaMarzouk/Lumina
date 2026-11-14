@@ -37,3 +37,14 @@ def fake_sentence_transformers(monkeypatch):
     for name in [m for m in sys.modules if m.startswith(("lumina.rag", "lumina.knowledge.embed_and_store"))]:
         monkeypatch.delitem(sys.modules, name, raising=False)
     return mod
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    """The API's rate limiters are process-wide: every test starts with empty counts."""
+    yield
+    import sys
+    api = sys.modules.get("lumina.api")
+    if api is not None:
+        api.chat_limiter.reset()
+        api.tts_limiter.reset()
