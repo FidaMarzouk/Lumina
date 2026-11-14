@@ -16,6 +16,7 @@ Quality is measured in eval/ (docs/evaluation.md) — do not assume it.
 from __future__ import annotations
 
 import logging
+import threading
 from dataclasses import dataclass, field
 
 import httpx
@@ -111,13 +112,29 @@ def _options() -> dict:
     return opts
 
 
+_SHARED: httpx.Client | None = None
+_SHARED_LOCK = threading.Lock()
+
+
+def _shared_client() -> httpx.Client:
+    """One kept-alive connection pool for every guard call (httpx.Client is thread-safe).
+
+    A new client per call cost ~2.1 s on Windows: "localhost" is tried over IPv6 first, Ollama listens on
+    IPv4 only, so each fresh connection waited for the fallback (P1, docs/evaluation.md §5).  Two guard calls
+    on every risky turn made this the largest share of a turn's time.
+    """
+    global _SHARED
+    if _SHARED is None:
+        with _SHARED_LOCK:
+            if _SHARED is None:
+                _SHARED = httpx.Client(timeout=SAFETY_GUARD_TIMEOUT_S,
+                                       limits=httpx.Limits(max_keepalive_connections=8, keepalive_expiry=300))
+    return _SHARED
+
+
 def _call(path: str, payload: dict, client: httpx.Client | None, extract) -> str | None:
     try:
-        if client is None:
-            with httpx.Client(timeout=SAFETY_GUARD_TIMEOUT_S) as c:
-                r = c.post(f"{OLLAMA_BASE_URL}{path}", json=payload)
-        else:
-            r = client.post(f"{OLLAMA_BASE_URL}{path}", json=payload)
+        r = (client or _shared_client()).post(f"{OLLAMA_BASE_URL}{path}", json=payload)
         r.raise_for_status()
         return extract(r.json())
     except Exception as exc:                      # an unavailable guard must never break a turn

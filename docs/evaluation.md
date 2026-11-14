@@ -312,19 +312,27 @@ hold **no text and no user or session id**, and are deleted after 30 days. `pyth
 summarises recent real traffic; `eval/runners/latency.py` sends 19 fixed messages twice through the full stack
 (Llama 3.1 8B on an RTX 5050 laptop GPU, Llama Guard 1B on the CPU). Both write `eval/reports/turn_traces.json`.
 
-| Stage | Median | 90th percentile |
-|---|---|---|
-| Safety assessment (floor, classifiers, Llama Guard, LLM reader or translator, in parallel) | 2.6 s | 2.6 s |
-| Reply (LLM) | 1.4 s | 3.0 s |
-| Output guard (structural checks; Llama Guard on the reply at elevated or crisis risk) | 2.9 s | 3.1 s |
-| **Whole turn** | **6.2 s** | **7.6 s** |
+| Stage | Median before P1 | Median after P1 | 90th percentile after |
+|---|---|---|---|
+| Safety assessment (floor, classifiers, Llama Guard, LLM reader or translator, in parallel) | 2.6 s | **0.57 s** | 0.74 s |
+| Reply (LLM) | 1.4 s | 1.6 s | 2.6 s |
+| Output guard (structural checks; Llama Guard on the reply at elevated or crisis risk) | 2.9 s | **0.84 s** | 1.3 s |
+| **Whole turn** | **6.2 s** | **2.9 s** | **4.4 s** |
 
 **How to read this:**
-- The LLM writes only a quarter of the wait. Llama Guard runs twice on risky turns, on the CPU, about 2.5 s
-  each time.
-- Since S3 many more turns are "elevated" rather than "none" or "crisis" (63% of these scripted turns were
-  elevated or crisis), and every one of them gets Llama Guard's check of the reply. This is the first target
-  for P1.
+- **P1: most of the wait was a connection, not a model.** Llama Guard was called through a new HTTP connection
+  each time. On Windows "localhost" is tried over IPv6 first and Ollama listens on IPv4 only, so every new
+  connection waited about 2.1 s for the fallback (measured: 2,195 ms per call with a new connection to
+  localhost, 119 ms to 127.0.0.1, 105 ms over one kept-alive connection). Risky turns call Llama Guard twice.
+  `safety/guard.py` now keeps one shared connection pool. The safety outcomes of the 38 traced turns are
+  unchanged (16 elevated, 14 none, 8 crisis), and the crisis regression suite passes.
+- Putting Llama Guard on the GPU was measured and rejected: Ollama then evicts the chat model, and replies went
+  from 1.5 s to 6.7 s.
+- The planned "start the reply during the safety assessment" was not built: the assessment now takes 0.6 s,
+  which is all it could save, only on ordinary turns, while competing on the GPU with the LLM risk reader that
+  runs inside the assessment. Streaming the reply (P2) is the larger gain for how fast a turn feels.
+- The LLM is now the largest stage. Llama Guard's check of the reply (0.8 s) runs on every elevated or crisis
+  turn, 63% of these scripted turns.
 - The output guard replaced none of the 34 LLM replies, so its false-replacement rate on this set is 0. The
   set is small and scripted.
 - Text analysis finishes inside the safety assessment, so it adds no wait.

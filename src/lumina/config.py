@@ -83,8 +83,9 @@ EMBED_BATCH_SIZE      = 64     # embeddings are generated in batches
 OLLAMA_BASE_URL        = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 SAFETY_GUARD_MODEL     = os.getenv("SAFETY_GUARD_MODEL", "llama-guard3:1b")   # Ollama tag
 SAFETY_GUARD_TIMEOUT_S = float(os.getenv("SAFETY_GUARD_TIMEOUT_S", "8"))
-# 0 = run Llama Guard on CPU (~2.2 s, measured) so the chat LLM stays resident on an 8 GB GPU;
-# with both on the GPU Ollama evicted one of them every turn.  Set -1 to let Ollama decide.
+# 0 = run Llama Guard on CPU (~0.1-0.8 s per call, measured in P1) so the chat LLM stays resident on an 8 GB GPU;
+# with both on the GPU Ollama evicts the chat model (re-measured in P1: replies went from 1.5 s to 6.7 s).
+# Set -1 to let Ollama decide.  (The ~2.2 s once measured here was the connection, not the model: see guard.py.)
 SAFETY_GUARD_NUM_GPU   = int(os.getenv("SAFETY_GUARD_NUM_GPU", "0"))
 RISK_MODEL             = "vibhorag101/roberta-base-suicide-prediction-phr"   # MIT; binary suicide-risk classifier
 RISK_THRESHOLD         = 0.90   # P(suicidal) at or above → crisis (with floor | guard).  Chosen by the user from
