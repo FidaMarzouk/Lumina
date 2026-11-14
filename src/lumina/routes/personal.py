@@ -128,7 +128,14 @@ def insights(kind: Literal["session", "weekly"] | None = None, limit: int = Quer
 
 
 @router.get("/insights/weekly")
-def weekly_insight(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+def weekly_status(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    """Read-only: this week's insight if written, else whether one is due.  Never calls the LLM."""
+    return weekly.weekly_status(store, user)
+
+
+@router.post("/insights/weekly")
+def write_weekly_insight(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    """Writes this week's insight when it is due (LLM + guards, a few seconds); otherwise returns the status."""
     return weekly.weekly_insight(store, user)
 
 

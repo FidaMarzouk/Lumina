@@ -103,7 +103,8 @@ docker compose down                          # stop (data is kept; `down -v` del
 ## Test, evaluate, report
 ```bash
 pytest                                     # fast offline suite (no models)
-pytest -m models tests/regression          # crisis regression suite with the real models (~1 min)
+pytest -m models tests/regression          # crisis regression suite with the real models (~2 min)
+cd frontend && npm test                    # frontend unit tests (Vitest; pure logic, no browser or backend)
 python eval/runners/safety_detection.py    # crisis/injection metrics → eval/reports/*.json
 python eval/runners/safety_policy_sweep.py # crisis policy comparison
 python eval/runners/intent_classifier.py   # retrain + evaluate intent → models/intent/v1, eval/reports/

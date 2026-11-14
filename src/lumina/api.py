@@ -13,6 +13,7 @@ from .config import (
     MAX_HISTORY_CHARS,
     MAX_HISTORY_TURNS,
     MAX_MESSAGE_CHARS,
+    SESSION_SWEEP_MINUTES,
     TTS_MAX_CHARS,
     TTS_VOICES,
 )
@@ -52,7 +53,22 @@ async def lifespan(app: FastAPI):
     warm_up()                 # load spaCy + HuggingFace models once, before the first request
     if tts.available():         # voice loads in the background; chat works while it does
         threading.Thread(target=tts.warm_up, name="tts-warm-up", daemon=True).start()
+    stop = threading.Event()
+    threading.Thread(target=_sweep_idle_sessions, args=(stop,), name="session-sweep", daemon=True).start()
     yield
+    stop.set()
+
+
+def _sweep_idle_sessions(stop: threading.Event) -> None:
+    """Every SESSION_SWEEP_MINUTES (and once at start), close sessions idle for SESSION_IDLE_HOURS."""
+    from .memory import episodes
+    while True:
+        try:
+            episodes.sweep_idle(get_store())
+        except Exception as exc:             # a failed sweep is retried next time; it never stops the API
+            log.warning("Idle-session sweep failed: %s", type(exc).__name__)
+        if stop.wait(SESSION_SWEEP_MINUTES * 60):
+            return
 
 
 # ── App ───────────────────────────────────────────────────────────────────────

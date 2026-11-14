@@ -18,5 +18,7 @@ export default defineConfig({
       '/insights': api,
       '/jar': api,
     }
-  }
+  },
+  // npm test: unit tests for the pure logic (no browser, no backend)
+  test: { environment: 'node', include: ['src/**/*.test.{js,jsx}'] },
 })

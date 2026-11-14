@@ -179,6 +179,8 @@ PATTERN_YEAR_BAND_DAYS  = 75     # … ± this many days, when its similarity is
 PATTERN_YEAR_MARGIN     = 0.10   # … this margin of the closest earlier episode
 PATTERN_MIN_GAP_DAYS    = 21     # an episode must be at least this old to count as "from before"
 JOURNEY_STEP_MIN_TURNS  = 3      # user turns in a guided session before its step counts as done
+SESSION_IDLE_HOURS      = 6      # an open session with no turn for this long is closed (summary + next step)
+SESSION_SWEEP_MINUTES   = 30     # how often the API looks for idle sessions
 JOURNEYS_DIR            = PROJECT_ROOT / "configs" / "journeys"
 
 # ── Turn traces (lumina/observability.py) ─────────────────────────────────────

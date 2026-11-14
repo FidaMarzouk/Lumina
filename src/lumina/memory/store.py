@@ -254,6 +254,14 @@ class Store:
             c.execute("UPDATE sessions SET ended_at = COALESCE(ended_at, ?) WHERE id = ?",
                       (iso(now or utcnow()), session_id))
 
+    def idle_open_sessions(self, idle_since: datetime) -> list[dict]:
+        """Sessions still open whose last turn (or start, without turns) is older than `idle_since`."""
+        with self._conn() as c:
+            return [_row(r) for r in c.execute(
+                "SELECT s.* FROM sessions s LEFT JOIN turn_signals t ON t.session_id = s.id "
+                "WHERE s.ended_at IS NULL GROUP BY s.id "
+                "HAVING COALESCE(MAX(t.ts), s.started_at) < ? ORDER BY s.started_at", (iso(idle_since),))]
+
     def user_sessions(self, user_id: str) -> list[dict]:
         with self._conn() as c:
             return [_row(r) for r in c.execute("SELECT * FROM sessions WHERE user_id = ? ORDER BY started_at",

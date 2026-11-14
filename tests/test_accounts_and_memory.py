@@ -194,7 +194,8 @@ def test_users_cannot_reach_each_others_data(api_client, user_store, monkeypatch
 def test_personal_endpoints_require_login(api_client):
     c, _ = api_client
     for method, path in (("post", "/sessions"), ("get", "/journeys"), ("get", "/journey/next"),
-                         ("get", "/insights"), ("get", "/insights/weekly"), ("get", "/users/me/export")):
+                         ("get", "/insights"), ("get", "/insights/weekly"), ("post", "/insights/weekly"),
+                         ("get", "/users/me/export")):
         assert getattr(c, method)(path).status_code == 401, path
 
 
@@ -442,6 +443,42 @@ def test_close_session_stores_episode_reflection_and_next_step(user_store):
     assert again["reflection"]["id"] == out["reflection"]["id"]
 
 
+def test_sweep_closes_only_sessions_idle_for_six_hours(user_store):
+    u = _user(user_store)
+    idle = user_store.create_session(u["id"], "open", now=NOW - timedelta(hours=9))
+    for _ in range(3):
+        _turn(user_store, idle["id"], u["id"], when=NOW - timedelta(hours=8))
+    active = user_store.create_session(u["id"], "open", now=NOW - timedelta(hours=9))
+    _turn(user_store, active["id"], u["id"], when=NOW - timedelta(hours=1))         # old session, recent turn
+    empty = user_store.create_session(u["id"], "open", now=NOW - timedelta(hours=7))  # opened, nothing said
+    fresh = user_store.create_session(u["id"], "open", now=NOW - timedelta(minutes=5))
+    done = user_store.create_session(u["id"], "open", now=NOW - timedelta(days=2))
+    user_store.end_session(done["id"], now=NOW - timedelta(days=2))
+
+    n = episodes.sweep_idle(user_store, now=NOW, complete=_llm(SUMMARY, "Shall we pick this up again?"),
+                            embed=lambda t: np.ones(4, dtype=np.float32), injection_probability=lambda t: 0.0)
+    ended = {s["id"]: s["ended_at"] for s in user_store.user_sessions(u["id"])}
+    assert n == 2 and ended[idle["id"]] and ended[empty["id"]]
+    assert ended[active["id"]] is None and ended[fresh["id"]] is None
+    assert [i["session_id"] for i in user_store.list_insights(u["id"], "session")] == [idle["id"]]   # summarised
+    assert episodes.sweep_idle(user_store, now=NOW, complete=_llm()) == 0          # nothing left, no LLM call
+
+
+def test_sweep_survives_a_failing_session(user_store, monkeypatch):
+    u = _user(user_store)
+    for _ in range(2):
+        user_store.create_session(u["id"], "open", now=NOW - timedelta(hours=7))
+    calls = []
+
+    def flaky(store, user, session, **kw):
+        calls.append(session["id"])
+        if len(calls) == 1:
+            raise RuntimeError("llm down")
+        store.end_session(session["id"], now=NOW)
+    monkeypatch.setattr(episodes, "close_session", flaky)
+    assert episodes.sweep_idle(user_store, now=NOW) == 1 and len(calls) == 2
+
+
 def test_next_step_wording_gets_the_real_name_or_none():
     seen = []
     def complete(msgs, **k):
@@ -541,11 +578,15 @@ def test_feedback_shapes_the_next_weekly_insight(user_store):
 def test_weekly_insight_statuses(user_store):
     u = _user(user_store, consent=False)
     assert weekly.weekly_insight(user_store, u, now=NOW)["status"] == "memory_off"
+    assert weekly.weekly_status(user_store, u, now=NOW)["status"] == "memory_off"
     u = user_store.update_user(u["id"], memory_enabled=True)
     _episode(user_store, u["id"], 1, [1, 0, 0])
     assert weekly.weekly_insight(user_store, u, now=NOW) == {"status": "not_enough_data", "have": 1, "need": 2}
+    assert weekly.weekly_status(user_store, u, now=NOW) == {"status": "not_enough_data", "have": 1, "need": 2}
     _episode(user_store, u["id"], 3, [1, 0, 0])
     _episode(user_store, u["id"], 362, [1, 0, 0], "a year ago")
+    assert weekly.weekly_status(user_store, u, now=NOW) == {"status": "due"}      # reading writes nothing
+    assert user_store.list_insights(u["id"], "weekly") == []
 
     class Unsafe:
         available, unsafe, categories = True, True, ["suicide_self_harm"]
@@ -561,6 +602,24 @@ def test_weekly_insight_statuses(user_store):
     assert "BEFORE (in October 2025, about a year ago)" in prompts[0] and out["insight"]["evidence"]["echo"]
     cached = weekly.weekly_insight(user_store, u, now=NOW + timedelta(days=2), complete=_llm())
     assert cached["insight"]["id"] == out["insight"]["id"]
+    read = weekly.weekly_status(user_store, u, now=NOW + timedelta(days=2))
+    assert read["status"] == "ready" and read["insight"]["id"] == out["insight"]["id"]
+
+
+def test_weekly_get_never_calls_the_llm_and_post_writes(api_client, monkeypatch, user_store):
+    c, _ = api_client
+    token, _ = _register(c)
+    uid = c.get("/auth/me", headers=_auth(token)).json()["id"]
+    for days in (1, 3):
+        _episode(user_store, uid, days, [1, 0, 0])
+    monkeypatch.setattr(weekly, "utcnow", lambda: NOW)
+
+    def no_llm(*a, **k):
+        raise AssertionError("GET must not call the LLM")
+    monkeypatch.setattr(weekly, "weekly_insight", no_llm)
+    assert c.get("/insights/weekly", headers=_auth(token)).json() == {"status": "due"}
+    monkeypatch.setattr(weekly, "weekly_insight", lambda store, user: {"status": "ready", "insight": {"id": "w1"}})
+    assert c.post("/insights/weekly", headers=_auth(token)).json()["insight"]["id"] == "w1"
 
 
 # ─────────────────────────── inner weather, the jar, titles ───────────────────────────

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchInsights, fetchWeekly } from '../../api/personal.js'
+import { fetchInsights, fetchWeekly, writeWeekly } from '../../api/personal.js'
 import { ART } from '../art/artwork'
 import Jar from '../insights/Jar'
 import Journal from '../insights/Journal'
@@ -18,7 +18,9 @@ function InsightsPage({ token, name, onOpenAccount }) {
     fetchInsights(token)
       .then(list => { if (live) setItems(list) })
       .catch(() => { if (live) setError('Your insights couldn’t be loaded. Check that the server is running, then reopen this page.') })
+    // Read first; write only when a letter is due (the page shows "on its way" meanwhile).
     fetchWeekly(token)
+      .then(w => (w.status === 'due' ? writeWeekly(token) : w))
       .then(w => {
         if (!live) return
         setWeekly(w)

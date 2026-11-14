@@ -7,6 +7,8 @@
     3. the planner picks the next step; the LLM may personalise its wording from the summary
     4. the step is stored, so it is waiting at the next visit
 
+sweep_idle() closes sessions left open for SESSION_IDLE_HOURS the same way.
+
 A session with a crisis turn gets no summary, no reflection and no journey push — only an open
 check-in as its next step.  Failures at any point store nothing; nothing is ever invented.
 """
@@ -16,9 +18,9 @@ from __future__ import annotations
 import logging
 from collections import Counter
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from ..config import JOURNEY_STEP_MIN_TURNS, SUMMARY_MAX_TOKENS
+from ..config import JOURNEY_STEP_MIN_TURNS, SESSION_IDLE_HOURS, SUMMARY_MAX_TOKENS
 from ..insights import in_session
 from ..journey import planner
 from ..safety import output_guard
@@ -188,3 +190,26 @@ def close_session(store: Store, user: dict, session: dict, *, now: datetime | No
             step = {**step, "text": text}
     store.set_next_step(uid, step, now)
     return {"reflection": public_insight(reflection), "next_step": step}
+
+
+def sweep_idle(store: Store, *, idle_hours: float = SESSION_IDLE_HOURS, now: datetime | None = None,
+               complete: Callable | None = None, embed: Callable | None = None,
+               injection_probability: Callable | None = None) -> int:
+    """Close sessions nobody has written in for `idle_hours` (the tab was left open, or closed without the
+    browser telling us).  Each is closed exactly as "New chat" would close it: summary, reflection, next step.
+    Returns how many were closed; one failing session does not stop the others."""
+    now = now or utcnow()
+    closed = 0
+    for session in store.idle_open_sessions(now - timedelta(hours=idle_hours)):
+        user = store.get_user(session["user_id"])
+        if user is None:
+            continue
+        try:
+            close_session(store, user, session, now=now, complete=complete, embed=embed,
+                          injection_probability=injection_probability)
+            closed += 1
+        except Exception as exc:
+            log.warning("Closing an idle session failed: %s", type(exc).__name__)
+    if closed:
+        log.info("Closed %d idle session(s)", closed)
+    return closed

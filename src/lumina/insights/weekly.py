@@ -1,15 +1,19 @@
 """Weekly insight — put into words what the pattern miner found, connecting this week to the past.
 
-Generated on demand (no scheduler): when the user asks and the last weekly insight is at least
-WEEKLY_PERIOD_DAYS old, and the period has WEEKLY_MIN_EPISODES summarised sessions.  The text is
-checked by the output guard and Llama Guard; if either rejects it, nothing is stored or shown.
+Generated on demand (no scheduler), in two calls so that reading never writes:
+    weekly_status()   read-only (GET /insights/weekly): the current insight if one is less than
+                      WEEKLY_PERIOD_DAYS old, else whether one is due (the period has WEEKLY_MIN_EPISODES
+                      summarised sessions).  Never calls the LLM.
+    weekly_insight()  writes it (POST /insights/weekly), or returns the current one.
+The text is checked by the output guard and Llama Guard; if either rejects it, nothing is stored or shown.
 
 The person's "This fits" / "Not quite" on reflections from the last 60 days goes into the next
 weekly one: the LLM is told what landed and what did not, and an earlier conversation they said
 did not fit is never linked again.  A week's insight, once written, is not rewritten.
 
 Returns {"status": "ready", "insight": …} | {"status": "not_enough_data", "have": n, "need": m}
-      | {"status": "memory_off"} | {"status": "unavailable"}
+      | {"status": "memory_off"} | {"status": "unavailable"}     and, from weekly_status() only,
+        {"status": "due"}: enough conversations, no insight yet; POST to write it.
 """
 
 from __future__ import annotations
@@ -104,20 +108,47 @@ def _default_response_guard():
     return classify_response
 
 
+def _current(store: Store, user: dict, now: datetime) -> dict | None:
+    """The weekly insight written in the last WEEKLY_PERIOD_DAYS, if any."""
+    latest = store.list_insights(user["id"], kind="weekly", limit=1)
+    if latest and parse_iso(latest[0]["created_at"]) > now - timedelta(days=WEEKLY_PERIOD_DAYS):
+        return latest[0]
+    return None
+
+
+def _evidence(store: Store, user: dict, now: datetime) -> tuple[list[dict], patterns.PatternReport]:
+    feedback = recent_feedback(store, user["id"], now)
+    # A link to the past that the person said did not fit is not made again.
+    rejected = {f["echo_then"] for f in feedback if f["verdict"] == "not_quite" and f["echo_then"]}
+    return feedback, patterns.mine(store, user["id"], now, exclude_earlier=rejected)
+
+
+def weekly_status(store: Store, user: dict, *, now: datetime | None = None) -> dict:
+    """What GET /insights/weekly returns: read-only, no LLM call, nothing stored."""
+    now = now or utcnow()
+    if not user["memory_enabled"]:
+        return {"status": "memory_off"}
+    current = _current(store, user, now)
+    if current:
+        return {"status": "ready", "insight": public_insight(current)}
+    _, report = _evidence(store, user, now)
+    if len(report.episodes) < WEEKLY_MIN_EPISODES:
+        return {"status": "not_enough_data", "have": len(report.episodes), "need": WEEKLY_MIN_EPISODES}
+    return {"status": "due"}
+
+
 def weekly_insight(store: Store, user: dict, *, now: datetime | None = None, complete: Callable | None = None,
                    response_guard: Callable | None = None, force: bool = False) -> dict:
+    """What POST /insights/weekly returns: writes this week's insight unless one is current."""
     now = now or utcnow()
     if not user["memory_enabled"]:
         return {"status": "memory_off"}
 
-    latest = store.list_insights(user["id"], kind="weekly", limit=1)
-    if latest and not force and parse_iso(latest[0]["created_at"]) > now - timedelta(days=WEEKLY_PERIOD_DAYS):
-        return {"status": "ready", "insight": public_insight(latest[0])}
+    current = None if force else _current(store, user, now)
+    if current:
+        return {"status": "ready", "insight": public_insight(current)}
 
-    feedback = recent_feedback(store, user["id"], now)
-    # A link to the past that the person said did not fit is not made again.
-    rejected = {f["echo_then"] for f in feedback if f["verdict"] == "not_quite" and f["echo_then"]}
-    report = patterns.mine(store, user["id"], now, exclude_earlier=rejected)
+    feedback, report = _evidence(store, user, now)
     if len(report.episodes) < WEEKLY_MIN_EPISODES:
         return {"status": "not_enough_data", "have": len(report.episodes), "need": WEEKLY_MIN_EPISODES}
 

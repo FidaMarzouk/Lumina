@@ -5,7 +5,7 @@
 
 The history is invented (lumina/memory/synthetic.py).  It includes a planted pattern: a work
 deadline → "I'm not good enough" → anxiety → working late, about a year ago and again this week,
-so GET /insights/weekly can connect today's story to last year.  An existing account with the same
+so POST /insights/weekly can connect today's story to last year.  An existing account with the same
 email is deleted first.
 """
 

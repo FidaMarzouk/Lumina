@@ -8,8 +8,10 @@ export const completeStep = (token, journeyId, stepId) =>
 
 // Insights
 export const fetchInsights = token => request('/insights?limit=50', { token }).then(r => r.insights)
-// Written on demand by the LLM when a week's insight is due, so this can take several seconds.
+// Reading the weekly letter never writes one: GET says whether it is ready, due or not yet possible.
 export const fetchWeekly = token => request('/insights/weekly', { token })
+// Writes this week's letter when it is due (the LLM and the safety checks: several seconds).
+export const writeWeekly = token => request('/insights/weekly', { method: 'POST', token })
 export const sendFeedback = (token, id, value) =>
   request(`/insights/${encodeURIComponent(id)}/feedback`, { method: 'POST', token, body: { value } })
 
