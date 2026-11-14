@@ -40,6 +40,13 @@ INTENTS: dict[str, str] = {
         "the user is making small talk: a greeting, thanks, goodbye, a pleasantry, positive news, or a "
         "message unrelated to their wellbeing"
     ),
+    # Q3: the router's first gate for the agent tools (A1-A3).  Asking for an exercise or technique is
+    # seeking_advice, not an action; only requests to record, fetch, remind or forget are.
+    "action_request": (
+        "the user asks Lumina to do something in the app for them: save or note something in their journal, "
+        "log their sleep or mood, set a reminder, show or look up what they wrote or tracked before, or forget "
+        "or delete something it keeps"
+    ),
 }
 
 INTENT_NAMES = tuple(INTENTS)

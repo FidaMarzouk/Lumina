@@ -191,10 +191,40 @@ Recall on deepset is low partly because deepset counts benign role-play as injec
   - **seeking_validation**, **help_seeking** and **information** are over-predicted (low precision).
   - **sharing_experience** is confused with venting and casual.
 - Intent only affects tone and whether retrieval runs. It never affects safety, so these errors are low-impact.
-- Next steps, in order:
-  1. Hand-correct a sample of the silver labels.
-  2. Try SetFit fine-tuning.
-  3. Weigh mpnet's +0.03 F1 against its higher latency.
+
+The table and per-class figures above are **v1**. **v2 (Q3)** replaced it:
+
+**v2: action requests, and cleaner training labels.** The agent tools (roadmap A2/A3) need a cheap first gate:
+is the person asking Lumina to *do* something in the app (save a journal entry, log sleep or mood, set a
+reminder, look something up, delete something)? v1 had no such intent, and read every one of these as venting
+or small talk. v2 adds `action_request` and changes the training labels.
+- **Labels both LLMs agree on.** Qwen 2.5 7B labelled the same pool (`silver_qwen.jsonl`). It is no better than
+  Llama 3.1 against gold (0.658 vs 0.672 macro-F1) but makes different mistakes, so v2 trains only on the
+  2,075 messages where both agree. An ablation trained on Llama's labels alone
+  (`eval/reports/intent_classifier_llama_labels.json`) does worse with every embedder (bge-small 0.572 vs 0.659,
+  mpnet 0.565 vs 0.630 on the real messages).
+- **Action examples are generated, the test is hand-written.** 627 generated examples
+  (`actions_train.jsonl`): action requests in five writing styles, and near-misses that mention the same things
+  (hours slept, journals, reminders) without asking for anything. The test set (`gold_actions.jsonl`, 40 requests
+  and 40 near-misses) was written first and separately; generated examples within cosine 0.85 of a test item
+  were dropped.
+
+| Model | Real messages (300) | Action items (80) | Both |
+|---|---|---|---|
+| v1 (bge-small, Llama labels) | 0.545 | 0.520 | 0.488 |
+| **v2 (mpnet, chosen by CV; agreed labels + action data)** | **0.630** | **0.798** | **0.689** |
+| v2 with bge-small (not chosen) | 0.659 | 0.737 | 0.695 |
+
+- `action_request`: precision 0.90, recall 0.93. The roadmap target (macro-F1 ≥ 0.65) is met.
+- bge-small scores higher on the real messages, but the embedder is chosen by cross-validation on training data,
+  and switching because of test scores would make the test a tuning set.
+- **Remaining false actions.** "I slept badly again, maybe 4 hours" is still read as an action (0.75). Until the
+  tools exist, an action request gets an honest "I can't do that yet" reply that never claims anything was
+  saved, and that prompt tells the LLM to ignore it when the message is not really a request: in three tries,
+  that message got an ordinary, caring reply. With the tools (A2), the tool-calling model makes the final call.
+- **Found on the way:** "show me what I wrote last Tuesday" is flagged as prompt injection by the injection
+  classifier, so it gets the injection reply. It must be handled before the read tools ship (A2).
+- The action test items were written by Claude and are **pending the user's review**.
 
 ## 4. Memory and insights
 All three runners use invented data (`src/lumina/memory/synthetic.py`, `data/eval/cbt_extraction/`). None uses real users.
@@ -247,6 +277,33 @@ All three runners use invented data (`src/lumina/memory/synthetic.py`, `data/eva
   reconnecting). The fits are a judgement written for this test, pending the user's review, and 7 stories prove
   little; there is also no similarity floor that separates "no journey needed" (the good-week story still gets a
   suggestion). Suggestions are only offered in the opening line, so that costs little.
+
+## 4b. Reply quality (Q2)
+The reply prompts were rewritten so each intent gets its own task (to be heard, advice, reassurance, help
+finding care, information), the opening and "don't invent what they said" rules are explicit, and a length
+budget closes every prompt. `eval/runners/reply_quality.py` compares replies before and after on 59 of the
+user-reviewed gold messages (sampled by intent; one help-seeking message was a crisis turn and is skipped).
+Safety outcome, analysis, model and seed are the same for both versions.
+
+| | Before | After |
+|---|---|---|
+| Opens with a stock phrase ("It sounds like", "I can imagine"…) | 71% | **5%** |
+| Mean length | 4.8 sentences | 5.2 sentences |
+| Replaced by the output guard | 0 | 0 |
+| Judge (Qwen 2.5 7B, blind, 1–5): understood | 3.95 | 3.95 |
+| Judge: answers the ask | 3.20 | 3.47 |
+| Judge: specific to the person | 2.36 | 2.54 |
+| Judge: safe and respectful | 4.92 | 4.93 |
+
+**How to read this:**
+- The surface habits changed clearly; the LLM judge sees a modest gain, largest for advice (3.48 → 3.85 by
+  intent). The judge is a 7B model and its scores are coarse.
+- **The verdict is the blind human rating**, not yet done: `reports/reply_rating.html` shows each message with
+  both replies as A and B in random order. `python eval/runners/reply_quality.py score ratings.json` adds the
+  ratings to `eval/reports/reply_quality.json`.
+- Known gaps: information answers still run long (8 of 10 over their 5-sentence budget); the model sometimes
+  gives advice nobody asked for on "sharing" messages; and a first draft of the prompts had one reply replaced
+  by Llama Guard as "specialized advice" (body image), a guard false alarm.
 
 ## 5. Speed and routing (turn traces)
 Every turn leaves a trace (`src/lumina/observability.py`) in its own SQLite file, `data/user/traces.db`: time

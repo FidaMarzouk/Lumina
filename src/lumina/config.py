@@ -40,7 +40,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 NLP_DEVICE = os.getenv("NLP_DEVICE", "cpu").lower()
 
 # Intent classifier — trained (embeddings + logistic regression); see eval/runners/intent_classifier.py
-INTENT_MODEL_DIR      = MODELS_DIR / "intent" / "v1"
+INTENT_MODEL_DIR      = MODELS_DIR / "intent" / "v2"   # Q3: + action_request, labels both LLMs agree on
 INTENT_AMBIGUOUS_BELOW = 0.45   # top-class probability below this → reported as ambiguous (top-2)
 INTENT_MODEL    = "facebook/bart-large-mnli"   # legacy zero-shot; used only until the trained model ships
 

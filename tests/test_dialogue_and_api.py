@@ -98,6 +98,45 @@ def test_missing_vectorstore_degrades_gracefully(engines, monkeypatch, fake_sent
     assert out["rag_hits"] == 0 and out["system_prompt"]
 
 
+@pytest.mark.parametrize("intent,needle", [
+    ("venting", "want to be heard"), ("seeking_advice", "2 or 3"), ("seeking_validation", "Answer that directly"),
+    ("help_seeking", "family doctor"), ("sharing_experience", "curious question"),
+])
+def test_each_intent_gets_its_own_task(engines, intent, needle):
+    engines(_nlp(intent=intent))
+    p = ee.build_prompt("x", SAFE)["system_prompt"]
+    assert "WHAT THEY NEED FROM THIS REPLY" in p and needle in p
+    assert "Do not open with stock phrases" in p and "Never diagnose" in p
+
+
+def test_no_invented_recall_and_no_entity_echo(engines):
+    """The old 'reference these to show you were listening' line produced 'you mentioned … before'."""
+    engines(_nlp(entities={"THERAPY": ["grounding"]}))
+    p = ee.build_prompt("x", SAFE)["system_prompt"]
+    assert "Reference these" not in p and "WHAT THEY MENTIONED" not in p
+    assert "never say they told you something before" in p
+
+
+def test_ambiguous_intent_mentions_the_second_reading(engines):
+    nlp = _nlp(intent="venting")
+    nlp["intent_ambiguous"] = [{"intent": "venting", "confidence": 0.4}, {"intent": "seeking_advice", "confidence": 0.35}]
+    engines(nlp)
+    p = ee.build_prompt("x", SAFE)["system_prompt"]
+    assert "could also be read another way" in p and "they are asking what to do" in p
+
+
+def test_information_answers_first(engines):
+    engines(_nlp(intent="information"))
+    p = ee.build_prompt("what is a panic attack?", SAFE)["system_prompt"]
+    assert "Start with the answer itself" in p
+
+
+def test_crisis_and_injection_prompts_are_unchanged_by_the_tasks(engines):
+    engines(_nlp(intent="seeking_advice"))
+    for safety in (CRISIS, SafetyAssessment("none", "none", True, {})):
+        assert "WHAT THEY NEED FROM THIS REPLY" not in ee.build_prompt("x", safety)["system_prompt"]
+
+
 def test_medication_rule_is_single_and_consistent(engines):
     engines(_nlp(intent="seeking_advice", entities={"MEDICATION": ["sertraline"]}))
     p = ee.build_prompt("should i stop my meds?", SAFE)["system_prompt"]
@@ -274,3 +313,29 @@ def test_api_passes_persona_and_rejects_unknown(client, monkeypatch):
     monkeypatch.setattr(api, "respond", fake)
     assert c.post("/chat", json={"message": "hi", "persona": "coach"}).status_code == 200 and seen["persona"] == "coach"
     assert c.post("/chat", json={"message": "hi", "persona": "pirate"}).status_code == 422
+
+
+def test_length_budget_and_opening_rule_come_last(engines):
+    for intent, sentences in (("seeking_advice", 6), ("venting", 4), ("information", 5), ("casual", 2)):
+        engines(_nlp(intent=intent))
+        p = ee.build_prompt("x", SAFE, persona="coach")["system_prompt"]
+        tail = p[p.rindex("BEFORE YOU ANSWER"):]
+        assert f"At most {sentences} sentences" in tail and "It sounds like" in tail
+        assert "CONVERSATION STYLE" not in tail                       # persona comes before, not after
+
+
+def test_action_requests_get_an_honest_cannot_yet_reply_without_retrieval_or_memory(engines, monkeypatch):
+    class Fake:
+        def query(self, q, top_k): raise AssertionError("an action request must not retrieve")
+    monkeypatch.setattr(ee, "_RETRIEVER", Fake())
+    engines(_nlp(intent="action_request"))
+    out = ee.build_prompt("log my sleep, 4 hours", SAFE, memory={"recalled": [{"when": "x", "summary": "s"}]})
+    p = out["system_prompt"]
+    assert out["intent_category"] == "action" and out["rag_hits"] == 0
+    assert "You cannot do any of that yet" in p and "Never say or imply that you saved" in p
+    assert "WHAT YOU REMEMBER" not in p and p.rstrip().endswith('Do not begin with "It sounds like".')
+
+
+def test_safety_still_wins_over_an_action_request(engines):
+    engines(_nlp(intent="action_request"))
+    assert ee.build_prompt("x", CRISIS)["intent_category"] == "crisis"

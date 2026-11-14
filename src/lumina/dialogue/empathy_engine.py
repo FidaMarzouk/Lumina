@@ -34,6 +34,7 @@ _RAG_ELIGIBLE_INTENTS = {"seeking_advice", "help_seeking", "information", "seeki
 
 _LIGHT_INTENTS = {"casual"}
 _INFORMATIONAL_INTENTS = {"information"}
+_ACTION_INTENTS = {"action_request"}      # Q3: asks the app to save, log, remind, look up or delete
 
 _IDENTITY = (
     "You are Lumina, a warm mental health support companion. You offer emotional support and "
@@ -58,11 +59,13 @@ _RETRIEVER = None
 # ── Intent categorisation ─────────────────────────────────────────────────────
 
 def _classify_intent_category(intent: str, safety: SafetyAssessment) -> str:
-    """One of: 'crisis' | 'injection' | 'light' | 'informational' | 'emotional'."""
+    """One of: 'crisis' | 'injection' | 'action' | 'light' | 'informational' | 'emotional'."""
     if safety.is_crisis:
         return "crisis"
     if safety.injection:
         return "injection"
+    if intent in _ACTION_INTENTS:
+        return "action"
     if intent in _LIGHT_INTENTS:
         return "light"
     if intent in _INFORMATIONAL_INTENTS:
@@ -129,23 +132,69 @@ def _pick_strategy(intent: str, emotion: str, category: str) -> tuple[str, str]:
     return STRATEGY_MAP.get((intent, emotion), DEFAULT_STRATEGY)
 
 
-# ── Entity formatting ─────────────────────────────────────────────────────────
-
-def _format_entities(entities: dict) -> str:
-    label_names = {
-        "DISORDER"        : "Conditions mentioned",
-        "MEDICATION"      : "Medications mentioned",
-        "THERAPY"         : "Therapies mentioned",
-        "SYMPTOM"         : "Symptoms mentioned",
-        "EMOTION_STATE"   : "Emotional states expressed",
-        "COPING_STRATEGY" : "Coping strategies mentioned",
-        "SUPPORT_RESOURCE": "Support resources mentioned",
-    }
-    lines = [f"- {name}: {', '.join(entities[key])}" for key, name in label_names.items() if entities.get(key)]
-    return "\n".join(lines)
-
-
 # ── System prompt builders ────────────────────────────────────────────────────
+
+# How every ordinary reply is written (crisis and injection prompts are separate and fixed).  Written against
+# what the audit found: 7 of 12 replies opened "It sounds like", requests for advice or reassurance got a
+# question back, and "reference what they mentioned" produced invented memories ("you mentioned … before").
+_HOW_TO_WRITE = (
+    "HOW TO WRITE:\n"
+    "- Begin with something specific to what they actually said. Do not open with stock phrases such as "
+    "\"It sounds like\", \"I can imagine\", \"I hear you\" or \"That must be\".\n"
+    "- Use their own words for their situation and feelings. Never add events, people or feelings they did not "
+    "mention, and never say they told you something before unless it is in this conversation.\n"
+    "- Plain, warm, everyday language. No clinical terms and no labels for them.\n"
+    "- Ask at most one question, and only when it helps them go on.\n"
+    "- Never diagnose. If they ask whether they have a condition, say honestly that only a professional can "
+    "assess that, explain briefly what such an assessment looks at, and take their wish to understand seriously.\n"
+)
+
+# What each intent is asking for, and what a good reply does with it (lumina/nlp/intent_taxonomy.py).
+_TASKS = {
+    "venting": (
+        "They mainly want to be heard. Reflect the heart of what they said and how it seems to feel, specifically "
+        "enough that they know you followed. No advice or fixes unless they ask."),
+    "seeking_advice": (
+        "They are asking what to do. Answer that: after at most one sentence of acknowledgement, offer 2 or 3 "
+        "concrete, small steps that fit their situation (for example words they could use, or a first move for "
+        "today), as options rather than orders, one short sentence each. You may end by asking which feels "
+        "doable."),
+    "seeking_validation": (
+        "They are asking whether their reaction is normal or okay. Answer that directly within your first two "
+        "sentences: if it is a common, understandable human reaction, say so plainly and say why, instead of "
+        "turning the question back to them. Then acknowledge how it feels."),
+    "help_seeking": (
+        "They want to find, afford or prepare for professional support. Be practical: name the kinds of places "
+        "people usually start (a family doctor, university or workplace counselling, low-cost or sliding-scale "
+        "services, community or online options) and one thing they could do this week. Never invent names of "
+        "services, prices or phone numbers."),
+    "sharing_experience": (
+        "They are telling you about something that happened, without asking for anything. Respond to what they "
+        "shared with real interest, notice what seems to matter to them in it, and, if it fits, ask one curious "
+        "question."),
+}
+
+
+_BUDGET = {"action_request": (3, 60), "venting": (4, 70), "seeking_advice": (6, 110), "seeking_validation": (5, 90),
+           "help_seeking": (6, 110), "sharing_experience": (4, 70), "information": (5, 100), "casual": (2, 35)}
+
+
+def _closing(intent: str) -> str:
+    sentences, words = _BUDGET.get(intent, _BUDGET["venting"])
+    return ("\n\nBEFORE YOU ANSWER (most important):\n"
+            f"- At most {sentences} sentences, about {words} words in all. Shorter is better than longer.\n"
+            "- Your first words are about them or what they said. Do not begin with \"It sounds like\".")
+
+
+def _task(nlp: dict) -> str:
+    intent = nlp.get("intent")
+    out = f"WHAT THEY NEED FROM THIS REPLY:\n{_TASKS.get(intent, _TASKS['venting'])}\n"
+    second = next((a["intent"] for a in (nlp.get("intent_ambiguous") or []) if a["intent"] != intent), None)
+    if second in _TASKS:
+        out += ("The message could also be read another way; if so, they may want this too: "
+                f"{_TASKS[second].split('.')[0].lower()}.\n")
+    return out + "\n"
+
 
 def _prompt_light(tone: str, avoid: str) -> str:
     return (
@@ -154,39 +203,57 @@ def _prompt_light(tone: str, avoid: str) -> str:
         "RESPONSE INSTRUCTIONS:\n"
         f"Tone: {tone}.\n"
         f"Avoid: {avoid}.\n"
-        "- Respond naturally and warmly, in 1 to 2 sentences.\n"
+        "- Respond naturally and warmly, in 1 to 2 sentences, the way a friend would.\n"
+        "- If they share good news, be glad with them, specifically. Do not open with \"It sounds like\".\n"
         "- Do not project emotions, assume struggles, or bring up mental health unprompted.\n"
         "- Match the user's energy; you may mention you're here if they ever want to talk.\n"
+    ).strip()
+
+
+def _prompt_action(tone: str, avoid: str) -> str:
+    """The person asked the app to do something (save, log, remind, look up, delete).  Until the tools exist
+    (roadmap A2/A3) Lumina cannot, and must never pretend it did: an invented "I've logged your sleep" would be
+    a broken promise about their own data."""
+    return (
+        _IDENTITY
+        + "The person is asking you to do something in the app for them: save or note something, log their sleep "
+        "or mood, set a reminder, look up what they wrote or tracked, or delete something.\n\n"
+        "WHAT THEY NEED FROM THIS REPLY:\n"
+        "You cannot do any of that yet. Say so briefly and honestly, in one sentence, without apologising at "
+        "length. Never say or imply that you saved, logged, noted, tracked, set, looked up or deleted anything, "
+        "and never make up what they wrote or tracked before. Then respond warmly to anything else in their "
+        "message (how they feel, what happened), or offer to talk it through here instead.\n"
+        "This was detected automatically and can be wrong: if they are not actually asking you to do something, "
+        "ignore the paragraph above and simply respond to what they said.\n\n"
+        + _HOW_TO_WRITE
+        + "\nRESPONSE INSTRUCTIONS:\n"
+        f"Tone: {tone}.\n"
+        f"Avoid: {avoid}.\n"
+        + _NO_NUMBERS_RULE
     ).strip()
 
 
 def _prompt_emotional(nlp: dict, feeling: dict, sentiment: str, tone: str, avoid: str,
                       rag_context: list[str], elevated: bool) -> str:
     # No "possible themes" block: the zero-shot labels it carried were noise and made the LLM invent context
-    # (Q1).  The LLM reads the message itself.
+    # (Q1).  The LLM reads the message itself; the analysis below is a hint only.
     prompt = _IDENTITY + "Respond as a warm, understanding person — never clinical or robotic.\n\n"
 
-    prompt += "EMOTIONAL CONTEXT (automatic analysis — may be imperfect):\n"
+    prompt += "EMOTIONAL CONTEXT (automatic analysis; often wrong, so trust the message over it):\n"
     prompt += f"Sentiment: {sentiment}. Dominant emotion: {feeling['emotion']}.\n"
     if feeling["emotion_ambiguous"]:
-        prompt += "The emotional signal is weak — do not assume how they feel; ask gently.\n"
+        prompt += "The emotional signal is weak — do not assume how they feel.\n"
     prompt += "\n"
-
-    entity_str = _format_entities(nlp["entities"])
-    if entity_str:
-        prompt += f"WHAT THEY MENTIONED:\n{entity_str}\nReference these to show you were listening.\n\n"
 
     if rag_context:
         prompt += "BACKGROUND INFORMATION (from the knowledge base; may not apply to this person):\n"
         prompt += "".join(f"- {chunk}\n" for chunk in rag_context)
-        prompt += "Use it only if relevant. Do not quote it directly.\n\n"
+        prompt += "Use it only if it helps answer them. Do not quote it directly.\n\n"
 
-    prompt += (
-        "RESPONSE INSTRUCTIONS:\n"
+    prompt += _task(nlp) + _HOW_TO_WRITE + (
+        "\nRESPONSE INSTRUCTIONS:\n"
         f"Tone: {tone}.\n"
         f"Avoid: {avoid}.\n"
-        "- Keep your response concise — 2 to 4 sentences.\n"
-        "- Do not diagnose or label their condition.\n"
         "- Do not suggest seeing a therapist if they already mentioned having one.\n"
         + _MEDICATION_RULE + _NO_NUMBERS_RULE
     )
@@ -201,19 +268,19 @@ def _prompt_emotional(nlp: dict, feeling: dict, sentiment: str, tone: str, avoid
 def _prompt_informational(nlp: dict, tone: str, avoid: str, rag_context: list[str]) -> str:
     prompt = _IDENTITY + "The user is asking for general information about a mental health topic.\n\n"
 
-    entity_str = _format_entities(nlp["entities"])
-    if entity_str:
-        prompt += f"TOPIC CONTEXT:\n{entity_str}\n\n"
-
     if rag_context:
         prompt += "KNOWLEDGE BASE EXCERPTS:\n" + "".join(f"- {chunk}\n" for chunk in rag_context)
         prompt += "Ground your answer in these excerpts. Paraphrase — do not copy verbatim.\n\n"
 
     prompt += (
-        "RESPONSE INSTRUCTIONS:\n"
+        "WHAT THEY NEED FROM THIS REPLY:\n"
+        "A clear answer to their question. Start with the answer itself, not with a comment on how they might "
+        "feel. Plain language, most useful information first. If it helps, end with one short offer to talk "
+        "about how it relates to them.\n\n"
+        + _HOW_TO_WRITE
+        + "\nRESPONSE INSTRUCTIONS:\n"
         f"Tone: {tone}.\n"
         f"Avoid: {avoid}.\n"
-        "- Answer clearly in 2 to 5 sentences, most useful information first.\n"
         "- This is general information, not advice for their specific situation.\n"
         "- If the topic is outside what you know, say so honestly.\n"
         + _MEDICATION_RULE + _NO_NUMBERS_RULE
@@ -346,6 +413,8 @@ def build_prompt(text: str, safety: SafetyAssessment, analysis: tuple[dict, dict
         system_prompt = _prompt_crisis()
     elif category == "injection":
         system_prompt = _prompt_injection()
+    elif category == "action":
+        system_prompt = _with_persona(_prompt_action(tone, avoid), persona)
     elif category == "light":
         system_prompt = _with_persona(_prompt_light(tone, avoid) + _memory_blocks(memory, category), persona)
     elif category == "informational":
@@ -355,6 +424,10 @@ def build_prompt(text: str, safety: SafetyAssessment, analysis: tuple[dict, dict
         system_prompt = _with_persona(_prompt_emotional(nlp, feeling, sentiment, tone, avoid, rag_context,
                                                         elevated=safety.risk_level == "elevated")
                                       + _memory_blocks(memory, category), persona)
+    if category in ("action", "light", "informational", "emotional"):
+        # Last, after memory and persona: small models follow the end of a prompt best.
+        system_prompt += _closing({"light": "casual", "informational": "information",
+                                   "action": "action_request"}.get(category, intent))
 
     log.info("Prompt built — intent=%s category=%s emotion=%s rag_hits=%d risk=%s",
              intent, category, feeling["emotion"], len(rag_context), safety.risk_level)

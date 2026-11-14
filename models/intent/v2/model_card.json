@@ -1,0 +1,314 @@
+{
+  "version": "v2",
+  "created": "2026-11-14",
+  "embedder": "sentence-transformers/all-mpnet-base-v2",
+  "labels": [
+    "action_request",
+    "casual",
+    "help_seeking",
+    "information",
+    "seeking_advice",
+    "seeking_validation",
+    "sharing_experience",
+    "venting"
+  ],
+  "selection": "highest 5-fold CV macro-F1 on silver train",
+  "train_data": {
+    "file": "data/eval/intent/silver.jsonl",
+    "sha256_16": "6fbea859f9afb65a",
+    "n": 2481,
+    "labels": "agree",
+    "plus": "data/eval/intent/actions_train.jsonl"
+  },
+  "gold_metrics": {
+    "macro_f1": 0.6302,
+    "accuracy": 0.6633,
+    "per_class": {
+      "venting": {
+        "precision": 0.803,
+        "recall": 0.51,
+        "f1-score": 0.624,
+        "support": 104.0
+      },
+      "seeking_advice": {
+        "precision": 0.58,
+        "recall": 0.853,
+        "f1-score": 0.69,
+        "support": 34.0
+      },
+      "seeking_validation": {
+        "precision": 0.375,
+        "recall": 0.75,
+        "f1-score": 0.5,
+        "support": 12.0
+      },
+      "help_seeking": {
+        "precision": 0.6,
+        "recall": 0.75,
+        "f1-score": 0.667,
+        "support": 8.0
+      },
+      "information": {
+        "precision": 0.421,
+        "recall": 0.889,
+        "f1-score": 0.571,
+        "support": 18.0
+      },
+      "sharing_experience": {
+        "precision": 0.552,
+        "recall": 0.615,
+        "f1-score": 0.582,
+        "support": 26.0
+      },
+      "casual": {
+        "precision": 0.854,
+        "recall": 0.714,
+        "f1-score": 0.778,
+        "support": 98.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        "venting",
+        "seeking_advice",
+        "seeking_validation",
+        "help_seeking",
+        "information",
+        "sharing_experience",
+        "casual",
+        "action_request"
+      ],
+      "matrix": [
+        [
+          53,
+          16,
+          12,
+          3,
+          9,
+          3,
+          7,
+          1
+        ],
+        [
+          5,
+          29,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          9,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          1,
+          0,
+          16,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          1,
+          0,
+          0,
+          1,
+          16,
+          5,
+          0
+        ],
+        [
+          3,
+          2,
+          2,
+          1,
+          10,
+          10,
+          70,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "combined_metrics": {
+    "macro_f1": 0.689,
+    "accuracy": 0.7,
+    "per_class": {
+      "venting": {
+        "precision": 0.797,
+        "recall": 0.534,
+        "f1-score": 0.64,
+        "support": 118.0
+      },
+      "seeking_advice": {
+        "precision": 0.604,
+        "recall": 0.821,
+        "f1-score": 0.696,
+        "support": 39.0
+      },
+      "seeking_validation": {
+        "precision": 0.433,
+        "recall": 0.812,
+        "f1-score": 0.565,
+        "support": 16.0
+      },
+      "help_seeking": {
+        "precision": 0.667,
+        "recall": 0.8,
+        "f1-score": 0.727,
+        "support": 10.0
+      },
+      "information": {
+        "precision": 0.465,
+        "recall": 0.87,
+        "f1-score": 0.606,
+        "support": 23.0
+      },
+      "sharing_experience": {
+        "precision": 0.556,
+        "recall": 0.625,
+        "f1-score": 0.588,
+        "support": 32.0
+      },
+      "casual": {
+        "precision": 0.849,
+        "recall": 0.716,
+        "f1-score": 0.777,
+        "support": 102.0
+      },
+      "action_request": {
+        "precision": 0.902,
+        "recall": 0.925,
+        "f1-score": 0.914,
+        "support": 40.0
+      }
+    },
+    "confusion": {
+      "labels": [
+        "venting",
+        "seeking_advice",
+        "seeking_validation",
+        "help_seeking",
+        "information",
+        "sharing_experience",
+        "casual",
+        "action_request"
+      ],
+      "matrix": [
+        [
+          63,
+          16,
+          13,
+          3,
+          10,
+          5,
+          7,
+          1
+        ],
+        [
+          6,
+          32,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          1,
+          0,
+          13,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          2,
+          0,
+          20,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          1,
+          0,
+          0,
+          1,
+          20,
+          5,
+          1
+        ],
+        [
+          3,
+          2,
+          2,
+          1,
+          10,
+          10,
+          73,
+          1
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          37
+        ]
+      ]
+    }
+  },
+  "notes": "Silver labels from Llama 3.1 8B kept where Qwen 2.5 7B agrees; generated action_request examples; gold labels by Claude, reviewed by user (ambiguous items set to venting); action test items pending review."
+}

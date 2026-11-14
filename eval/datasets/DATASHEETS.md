@@ -41,7 +41,10 @@ re-training the intent classifier without them, and replacing them in the evalua
 |---|---|
 | `pool.jsonl` | 3,029 real messages, built by `eval/datasets/intent/build_pool.py` from the sources below. Exact duplicates removed; U+FFFD repaired; DailyDialog detokenised. |
 | `silver.jsonl` | Training labels from **Llama 3.1 8B** (local, temperature 0), following the definitions in `chatbot/nlp/intent_taxonomy.py` (`silver_label.py`). Machine-generated and unreviewed. |
-| `gold.jsonl` | **300** held-out messages, stratified by source (seed 2026), labelled independently by Claude (Opus 5.5) using the same definitions. **40 are flagged `ambiguous`.** Status: *pending user review*. Never used for training or model selection. |
+| `gold.jsonl` | **300** held-out messages, stratified by source (seed 2026), labelled independently by Claude (Opus 5.5) using the same definitions. **40 are flagged `ambiguous`.** Reviewed by the user on 2026-10-12 (ambiguous items set to `venting`). Never used for training or model selection. |
+| `silver_qwen.jsonl` | Second set of training labels for the same pool, from **Qwen 2.5 7B** with the same prompt and the 8-intent taxonomy (`silver_label.py --model qwen2.5:7b --out …`, 2026-11-14). Training (v2) keeps only messages where it agrees with `silver.jsonl`. Machine-generated and unreviewed. |
+| `actions_train.jsonl` | **627 generated** training examples (`generate_actions.py`, Qwen 2.5 7B, temperature 0.9, 2026-11-14): `action_request` messages across six kinds of action and five writing styles, plus near-misses on the same topics labelled with the intent they were written as. Silver quality: some are mislabelled (e.g. a look-up filed as a log). Items within cosine 0.85 of a test item were dropped. |
+| `gold_actions.jsonl` | **80 hand-written** test items (Claude, 2026-11-14): 40 action requests (journal, sleep, mood, reminders, look-ups, deletions, some wrapped in feelings or typos) and 40 near-misses with their true intent. Written before the training examples were generated. Status: *pending user review*. Never used for training or model selection. |
 
 Pool sources:
 | Source | Licence | n in pool | Typical intents |

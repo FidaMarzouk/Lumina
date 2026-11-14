@@ -1,0 +1,2947 @@
+{
+  "version": "ablation_llama_labels",
+  "training_labels": "llama",
+  "n_train": 3176,
+  "n_gold": 300,
+  "n_gold_actions": 80,
+  "n_gold_clear": 260,
+  "train_label_counts": {
+    "venting": 884,
+    "seeking_advice": 241,
+    "seeking_validation": 184,
+    "help_seeking": 53,
+    "information": 345,
+    "sharing_experience": 295,
+    "casual": 906,
+    "action_request": 268
+  },
+  "gold_label_counts": {
+    "venting": 118,
+    "seeking_advice": 39,
+    "seeking_validation": 16,
+    "help_seeking": 10,
+    "information": 23,
+    "sharing_experience": 32,
+    "casual": 102,
+    "action_request": 40
+  },
+  "models": {
+    "previous:v1": {
+      "gold": {
+        "macro_f1": 0.5455,
+        "accuracy": 0.62,
+        "per_class": {
+          "venting": {
+            "precision": 0.739,
+            "recall": 0.625,
+            "f1-score": 0.677,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.75,
+            "recall": 0.529,
+            "f1-score": 0.621,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.281,
+            "recall": 0.75,
+            "f1-score": 0.409,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.368,
+            "recall": 0.875,
+            "f1-score": 0.519,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.311,
+            "recall": 0.778,
+            "f1-score": 0.444,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.474,
+            "recall": 0.346,
+            "f1-score": 0.4,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.877,
+            "recall": 0.653,
+            "f1-score": 0.749,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              65,
+              4,
+              14,
+              5,
+              8,
+              5,
+              3,
+              0
+            ],
+            [
+              6,
+              18,
+              6,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              14,
+              0,
+              0,
+              0
+            ],
+            [
+              7,
+              0,
+              0,
+              0,
+              4,
+              9,
+              6,
+              0
+            ],
+            [
+              6,
+              2,
+              1,
+              1,
+              19,
+              5,
+              64,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_actions": {
+        "macro_f1": 0.5198,
+        "accuracy": 0.4,
+        "per_class": {
+          "venting": {
+            "precision": 0.455,
+            "recall": 0.714,
+            "f1-score": 0.556,
+            "support": 14.0
+          },
+          "seeking_advice": {
+            "precision": 0.571,
+            "recall": 0.8,
+            "f1-score": 0.667,
+            "support": 5.0
+          },
+          "seeking_validation": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 4.0
+          },
+          "help_seeking": {
+            "precision": 0.667,
+            "recall": 1.0,
+            "f1-score": 0.8,
+            "support": 2.0
+          },
+          "information": {
+            "precision": 0.2,
+            "recall": 0.8,
+            "f1-score": 0.32,
+            "support": 5.0
+          },
+          "sharing_experience": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1-score": 0.571,
+            "support": 6.0
+          },
+          "casual": {
+            "precision": 0.286,
+            "recall": 1.0,
+            "f1-score": 0.444,
+            "support": 4.0
+          },
+          "action_request": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              10,
+              1,
+              1,
+              1,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              4,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0
+            ],
+            [
+              11,
+              2,
+              1,
+              0,
+              14,
+              2,
+              10,
+              0
+            ]
+          ]
+        }
+      },
+      "combined": {
+        "macro_f1": 0.4875,
+        "accuracy": 0.5737,
+        "per_class": {
+          "venting": {
+            "precision": 0.682,
+            "recall": 0.636,
+            "f1-score": 0.658,
+            "support": 118.0
+          },
+          "seeking_advice": {
+            "precision": 0.71,
+            "recall": 0.564,
+            "f1-score": 0.629,
+            "support": 39.0
+          },
+          "seeking_validation": {
+            "precision": 0.342,
+            "recall": 0.812,
+            "f1-score": 0.481,
+            "support": 16.0
+          },
+          "help_seeking": {
+            "precision": 0.409,
+            "recall": 0.9,
+            "f1-score": 0.562,
+            "support": 10.0
+          },
+          "information": {
+            "precision": 0.277,
+            "recall": 0.783,
+            "f1-score": 0.409,
+            "support": 23.0
+          },
+          "sharing_experience": {
+            "precision": 0.481,
+            "recall": 0.406,
+            "f1-score": 0.441,
+            "support": 32.0
+          },
+          "casual": {
+            "precision": 0.782,
+            "recall": 0.667,
+            "f1-score": 0.72,
+            "support": 102.0
+          },
+          "action_request": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              75,
+              5,
+              15,
+              6,
+              8,
+              6,
+              3,
+              0
+            ],
+            [
+              6,
+              22,
+              6,
+              4,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              13,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              18,
+              1,
+              0,
+              0
+            ],
+            [
+              8,
+              0,
+              0,
+              0,
+              5,
+              13,
+              6,
+              0
+            ],
+            [
+              6,
+              2,
+              1,
+              1,
+              19,
+              5,
+              68,
+              0
+            ],
+            [
+              11,
+              2,
+              1,
+              0,
+              14,
+              2,
+              10,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.5951,
+        "accuracy": 0.6538,
+        "per_class": {
+          "venting": {
+            "precision": 0.681,
+            "recall": 0.766,
+            "f1-score": 0.721,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.857,
+            "recall": 0.529,
+            "f1-score": 0.655,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1-score": 0.5,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.5,
+            "recall": 0.875,
+            "f1-score": 0.636,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.35,
+            "recall": 0.778,
+            "f1-score": 0.483,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.529,
+            "recall": 0.346,
+            "f1-score": 0.419,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.889,
+            "recall": 0.653,
+            "f1-score": 0.753,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              49,
+              1,
+              6,
+              0,
+              3,
+              3,
+              2,
+              0
+            ],
+            [
+              6,
+              18,
+              6,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              3,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              14,
+              0,
+              0,
+              0
+            ],
+            [
+              7,
+              0,
+              0,
+              0,
+              4,
+              9,
+              6,
+              0
+            ],
+            [
+              6,
+              2,
+              1,
+              1,
+              19,
+              5,
+              64,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "silver_labeller_llama3.1": {
+      "gold": {
+        "macro_f1": 0.6716,
+        "accuracy": 0.7133,
+        "per_class": {
+          "venting": {
+            "precision": 0.78,
+            "recall": 0.683,
+            "f1-score": 0.728,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.774,
+            "recall": 0.706,
+            "f1-score": 0.738,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.429,
+            "recall": 0.75,
+            "f1-score": 0.545,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1-score": 0.667,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.419,
+            "recall": 1.0,
+            "f1-score": 0.59,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.75,
+            "recall": 0.577,
+            "f1-score": 0.652,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.845,
+            "recall": 0.724,
+            "f1-score": 0.78,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              71,
+              3,
+              8,
+              4,
+              8,
+              3,
+              7,
+              0
+            ],
+            [
+              8,
+              24,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              9,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              18,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              0,
+              0,
+              0,
+              1,
+              15,
+              6,
+              0
+            ],
+            [
+              6,
+              1,
+              2,
+              0,
+              16,
+              2,
+              71,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.7409,
+        "accuracy": 0.7577,
+        "per_class": {
+          "venting": {
+            "precision": 0.73,
+            "recall": 0.844,
+            "f1-score": 0.783,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.828,
+            "recall": 0.706,
+            "f1-score": 0.762,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.562,
+            "recall": 0.75,
+            "f1-score": 0.643,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.857,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1-score": 0.667,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.833,
+            "recall": 0.577,
+            "f1-score": 0.682,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.877,
+            "recall": 0.724,
+            "f1-score": 0.793,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              54,
+              1,
+              3,
+              0,
+              1,
+              1,
+              4,
+              0
+            ],
+            [
+              8,
+              24,
+              2,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              9,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              18,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              0,
+              0,
+              0,
+              1,
+              15,
+              6,
+              0
+            ],
+            [
+              6,
+              1,
+              2,
+              0,
+              16,
+              2,
+              71,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "cohen_kappa_vs_gold": 0.6294
+    },
+    "silver_labeller_qwen2.5": {
+      "gold": {
+        "macro_f1": 0.6583,
+        "accuracy": 0.6667,
+        "per_class": {
+          "venting": {
+            "precision": 0.839,
+            "recall": 0.5,
+            "f1-score": 0.627,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.508,
+            "recall": 0.941,
+            "f1-score": 0.66,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.37,
+            "recall": 0.833,
+            "f1-score": 0.513,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.857,
+            "recall": 0.75,
+            "f1-score": 0.8,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.64,
+            "recall": 0.889,
+            "f1-score": 0.744,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.452,
+            "recall": 0.538,
+            "f1-score": 0.491,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.843,
+            "recall": 0.714,
+            "f1-score": 0.773,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              52,
+              22,
+              11,
+              1,
+              3,
+              8,
+              7,
+              0
+            ],
+            [
+              2,
+              32,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              0,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              1,
+              3,
+              0,
+              0,
+              14,
+              6,
+              0
+            ],
+            [
+              5,
+              3,
+              3,
+              0,
+              6,
+              9,
+              70,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.7335,
+        "accuracy": 0.7423,
+        "per_class": {
+          "venting": {
+            "precision": 0.818,
+            "recall": 0.703,
+            "f1-score": 0.756,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.653,
+            "recall": 0.941,
+            "f1-score": 0.771,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.5,
+            "recall": 0.833,
+            "f1-score": 0.625,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.857,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.727,
+            "recall": 0.889,
+            "f1-score": 0.8,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.538,
+            "recall": 0.538,
+            "f1-score": 0.538,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.875,
+            "recall": 0.714,
+            "f1-score": 0.787,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              45,
+              8,
+              4,
+              0,
+              0,
+              3,
+              4,
+              0
+            ],
+            [
+              2,
+              32,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              10,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              6,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0,
+              0,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              1,
+              3,
+              0,
+              0,
+              14,
+              6,
+              0
+            ],
+            [
+              5,
+              3,
+              3,
+              0,
+              6,
+              9,
+              70,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "cohen_kappa_vs_gold": 0.5812
+    },
+    "lr:sentence-transformers/all-MiniLM-L6-v2": {
+      "C": 16.0,
+      "cv_macro_f1": 0.6422,
+      "ms_per_text_batched": 0.41,
+      "gold": {
+        "macro_f1": 0.5295,
+        "accuracy": 0.5767,
+        "per_class": {
+          "venting": {
+            "precision": 0.718,
+            "recall": 0.49,
+            "f1-score": 0.583,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.59,
+            "recall": 0.676,
+            "f1-score": 0.63,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.31,
+            "recall": 0.75,
+            "f1-score": 0.439,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.412,
+            "recall": 0.875,
+            "f1-score": 0.56,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.366,
+            "recall": 0.833,
+            "f1-score": 0.508,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.35,
+            "recall": 0.269,
+            "f1-score": 0.304,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.753,
+            "recall": 0.622,
+            "f1-score": 0.682,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              51,
+              12,
+              13,
+              6,
+              4,
+              7,
+              10,
+              1
+            ],
+            [
+              6,
+              23,
+              2,
+              3,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              0,
+              15,
+              0,
+              0,
+              0
+            ],
+            [
+              7,
+              0,
+              1,
+              0,
+              1,
+              7,
+              10,
+              0
+            ],
+            [
+              5,
+              2,
+              3,
+              1,
+              19,
+              6,
+              61,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_actions": {
+        "macro_f1": 0.7975,
+        "accuracy": 0.8375,
+        "per_class": {
+          "venting": {
+            "precision": 0.833,
+            "recall": 0.714,
+            "f1-score": 0.769,
+            "support": 14.0
+          },
+          "seeking_advice": {
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1-score": 0.889,
+            "support": 5.0
+          },
+          "seeking_validation": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.889,
+            "support": 4.0
+          },
+          "help_seeking": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+          },
+          "information": {
+            "precision": 0.625,
+            "recall": 1.0,
+            "f1-score": 0.769,
+            "support": 5.0
+          },
+          "sharing_experience": {
+            "precision": 0.5,
+            "recall": 0.333,
+            "f1-score": 0.4,
+            "support": 6.0
+          },
+          "casual": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+          },
+          "action_request": {
+            "precision": 0.902,
+            "recall": 0.925,
+            "f1-score": 0.914,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              10,
+              0,
+              1,
+              0,
+              0,
+              2,
+              0,
+              1
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              5,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              2,
+              0,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              3,
+              1
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              37
+            ]
+          ]
+        }
+      },
+      "combined": {
+        "macro_f1": 0.6074,
+        "accuracy": 0.6316,
+        "per_class": {
+          "venting": {
+            "precision": 0.735,
+            "recall": 0.517,
+            "f1-score": 0.607,
+            "support": 118.0
+          },
+          "seeking_advice": {
+            "precision": 0.628,
+            "recall": 0.692,
+            "f1-score": 0.659,
+            "support": 39.0
+          },
+          "seeking_validation": {
+            "precision": 0.382,
+            "recall": 0.812,
+            "f1-score": 0.52,
+            "support": 16.0
+          },
+          "help_seeking": {
+            "precision": 0.474,
+            "recall": 0.9,
+            "f1-score": 0.621,
+            "support": 10.0
+          },
+          "information": {
+            "precision": 0.408,
+            "recall": 0.87,
+            "f1-score": 0.556,
+            "support": 23.0
+          },
+          "sharing_experience": {
+            "precision": 0.375,
+            "recall": 0.281,
+            "f1-score": 0.321,
+            "support": 32.0
+          },
+          "casual": {
+            "precision": 0.753,
+            "recall": 0.627,
+            "f1-score": 0.684,
+            "support": 102.0
+          },
+          "action_request": {
+            "precision": 0.86,
+            "recall": 0.925,
+            "f1-score": 0.892,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              61,
+              12,
+              14,
+              6,
+              4,
+              9,
+              10,
+              2
+            ],
+            [
+              6,
+              27,
+              2,
+              3,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              13,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              0,
+              20,
+              0,
+              0,
+              0
+            ],
+            [
+              8,
+              0,
+              1,
+              0,
+              2,
+              9,
+              10,
+              2
+            ],
+            [
+              5,
+              2,
+              3,
+              1,
+              19,
+              6,
+              64,
+              2
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              37
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.5975,
+        "accuracy": 0.6308,
+        "per_class": {
+          "venting": {
+            "precision": 0.677,
+            "recall": 0.656,
+            "f1-score": 0.667,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.676,
+            "recall": 0.676,
+            "f1-score": 0.676,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.429,
+            "recall": 0.75,
+            "f1-score": 0.545,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.636,
+            "recall": 0.875,
+            "f1-score": 0.737,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.385,
+            "recall": 0.833,
+            "f1-score": 0.526,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.412,
+            "recall": 0.269,
+            "f1-score": 0.326,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.813,
+            "recall": 0.622,
+            "f1-score": 0.705,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              42,
+              7,
+              5,
+              0,
+              2,
+              4,
+              4,
+              0
+            ],
+            [
+              6,
+              23,
+              2,
+              3,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              0,
+              15,
+              0,
+              0,
+              0
+            ],
+            [
+              7,
+              0,
+              1,
+              0,
+              1,
+              7,
+              10,
+              0
+            ],
+            [
+              5,
+              2,
+              3,
+              1,
+              19,
+              6,
+              61,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "lr:BAAI/bge-small-en-v1.5": {
+      "C": 16.0,
+      "cv_macro_f1": 0.6849,
+      "ms_per_text_batched": 1.28,
+      "gold": {
+        "macro_f1": 0.5724,
+        "accuracy": 0.6433,
+        "per_class": {
+          "venting": {
+            "precision": 0.753,
+            "recall": 0.644,
+            "f1-score": 0.694,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.84,
+            "recall": 0.618,
+            "f1-score": 0.712,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.32,
+            "recall": 0.667,
+            "f1-score": 0.432,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.389,
+            "recall": 0.875,
+            "f1-score": 0.538,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.372,
+            "recall": 0.889,
+            "f1-score": 0.525,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.444,
+            "recall": 0.308,
+            "f1-score": 0.364,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.825,
+            "recall": 0.673,
+            "f1-score": 0.742,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              67,
+              2,
+              12,
+              5,
+              6,
+              4,
+              7,
+              1
+            ],
+            [
+              6,
+              21,
+              3,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              8,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              8,
+              0,
+              0,
+              0,
+              3,
+              8,
+              7,
+              0
+            ],
+            [
+              5,
+              2,
+              1,
+              1,
+              17,
+              5,
+              66,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_actions": {
+        "macro_f1": 0.8341,
+        "accuracy": 0.875,
+        "per_class": {
+          "venting": {
+            "precision": 0.909,
+            "recall": 0.714,
+            "f1-score": 0.8,
+            "support": 14.0
+          },
+          "seeking_advice": {
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1-score": 0.8,
+            "support": 5.0
+          },
+          "seeking_validation": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.889,
+            "support": 4.0
+          },
+          "help_seeking": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 2.0
+          },
+          "information": {
+            "precision": 0.571,
+            "recall": 0.8,
+            "f1-score": 0.667,
+            "support": 5.0
+          },
+          "sharing_experience": {
+            "precision": 0.667,
+            "recall": 0.667,
+            "f1-score": 0.667,
+            "support": 6.0
+          },
+          "casual": {
+            "precision": 0.8,
+            "recall": 1.0,
+            "f1-score": 0.889,
+            "support": 4.0
+          },
+          "action_request": {
+            "precision": 0.974,
+            "recall": 0.95,
+            "f1-score": 0.962,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              10,
+              1,
+              1,
+              0,
+              0,
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              4,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              4,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              38
+            ]
+          ]
+        }
+      },
+      "combined": {
+        "macro_f1": 0.652,
+        "accuracy": 0.6921,
+        "per_class": {
+          "venting": {
+            "precision": 0.77,
+            "recall": 0.653,
+            "f1-score": 0.706,
+            "support": 118.0
+          },
+          "seeking_advice": {
+            "precision": 0.833,
+            "recall": 0.641,
+            "f1-score": 0.725,
+            "support": 39.0
+          },
+          "seeking_validation": {
+            "precision": 0.4,
+            "recall": 0.75,
+            "f1-score": 0.522,
+            "support": 16.0
+          },
+          "help_seeking": {
+            "precision": 0.45,
+            "recall": 0.9,
+            "f1-score": 0.6,
+            "support": 10.0
+          },
+          "information": {
+            "precision": 0.4,
+            "recall": 0.87,
+            "f1-score": 0.548,
+            "support": 23.0
+          },
+          "sharing_experience": {
+            "precision": 0.5,
+            "recall": 0.375,
+            "f1-score": 0.429,
+            "support": 32.0
+          },
+          "casual": {
+            "precision": 0.824,
+            "recall": 0.686,
+            "f1-score": 0.749,
+            "support": 102.0
+          },
+          "action_request": {
+            "precision": 0.927,
+            "recall": 0.95,
+            "f1-score": 0.938,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              77,
+              3,
+              13,
+              5,
+              6,
+              5,
+              7,
+              2
+            ],
+            [
+              6,
+              25,
+              3,
+              4,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              12,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              9,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              20,
+              1,
+              0,
+              0
+            ],
+            [
+              9,
+              0,
+              0,
+              0,
+              4,
+              12,
+              7,
+              0
+            ],
+            [
+              5,
+              2,
+              1,
+              1,
+              17,
+              5,
+              70,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              38
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.6308,
+        "accuracy": 0.6846,
+        "per_class": {
+          "venting": {
+            "precision": 0.703,
+            "recall": 0.812,
+            "f1-score": 0.754,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.913,
+            "recall": 0.618,
+            "f1-score": 0.737,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.5,
+            "recall": 0.667,
+            "f1-score": 0.571,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.538,
+            "recall": 0.875,
+            "f1-score": 0.667,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.4,
+            "recall": 0.889,
+            "f1-score": 0.552,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.5,
+            "recall": 0.308,
+            "f1-score": 0.381,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.857,
+            "recall": 0.673,
+            "f1-score": 0.754,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              52,
+              0,
+              3,
+              0,
+              3,
+              2,
+              4,
+              0
+            ],
+            [
+              6,
+              21,
+              3,
+              4,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              8,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              8,
+              0,
+              0,
+              0,
+              3,
+              8,
+              7,
+              0
+            ],
+            [
+              5,
+              2,
+              1,
+              1,
+              17,
+              5,
+              66,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    },
+    "lr:sentence-transformers/all-mpnet-base-v2": {
+      "C": 16.0,
+      "cv_macro_f1": 0.68,
+      "ms_per_text_batched": 2.16,
+      "gold": {
+        "macro_f1": 0.5645,
+        "accuracy": 0.6133,
+        "per_class": {
+          "venting": {
+            "precision": 0.768,
+            "recall": 0.51,
+            "f1-score": 0.613,
+            "support": 104.0
+          },
+          "seeking_advice": {
+            "precision": 0.667,
+            "recall": 0.706,
+            "f1-score": 0.686,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.31,
+            "recall": 0.75,
+            "f1-score": 0.439,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.368,
+            "recall": 0.875,
+            "f1-score": 0.519,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.34,
+            "recall": 0.889,
+            "f1-score": 0.492,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.48,
+            "recall": 0.462,
+            "f1-score": 0.471,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.851,
+            "recall": 0.643,
+            "f1-score": 0.733,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              53,
+              11,
+              16,
+              7,
+              6,
+              5,
+              6,
+              0
+            ],
+            [
+              6,
+              24,
+              0,
+              3,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              0,
+              0,
+              0,
+              5,
+              12,
+              5,
+              0
+            ],
+            [
+              4,
+              0,
+              3,
+              2,
+              18,
+              7,
+              63,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "gold_actions": {
+        "macro_f1": 0.6892,
+        "accuracy": 0.7875,
+        "per_class": {
+          "venting": {
+            "precision": 0.786,
+            "recall": 0.786,
+            "f1-score": 0.786,
+            "support": 14.0
+          },
+          "seeking_advice": {
+            "precision": 0.75,
+            "recall": 0.6,
+            "f1-score": 0.667,
+            "support": 5.0
+          },
+          "seeking_validation": {
+            "precision": 1.0,
+            "recall": 0.75,
+            "f1-score": 0.857,
+            "support": 4.0
+          },
+          "help_seeking": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1-score": 0.667,
+            "support": 2.0
+          },
+          "information": {
+            "precision": 0.571,
+            "recall": 0.8,
+            "f1-score": 0.667,
+            "support": 5.0
+          },
+          "sharing_experience": {
+            "precision": 0.5,
+            "recall": 0.167,
+            "f1-score": 0.25,
+            "support": 6.0
+          },
+          "casual": {
+            "precision": 0.75,
+            "recall": 0.75,
+            "f1-score": 0.75,
+            "support": 4.0
+          },
+          "action_request": {
+            "precision": 0.822,
+            "recall": 0.925,
+            "f1-score": 0.871,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              11,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              2
+            ],
+            [
+              1,
+              3,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              3,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              4,
+              0,
+              0,
+              1
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              1,
+              0,
+              3
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              3,
+              1
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              37
+            ]
+          ]
+        }
+      },
+      "combined": {
+        "macro_f1": 0.6135,
+        "accuracy": 0.65,
+        "per_class": {
+          "venting": {
+            "precision": 0.771,
+            "recall": 0.542,
+            "f1-score": 0.637,
+            "support": 118.0
+          },
+          "seeking_advice": {
+            "precision": 0.675,
+            "recall": 0.692,
+            "f1-score": 0.684,
+            "support": 39.0
+          },
+          "seeking_validation": {
+            "precision": 0.375,
+            "recall": 0.75,
+            "f1-score": 0.5,
+            "support": 16.0
+          },
+          "help_seeking": {
+            "precision": 0.4,
+            "recall": 0.8,
+            "f1-score": 0.533,
+            "support": 10.0
+          },
+          "information": {
+            "precision": 0.37,
+            "recall": 0.87,
+            "f1-score": 0.519,
+            "support": 23.0
+          },
+          "sharing_experience": {
+            "precision": 0.481,
+            "recall": 0.406,
+            "f1-score": 0.441,
+            "support": 32.0
+          },
+          "casual": {
+            "precision": 0.846,
+            "recall": 0.647,
+            "f1-score": 0.733,
+            "support": 102.0
+          },
+          "action_request": {
+            "precision": 0.804,
+            "recall": 0.925,
+            "f1-score": 0.86,
+            "support": 40.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              64,
+              11,
+              16,
+              7,
+              6,
+              6,
+              6,
+              2
+            ],
+            [
+              7,
+              27,
+              0,
+              3,
+              0,
+              1,
+              0,
+              1
+            ],
+            [
+              1,
+              0,
+              12,
+              0,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              20,
+              0,
+              0,
+              1
+            ],
+            [
+              5,
+              0,
+              0,
+              0,
+              6,
+              13,
+              5,
+              3
+            ],
+            [
+              4,
+              0,
+              3,
+              2,
+              18,
+              7,
+              66,
+              2
+            ],
+            [
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              37
+            ]
+          ]
+        }
+      },
+      "gold_clear": {
+        "macro_f1": 0.6379,
+        "accuracy": 0.6731,
+        "per_class": {
+          "venting": {
+            "precision": 0.733,
+            "recall": 0.688,
+            "f1-score": 0.71,
+            "support": 64.0
+          },
+          "seeking_advice": {
+            "precision": 0.75,
+            "recall": 0.706,
+            "f1-score": 0.727,
+            "support": 34.0
+          },
+          "seeking_validation": {
+            "precision": 0.474,
+            "recall": 0.75,
+            "f1-score": 0.581,
+            "support": 12.0
+          },
+          "help_seeking": {
+            "precision": 0.538,
+            "recall": 0.875,
+            "f1-score": 0.667,
+            "support": 8.0
+          },
+          "information": {
+            "precision": 0.372,
+            "recall": 0.889,
+            "f1-score": 0.525,
+            "support": 18.0
+          },
+          "sharing_experience": {
+            "precision": 0.571,
+            "recall": 0.462,
+            "f1-score": 0.511,
+            "support": 26.0
+          },
+          "casual": {
+            "precision": 0.887,
+            "recall": 0.643,
+            "f1-score": 0.746,
+            "support": 98.0
+          }
+        },
+        "confusion": {
+          "labels": [
+            "venting",
+            "seeking_advice",
+            "seeking_validation",
+            "help_seeking",
+            "information",
+            "sharing_experience",
+            "casual",
+            "action_request"
+          ],
+          "matrix": [
+            [
+              44,
+              7,
+              6,
+              1,
+              2,
+              1,
+              3,
+              0
+            ],
+            [
+              6,
+              24,
+              0,
+              3,
+              0,
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              9,
+              0,
+              2,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              0,
+              16,
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              0,
+              0,
+              0,
+              5,
+              12,
+              5,
+              0
+            ],
+            [
+              4,
+              0,
+              3,
+              2,
+              18,
+              7,
+              63,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "labeller_agreement": {
+    "share_of_gold_both_agree": 0.737,
+    "accuracy_where_they_agree": 0.819,
+    "accuracy_where_they_disagree_llama": 0.418
+  },
+  "selected": "BAAI/bge-small-en-v1.5"
+}

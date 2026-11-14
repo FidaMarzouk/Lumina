@@ -171,10 +171,14 @@ def safety_section() -> tuple[str, dict]:
 
 # ── intent ────────────────────────────────────────────────────────────────────
 def _model_label(key: str, deployed: str) -> str:
-    if key.startswith("silver"):
+    if key.startswith("silver_labeller_llama"):
         return "Llama 3.1 8B (label source)"
+    if key.startswith("silver_labeller_qwen"):
+        return "Qwen 2.5 7B (second label source)"
+    if key.startswith("previous:"):
+        return f"Previous model ({key.split(':', 1)[1]})"
     if key.startswith("zeroshot"):
-        return "Zero-shot BART-MNLI (previous)"
+        return "Zero-shot BART-MNLI (first approach)"
     name = key.split(":", 1)[1].split("/")[-1].removesuffix("-v1.5").removesuffix("-v2")
     return f"Trained on {name}" + (" (in use)" if key.split(":", 1)[1] == deployed else "")
 
@@ -182,31 +186,41 @@ def _model_label(key: str, deployed: str) -> str:
 def intent_section() -> tuple[str, dict]:
     rep = _json("intent_classifier")
     deployed = json.loads((config.INTENT_MODEL_DIR / "model_card.json").read_text(encoding="utf-8"))["embedder"]
+    in_use = rep["models"][f"lr:{deployed}"]
     models = sorted(rep["models"].items(), key=lambda kv: -kv[1]["gold"]["macro_f1"])
+    score = lambda m, k: f"{m[k]['macro_f1']:.3f}" if m.get(k) else "—"     # noqa: E731
     rows, trows = [], []
     for key, m in models:
         lat = m.get("ms_per_text_batched", m.get("ms_per_text"))
         is_dep = key == f"lr:{deployed}"
         lab = _model_label(key, deployed)
         rows.append({"label": lab, "value": m["gold"]["macro_f1"], "cls": "m-s1" if is_dep else "m-mute",
-                     "tip": f"{lab}: macro-F1 {m['gold']['macro_f1']:.3f}, accuracy {m['gold']['accuracy']:.3f}"
+                     "tip": f"{lab}: macro-F1 {m['gold']['macro_f1']:.3f} on real messages"
+                            + (f", {m['gold_actions']['macro_f1']:.3f} on the action items" if m.get("gold_actions") else "")
                             + (f", {lat:.1f} ms per message" if lat else "")})
-        trows.append([escape(lab), f"{m['gold']['macro_f1']:.3f}", f"{m['gold']['accuracy']:.3f}", f"{lat:.1f} ms" if lat else "—"])
-    fig1 = figure("The trained classifier beats the old zero-shot approach",
-                  f"Macro-F1 on {rep['n_gold']} real messages labelled by hand and reviewed. The classifier trains on "
-                  f"{rep['n_train']:,} labels from Llama 3.1, which caps how good it can get.",
-                  charts.hbars(rows, "Intent macro-F1 by model"), table(["Model", "Macro-F1", "Accuracy", "Latency"], trows, (1, 2, 3)))
-    sel = rep["models"][f"lr:{deployed}"]["gold"]["per_class"]
-    cls = sorted(((k, v) for k, v in sel.items() if k in rep["gold_label_counts"]), key=lambda kv: -kv[1]["f1-score"])
+        trows.append([escape(lab), score(m, "gold"), score(m, "gold_actions"), score(m, "combined"),
+                      f"{lat:.1f} ms" if lat else "—"])
+    labels = "labels both Llama 3.1 and Qwen 2.5 agree on" if rep.get("training_labels") == "agree" else "labels from Llama 3.1"
+    fig1 = figure(
+        "The classifier against what it replaced",
+        f"Macro-F1 on {rep['n_gold']} real messages labelled by hand and reviewed, and on "
+        f"{rep.get('n_gold_actions', 0)} hand-written action items (requests to save, log, remind, look up or delete, "
+        f"and near-misses that are not). The classifier trains on {rep['n_train']:,} {labels}, plus generated "
+        "action examples; the embedder is chosen by cross-validation on training data, never on these tests.",
+        charts.hbars(rows, "Intent macro-F1 on real messages, by model"),
+        table(["Model", "Real messages", "Action items", "Both", "Latency"], trows, (1, 2, 3, 4)))
+    sel = (in_use.get("combined") or in_use["gold"])["per_class"]
+    cls = sorted(sel.items(), key=lambda kv: -kv[1]["f1-score"])
     rows2 = [{"label": _human(k), "value": v["f1-score"], "tip": f"{_human(k)}: precision {v['precision']:.2f}, recall "
               f"{v['recall']:.2f}, n = {int(v['support'])}"} for k, v in cls]
-    fig2 = figure("Where it is weakest", "F1 per intent for the model in use. Intent only shapes tone and whether the "
-                  "knowledge base is searched; it never affects safety.", charts.hbars(rows2, "F1 per intent"),
+    fig2 = figure("Where it is weakest", "F1 per intent for the model in use, on both test sets. Intent shapes the reply "
+                  "and whether the knowledge base is searched; it never affects safety.", charts.hbars(rows2, "F1 per intent"),
                   table(["Intent", "Precision", "Recall", "F1", "n"],
                         [[_human(k), f"{v['precision']:.2f}", f"{v['recall']:.2f}", f"{v['f1-score']:.2f}", int(v["support"])]
                          for k, v in cls], (1, 2, 3, 4)))
-    return section("intent", "Intent", "Each message is classified into one of seven intents so the reply can match "
-                   "what the person is asking for: to vent, to get advice, or to get information.", fig1 + fig2), rep["models"][f"lr:{deployed}"]["gold"]
+    return section("intent", "Intent", f"Each message is classified into one of {len(sel)} intents so the reply can match "
+                   "what the person is asking for: to vent, to get advice or information, or to have the app do "
+                   "something.", fig1 + fig2), in_use.get("combined") or in_use["gold"]
 
 
 # ── retrieval ─────────────────────────────────────────────────────────────────
@@ -533,7 +547,8 @@ def build() -> str:
          f"by the policy in use, on a clinical test set; {_pct(1 - dep_policy['clinical_recall_crisis'])} are missed"),
         ("Everyday chat that shows the crisis banner", _pct(dep_policy["flag_rate_everyday"]),
          f"and {_pct(dep_policy['flag_rate_counselling_posts'])} of ordinary counselling posts"),
-        ("Intent macro-F1", f"{intent['macro_f1']:.2f}", "up from 0.36 for the zero-shot model it replaced"),
+        ("Intent macro-F1", f"{intent['macro_f1']:.2f}", "on real messages and action requests; 0.36 for the first, "
+                                                          "zero-shot approach"),
         ("Small talk kept out of retrieval", _pct(1 - ret["off_topic_kept"]),
          f"while {_pct(ret['on_topic_kept'])} of health questions still get passages"),
     ])

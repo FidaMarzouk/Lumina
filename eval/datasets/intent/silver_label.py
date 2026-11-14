@@ -7,7 +7,9 @@ agreement between the silver labeller and the gold labels is reported as a label
 
 Resumable: already-labelled ids in the output file are skipped.
 
-Run:  python eval/datasets/intent/silver_label.py [--model llama3.1]
+Run:  python eval/datasets/intent/silver_label.py [--model llama3.1] [--out data/eval/intent/silver.jsonl]
+      A second labeller (--model qwen2.5:7b --out data/eval/intent/silver_qwen.jsonl) lets training keep only
+      the messages both labellers agree on (eval/runners/intent_classifier.py).
 """
 
 from __future__ import annotations
@@ -49,15 +51,15 @@ def label(client: httpx.Client, model: str, text: str) -> dict:
     return {"silver": intent if intent in INTENTS else None, "silver_conf": out.get("confidence")}
 
 
-def main(model: str) -> None:
+def main(model: str, out: Path = OUT) -> None:
     done = set()
-    if OUT.exists():
-        done = {json.loads(l)["id"] for l in OUT.open(encoding="utf-8")}
+    if out.exists():
+        done = {json.loads(l)["id"] for l in out.open(encoding="utf-8")}
     pool = [json.loads(l) for l in POOL.open(encoding="utf-8")]
     todo = [r for r in pool if r["id"] not in done]
     print(f"{len(done)} done, {len(todo)} to label")
     t0 = time.time()
-    with httpx.Client(timeout=120) as client, OUT.open("a", encoding="utf-8", newline="\n") as f:
+    with httpx.Client(timeout=120) as client, out.open("a", encoding="utf-8", newline="\n") as f:
         for i, r in enumerate(todo, 1):
             try:
                 res = label(client, model, r["text"])
@@ -72,4 +74,6 @@ def main(model: str) -> None:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="llama3.1")
-    main(ap.parse_args().model)
+    ap.add_argument("--out", type=Path, default=OUT)
+    args = ap.parse_args()
+    main(args.model, args.out)

@@ -1,0 +1,77 @@
+{
+  "n": 59,
+  "llm": "ollama:llama3.1",
+  "before_ref": "ae2eb05",
+  "seed": 13,
+  "per_intent": {
+    "venting": 14,
+    "seeking_advice": 12,
+    "seeking_validation": 10,
+    "help_seeking": 7,
+    "information": 10,
+    "sharing_experience": 4,
+    "casual": 2
+  },
+  "surface": {
+    "before": {
+      "stock_opener": 0.712,
+      "ends_with_question": 0.814,
+      "sentences_mean": 4.8,
+      "replaced_by_output_guard": 0
+    },
+    "after": {
+      "stock_opener": 0.051,
+      "ends_with_question": 0.864,
+      "sentences_mean": 5.2,
+      "replaced_by_output_guard": 0
+    }
+  },
+  "judge": {
+    "model": "qwen2.5:7b",
+    "mean": {
+      "before": {
+        "understood": 3.95,
+        "answers": 3.2,
+        "specific": 2.36,
+        "safe": 4.92
+      },
+      "after": {
+        "understood": 3.95,
+        "answers": 3.47,
+        "specific": 2.54,
+        "safe": 4.93
+      }
+    },
+    "by_intent": {
+      "venting": {
+        "before": 3.57,
+        "after": 3.66
+      },
+      "seeking_advice": {
+        "before": 3.48,
+        "after": 3.85
+      },
+      "seeking_validation": {
+        "before": 3.6,
+        "after": 3.75
+      },
+      "help_seeking": {
+        "before": 4.11,
+        "after": 4.07
+      },
+      "information": {
+        "before": 3.73,
+        "after": 3.67
+      },
+      "sharing_experience": {
+        "before": 3.5,
+        "after": 3.56
+      },
+      "casual": {
+        "before": 2.5,
+        "after": 2.62
+      }
+    }
+  },
+  "human": null
+}
