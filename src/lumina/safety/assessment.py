@@ -1,28 +1,38 @@
 """Safety assessment of one user turn — combines the independent layers.
 
-    risk = max(floor, guard, risk classifier)          (no layer can cancel another)
+With the LLM reader's reading (English messages, reader on and working):
 
-    crisis    if  floor triggered
-              or  guard flags method / ideation / third_party
-              or  P(risk | message) >= RISK_THRESHOLD
-              or  the LLM reader says "other" or "method"
-              or  the LLM reader says "self" and P(risk | message) >= SAFETY_READER_SELF_MIN_P
-    elevated  if  P(risk | message) >= RISK_ELEVATED_THRESHOLD
-              or  the LLM reader says "self" (below the threshold above)
+    crisis    if  floor triggered                                          (always on its own)
+              or  the reader says "other" or "method"
+              or  the reader says "self" and (P(risk | message) >= SAFETY_READER_SELF_MIN_P
+                                              or guard flags or P(risk | message) >= RISK_THRESHOLD)
+    elevated  if  guard flags or P(risk | message) >= RISK_THRESHOLD but the reader says "none"
+              or  the reader says "self" without the confirmation above
+              or  P(risk | message) >= RISK_ELEVATED_THRESHOLD
               or  P(risk | recent user turns + message) >= RISK_THRESHOLD   (risk spread over turns)
               or  a recent turn was a crisis
     none      otherwise
 
-    The LLM reader (lumina/safety/reader.py) reads English messages for indirect risk the classifiers miss
-    ("my brother texted goodbye to everyone and now he isn't answering").  Its "self" reading alone flags 51%
-    of the r/SuicideWatch posts without ideation, so on its own it only raises risk to "elevated"; the
-    policy was chosen in eval/runners/safety_policy_sweep.py.
+Without a reading (reader off or failed; French and Arabic, read by the translator instead; Arabizi), every
+layer stands alone, as before S3:
+
+    crisis    if  floor triggered or guard flags or P(risk | message) >= RISK_THRESHOLD
+              or  the translator's reading says "self" / "method" / "other"
+    elevated, none   as above
+
+    Why (eval/runners/safety_policy_sweep.py, docs/evaluation.md): Llama Guard 1B and the classifier key on
+    topic words, and alone they opened the crisis sheet on "I need a therapist I can afford" or a sertraline
+    question.  The LLM reader (lumina/safety/reader.py) reads intent: requiring it to agree halves the false
+    alarms on counselling posts at the same clinical recall, and it alone catches indirect risk such as "my
+    brother texted goodbye to everyone and now he isn't answering".  A demoted turn is "elevated" (gentler
+    tone), never "none".  The floor is never demoted.
 
     subtype:  method       — explicit method request caught by the floor (fully templated, no LLM).
                              Llama Guard's "method" label is NOT used for this: it misfired on e.g. a
                              medication question; guard-flagged turns get the crisis prompt + output guard.
               ideation     — any other first-person signal
-              third_party  — guard says the risk concerns someone else and nothing else fired
+              third_party  — the reader (or, without a reading, the guard or translator) says the risk
+                             concerns someone else and nothing first-person fired
 
     Context only raises risk to "elevated" so one false alarm cannot cascade through a conversation.
 
@@ -207,16 +217,29 @@ def assess(message: str, history: list[dict] | None = None, detectors: Detectors
     understood = lang != "arabizi"
     unread = not understood or (lang in _TRANSLATED and not english)     # nothing could read this message
 
-    reader_self_high = (reader_risk == "self" and p_msg is not None and p_msg >= SAFETY_READER_SELF_MIN_P)
-    first_person = (fl.triggered or bool(guard_cats & {"method", "ideation"}) or msg_high
-                    or llm_risk in ("self", "method") or reader_risk == "method" or reader_self_high)
+    model_flag = bool(guard_cats) or msg_high      # Llama Guard or the classifier would raise a crisis
+    if reader_risk is not None:
+        # Confirmation (S3): the reader read this message, so Llama Guard or the classifier alone no longer
+        # opens the crisis sheet.  When the reader sees no risk, their flag lowers to "elevated"; when it sees
+        # risk, its reading also decides whose risk it is.
+        p_self = p_msg is not None and p_msg >= SAFETY_READER_SELF_MIN_P
+        first_person = (fl.triggered or reader_risk == "method"
+                        or (reader_risk == "self" and (p_self or model_flag)))
+        third_party = reader_risk == "other"
+        demoted = model_flag and reader_risk == "none"
+    else:
+        # No reading (reader off or failed, or a translated or unreadable message): every layer stands alone.
+        first_person = (fl.triggered or bool(guard_cats & {"method", "ideation"}) or msg_high
+                        or llm_risk in ("self", "method"))
+        third_party = "third_party" in guard_cats or llm_risk == "other"
+        demoted = False
     if fl.method:
         level, subtype = "crisis", "method"
     elif first_person:
         level, subtype = "crisis", "ideation"
-    elif "third_party" in guard_cats or llm_risk == "other" or reader_risk == "other":
+    elif third_party:
         level, subtype = "crisis", "third_party"
-    elif msg_mid or ctx_high or history_crisis or unread or reader_risk == "self":
+    elif msg_mid or ctx_high or history_crisis or unread or reader_risk == "self" or demoted:
         level, subtype = "elevated", "none"
     else:
         level, subtype = "none", "none"

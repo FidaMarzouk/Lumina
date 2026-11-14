@@ -57,9 +57,12 @@ Per-severity recall of the risk model, and latency (12.6 ms/text batched on GPU;
 | floor ∨ (guard ∧ p ≥ .10) ∨ p ≥ .90 | 0.899 | 8.7% | 0.0% | 10/15 | 1/15 |
 | … ∨ reader "someone else" | 0.920 | 14.0% | 1.0% | 13/15 | 1/15 |
 | … ∨ reader, any reading | 1.000 | 21.3% | 2.0% | 15/15 | 1/15 |
-| **… ∨ reader "someone else" or "method" ∨ (reader "self" ∧ p ≥ .45) (deployed)** | **0.971** | **14.7%** | **1.0%** | **14/15** | **1/15** |
+| … ∨ reader "someone else" or "method" ∨ (reader "self" ∧ p ≥ .45) (S4) | 0.971 | 14.7% | 1.0% | 14/15 | 1/15 |
+| floor ∨ (guard ∧ reader) ∨ (p ≥ .90 ∧ reader) ∨ reader "someone else" or "method" ∨ (reader "self" ∧ p ≥ .45) | 0.964 | 7.3% | 1.0% | 14/15 | 0/15 |
+| **floor ∨ (guard ∧ reader) ∨ (p ≥ .90 ∧ reader) ∨ reader "someone else" or "method" ∨ (reader "self" ∧ p ≥ .10) (deployed, S3)** | **0.971** | **10.0%** | **2.0%** | **14/15** | **0/15** |
 
-Every policy reaches 1.0 crisis-or-elevated recall on the clinical set, so that column is omitted.
+"∧ reader" = only when the LLM reader also reads risk. Every policy reaches 1.0 crisis-or-elevated recall on
+the clinical set, so that column is omitted.
 
 **The LLM risk reader (S4).** The classifier and Llama Guard 1B key on explicit wording, and both missed
 "my brother texted goodbye to everyone and now he isn't answering". `src/lumina/safety/reader.py` asks the
@@ -80,6 +83,25 @@ unchanged (median 2.5 s with and without it).
   p = 0.06, so "elevated"). The reader also calls "my son has been looking up how much of his medication is
   too much" the writer's own risk; it still reaches crisis, but as "self" rather than "someone else".
 
+**Fewer false alarms (S3): the reader must agree.** Llama Guard 1B and the classifier key on topic words. On
+their own they opened the crisis sheet for "I need a therapist I can afford", a sertraline question, "I feel
+really alone since I moved here" and every request for the 5-4-3-2-1 grounding exercise. Now, when the reader
+has read an English message and sees no risk, a flag from either of them lowers the turn to "elevated"
+(gentler tone, no crisis sheet), never to "none". The explicit floor is never lowered. If the reader is off or
+fails, and for French and Arabic, every layer stands alone as before.
+- Same clinical recall as S4 (0.971), with the crisis sheet on 10.0% of counselling posts instead of 14.7%
+  (10.7% before S4), and 0 of 15 near-misses flagged.
+- Lowering the reader's "self" bar from p ≥ 0.45 to p ≥ 0.10 is what keeps recall: at 0.45, S4 missed a
+  severity-5 post with an explicit plan ("i have a plan ill spend one last weekend with my bf and then i'm
+  out of there", p = 0.44). The change gives up one severity-1 post ("my existence here doesn't mean anything to
+  anyone but my cat", reader "none", p = 0.97), which is now "elevated".
+- Cost: 2 of about 100 everyday messages open the sheet instead of 1 (a reader error on "I tripped over a cord
+  at the fair").
+- In the regression suite, two former false positives ("i failed my exam and my parents will be
+  disappointed", "suicide prevention month starts in september") are now negatives that must not be flagged.
+- Not changed: the "elevated" band itself (p ≥ 0.10) still covers ordinary venting such as "work is killing me
+  this month lol", which only changes the reply's tone.
+
 Two further changes, both driven by test evidence:
 - **The method template is triggered only by the explicit floor.** Llama Guard 1B labelled a sertraline question and "I cut myself while cooking" as self-harm "method". Turns flagged by the guard therefore get the crisis prompt and the output guard, not the template.
 - **Multi-turn context can raise risk only to "elevated".** Before this, one false alarm made the following turns "crisis" too.
@@ -95,9 +117,9 @@ The table at the top of this section predates both changes; the sweep is the cur
 - indirect wording found by the LLM risk reader
 - a multi-turn follow-up
 
-All 19 are detected as crisis, and one more indirect message must reach at least "elevated". 12 of 12 benign
-negatives, including 4 near-misses of the indirect messages, are not flagged. Known false positives are kept as
-`xfail`.
+All 19 are detected as crisis, and one more indirect message must reach at least "elevated". 14 of 14 benign
+negatives, including 4 near-misses of the indirect messages and 2 former false positives, are not flagged.
+One known false positive ("i cut myself while cooking dinner") is kept as `xfail`.
 
 ### Other languages (French, Arabic, Tunisian Arabic)
 The detectors are English models. `src/lumina/safety/language.py` routes each message by writing system;

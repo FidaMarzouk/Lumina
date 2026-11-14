@@ -89,6 +89,8 @@ def section(sid: str, title: str, intro: str, body: str) -> str:
 # ── safety ────────────────────────────────────────────────────────────────────
 _POLICY_PARTS = [
     (re.compile(r"^\(guard&p>=(\.\d+)\)$"), lambda m: f"guard needs p ≥ 0{m[1]}"),
+    (re.compile(r"^\(guard&r:any\)$"), lambda m: "guard if the reader agrees"),
+    (re.compile(r"^\(p>=(\.\d+)&r:any\)$"), lambda m: f"p ≥ 0{m[1]} if the reader agrees"),
     (re.compile(r"^p>=(\.\d+)$"), lambda m: f"p ≥ 0{m[1]}"),
     (re.compile(r"^\(r:self&p>=(\.\d+)\)$"), lambda m: f"reader “self” with p ≥ 0{m[1]}"),
     (re.compile(r"^r:(\w+)$"), lambda m: {"other": "reader “someone else”", "method": "reader “method”",

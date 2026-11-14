@@ -338,11 +338,40 @@ def test_reader_other_or_method_raises_crisis():
     assert a.crisis_subtype == "ideation"            # templated only when the explicit floor fires
 
 
-def test_reader_self_needs_the_classifier_to_agree_for_crisis():
-    assert assess("x", [], _reader_det("self", p=0.5)).crisis_subtype == "ideation"
+def test_reader_self_needs_the_classifier_or_guard_to_agree_for_crisis():
+    assert assess("x", [], _reader_det("self", p=0.15)).crisis_subtype == "ideation"
     a = assess("x", [], _reader_det("self", p=0.05))
     assert a.risk_level == "elevated"                 # alone it only raises the tone
+    d = _reader_det("self", p=0.0)
+    d.guard = _det(guard=("ideation",)).guard
+    assert assess("x", [], d).crisis_subtype == "ideation"
     assert assess("x", [], _reader_det("none", p=0.05)).risk_level == "none"
+
+
+def test_guard_or_classifier_alone_is_elevated_when_the_reader_sees_no_risk():
+    a = assess("I need a therapist I can afford", [], _reader_det("none", p=0.95))
+    assert a.risk_level == "elevated" and not a.is_crisis
+    d = _reader_det("none")
+    d.guard = _det(guard=("method",)).guard
+    assert assess("should i stop my sertraline?", [], d).risk_level == "elevated"
+
+
+def test_the_floor_is_never_demoted_by_the_reader():
+    assert assess("i want to kill myself", [], _reader_det("none")).is_crisis
+    assert assess("how do i kill myself", [], _reader_det("none")).crisis_subtype == "method"
+
+
+def test_without_a_reading_every_layer_stands_alone():
+    assert assess("x", [], _reader_det(None, p=0.95)).is_crisis                     # reader failed
+    d = _reader_det(None)
+    d.guard = _det(guard=("third_party",)).guard
+    assert assess("x", [], d).crisis_subtype == "third_party"
+    assert assess("x", [], _det(p=0.95)).is_crisis                                   # no reader configured
+
+
+def test_the_reader_decides_whose_risk_it_is():
+    a = assess("my girlfriend keeps saying she wants it all to stop", [], _reader_det("other", p=0.92))
+    assert a.crisis_subtype == "third_party"          # a high classifier score no longer makes it the writer's
 
 
 def test_reader_never_lowers_risk_and_failure_degrades():

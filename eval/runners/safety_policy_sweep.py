@@ -76,18 +76,26 @@ def reader(texts):
     return np.array(out)
 
 
-DEPLOYED = "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.45)"
+DEPLOYED = "floor|(guard&r:any)|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.10)"
 POLICIES = {
     "floor|guard|p>=.45 (first policy)":   lambda f, g, p, r: f | g | (p >= .45),
     "floor|guard|p>=.90 (before S4)":      lambda f, g, p, r: f | g | (p >= .90),
     "floor|guard|p>=.98":                  lambda f, g, p, r: f | g | (p >= .98),
     "floor|(guard&p>=.10)|p>=.90":         lambda f, g, p, r: f | (g & (p >= .10)) | (p >= .90),
+    # S4: the LLM reader added as one more independent layer
     "floor|guard|p>=.90|r:other":          lambda f, g, p, r: f | g | (p >= .90) | (r == "other"),
     "floor|guard|p>=.90|r:any":            lambda f, g, p, r: f | g | (p >= .90) | (r != "none"),
-    "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.10)":
-        lambda f, g, p, r: f | g | (p >= .90) | np.isin(r, ["other", "method"]) | ((r == "self") & (p >= .10)),
-    DEPLOYED:
+    "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.45) (S4)":
         lambda f, g, p, r: f | g | (p >= .90) | np.isin(r, ["other", "method"]) | ((r == "self") & (p >= .45)),
+    # S3: guard and classifier open the crisis sheet only when the reader agrees (else "elevated")
+    "floor|guard|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.45)":
+        lambda f, g, p, r: f | g | ((p >= .90) & (r != "none")) | np.isin(r, ["other", "method"]) | ((r == "self") & (p >= .45)),
+    "floor|(guard&r:any)|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.45)":
+        lambda f, g, p, r: f | (g & (r != "none")) | ((p >= .90) & (r != "none")) | np.isin(r, ["other", "method"])
+        | ((r == "self") & (p >= .45)),
+    DEPLOYED:
+        lambda f, g, p, r: f | (g & (r != "none")) | ((p >= .90) & (r != "none")) | np.isin(r, ["other", "method"])
+        | ((r == "self") & (p >= .10)),
 }
 
 

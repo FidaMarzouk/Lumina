@@ -18,7 +18,8 @@ def page():
 def test_report_has_every_section_and_marks_settings_in_use(page):
     for sid in ("overview", "safety", "intent", "retrieval", "personal", "market"):
         assert f'id="{sid}"' in page
-    assert f"In use: p ≥ {config.RISK_THRESHOLD:.2f}" in page
+    in_use = re.search(r"In use: ([^<\"]+)", page)[1]       # the deployed crisis policy
+    assert f"p ≥ {config.RISK_THRESHOLD:.2f}" in in_use and f"p ≥ {config.SAFETY_READER_SELF_MIN_P:.2f}" in in_use
     assert f"In use: {config.MIN_SIMILARITY:.2f}" in page
     assert f"In use: {config.MEMORY_MIN_SIMILARITY:.2f}" in page
     assert page.count('<li class="finding">') == 7

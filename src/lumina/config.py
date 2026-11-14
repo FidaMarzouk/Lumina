@@ -108,9 +108,10 @@ SAFETY_TRANSLATE_MAX_TOKENS = 400
 # used is set in assessment.py from eval/reports/safety_policy_sweep.json.  0 = off.
 SAFETY_READER            = os.getenv("SAFETY_READER", "1") != "0"
 SAFETY_READER_MAX_TOKENS = 20
-SAFETY_READER_SELF_MIN_P = 0.45   # reader "self" → crisis only with P(risk) at or above this, else "elevated".
-                                  # safety_policy_sweep.json: clinical crisis recall 0.92 → 0.97, banner on
-                                  # counselling posts 10.7% → 13.3%, everyday chat stays 0%
+SAFETY_READER_SELF_MIN_P = 0.10   # reader "self" → crisis with P(risk) at or above this (or guard/classifier
+                                  # agreeing), else "elevated".  And guard or classifier alone → "elevated" when
+                                  # the reader says "none" (S3).  safety_policy_sweep.json: clinical crisis recall
+                                  # 0.971 (as at S4), banner on counselling posts 14.7% → 10.0%
 # Crisis contact details live only in the frontend banner (frontend/src/components/ui/CrisisBanner.jsx).
 
 # ── Request limits ────────────────────────────────────────────────────────────

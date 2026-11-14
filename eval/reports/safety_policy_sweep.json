@@ -77,19 +77,8 @@
       "indirect_near_miss_flagged": "1/15"
     },
     {
-      "policy": "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.10)",
+      "policy": "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.45) (S4)",
       "deployed": false,
-      "clinical_recall_crisis": 0.978,
-      "clinical_recall_crisis_or_elevated": 1.0,
-      "flag_rate_counselling_posts": 0.173,
-      "flag_rate_everyday": 0.02,
-      "flag_rate_hard_negatives": 0.559,
-      "indirect_crisis_detected": "14/15",
-      "indirect_near_miss_flagged": "1/15"
-    },
-    {
-      "policy": "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.45)",
-      "deployed": true,
       "clinical_recall_crisis": 0.971,
       "clinical_recall_crisis_or_elevated": 1.0,
       "flag_rate_counselling_posts": 0.147,
@@ -97,6 +86,39 @@
       "flag_rate_hard_negatives": 0.525,
       "indirect_crisis_detected": "14/15",
       "indirect_near_miss_flagged": "1/15"
+    },
+    {
+      "policy": "floor|guard|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.45)",
+      "deployed": false,
+      "clinical_recall_crisis": 0.964,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.113,
+      "flag_rate_everyday": 0.01,
+      "flag_rate_hard_negatives": 0.492,
+      "indirect_crisis_detected": "14/15",
+      "indirect_near_miss_flagged": "0/15"
+    },
+    {
+      "policy": "floor|(guard&r:any)|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.45)",
+      "deployed": false,
+      "clinical_recall_crisis": 0.964,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.073,
+      "flag_rate_everyday": 0.01,
+      "flag_rate_hard_negatives": 0.441,
+      "indirect_crisis_detected": "14/15",
+      "indirect_near_miss_flagged": "0/15"
+    },
+    {
+      "policy": "floor|(guard&r:any)|(p>=.90&r:any)|r:other|r:method|(r:self&p>=.10)",
+      "deployed": true,
+      "clinical_recall_crisis": 0.971,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.1,
+      "flag_rate_everyday": 0.02,
+      "flag_rate_hard_negatives": 0.475,
+      "indirect_crisis_detected": "14/15",
+      "indirect_near_miss_flagged": "0/15"
     }
   ]
 }
