@@ -100,6 +100,10 @@ RISK_ELEVATED_THRESHOLD = 0.10  # P(suicidal) at or above → elevated (gentler 
 INJECTION_MODEL        = "protectai/deberta-v3-base-prompt-injection-v2"     # Apache-2.0
 INJECTION_THRESHOLD    = 0.90   # P(INJECTION) at or above → flagged.  0.28% FPR on mental-health text (eval/reports)
 RECENT_RISK_TURNS      = 6      # previous user turns considered for conversation-level risk
+# French and Arabic messages are translated by the chat LLM so the English detectors can read them
+# (lumina/safety/language.py; eval/reports/safety_multilingual.json).  0 = detectors see the original only.
+SAFETY_TRANSLATE            = os.getenv("SAFETY_TRANSLATE", "1") != "0"
+SAFETY_TRANSLATE_MAX_TOKENS = 400
 # Crisis contact details live only in the frontend banner (frontend/src/components/ui/CrisisBanner.jsx).
 
 # ── Request limits ────────────────────────────────────────────────────────────

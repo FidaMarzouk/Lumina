@@ -24,6 +24,7 @@ nlp = [
     "transformers>=4.44",
     "sentence-transformers>=3.0",
     "spacy>=3.7",
+    "lingua-language-detector>=2.0",   # safety layer: is this message French? (lumina/safety/language.py)
 ]
 rag = [
     "chromadb>=0.5",

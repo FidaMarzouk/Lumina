@@ -1,6 +1,7 @@
 """Turn orchestrator — the fixed, deterministic flow of one conversational turn.
 
     normalise history → SAFETY ASSESSMENT → (method request? → template, no LLM)
+                      → (unreadable script? → fixed "please write in…" reply, no LLM)
                       → [signed-in session: memory context] → analysis + prompt (empathy_engine)
                       → LLM → OUTPUT GUARD → reply
                       → [signed-in session: record labels; CBT extraction in the background]
@@ -103,6 +104,14 @@ def respond(message: str, history: list | None = None, persona: str = "listener"
             _remember(session, message, safety, None, False)
         return TurnResult(templates.method_reply(), "crisis", "neutral", "neutral", True, "method",
                           "crisis", safety.injection, [], {"safety": safety.signals, "path": "template"})
+
+    # Written in a way neither the safety models nor the LLM can read (Arabizi): say so, don't guess.
+    if not safety.understood and not safety.is_crisis:
+        if session is not None:
+            _remember(session, message, safety, None, False)
+        return TurnResult(templates.unsupported_language_reply(), "unsupported_language", "neutral", "neutral",
+                          False, "none", safety.risk_level, safety.injection, [],
+                          {"safety": safety.signals, "path": "template_language"})
 
     context, connections = None, None
     if session is not None and safety.risk_level == "none" and not safety.injection:

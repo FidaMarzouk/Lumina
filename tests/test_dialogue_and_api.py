@@ -131,6 +131,16 @@ def pipeline(monkeypatch, engines):
     return install
 
 
+def test_unreadable_script_gets_the_fixed_reply_without_the_llm(pipeline):
+    calls = pipeline(SafetyAssessment("elevated", "none", False, {}, language="arabizi", understood=False))
+    out = orch.respond("nheb nmout")
+    assert calls == [] and out.debug["path"] == "template_language" and not out.crisis_flag
+    assert out.risk_level == "elevated" and "Get help" in out.reply and "français" in out.reply
+    # a crisis seen on the original text still takes the crisis path
+    calls = pipeline(SafetyAssessment("crisis", "ideation", False, {}, language="arabizi", understood=False))
+    assert orch.respond("kms n7eb").crisis_flag and len(calls) == 1
+
+
 def test_method_request_never_reaches_the_llm(pipeline):
     calls = pipeline(SafetyAssessment("crisis", "method", False, {}))
     out = orch.respond("x", [])

@@ -1,0 +1,154 @@
+{
+  "n": 100,
+  "llm": "ollama:llama3.1",
+  "reviewed_by_native_speaker": true,
+  "with_language_handling": {
+    "by_writing_system": {
+      "fr": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 15,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 1,
+        "scored_as_injection": 0,
+        "not_understood": 0,
+        "routed": {
+          "fr": 25
+        },
+        "crisis_recall": 1.0,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.0
+      },
+      "ar": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 15,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 1,
+        "scored_as_injection": 0,
+        "not_understood": 0,
+        "routed": {
+          "ar": 25
+        },
+        "crisis_recall": 1.0,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.0
+      },
+      "tn_arab": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 15,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 2,
+        "ordinary_flagged_elevated": 0,
+        "scored_as_injection": 0,
+        "not_understood": 0,
+        "routed": {
+          "ar": 25
+        },
+        "crisis_recall": 1.0,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.2
+      },
+      "tn_latn": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 3,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 10,
+        "scored_as_injection": 0,
+        "not_understood": 23,
+        "routed": {
+          "arabizi": 23,
+          "fr": 2
+        },
+        "crisis_recall": 0.2,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.0
+      }
+    },
+    "overall": {
+      "crisis_recall": 0.8,
+      "crisis_or_elevated_recall": 1.0,
+      "ordinary_crisis_rate": 0.05,
+      "scored_as_injection": 0
+    }
+  },
+  "baseline_english_only": {
+    "by_writing_system": {
+      "fr": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 6,
+        "crisis_or_elevated": 9,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 1,
+        "scored_as_injection": 1,
+        "not_understood": 0,
+        "routed": {
+          "en": 25
+        },
+        "crisis_recall": 0.4,
+        "crisis_or_elevated_recall": 0.6,
+        "ordinary_crisis_rate": 0.0
+      },
+      "ar": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 7,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 10,
+        "scored_as_injection": 20,
+        "not_understood": 0,
+        "routed": {
+          "en": 25
+        },
+        "crisis_recall": 0.467,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.0
+      },
+      "tn_arab": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 2,
+        "crisis_or_elevated": 15,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 10,
+        "scored_as_injection": 22,
+        "not_understood": 0,
+        "routed": {
+          "en": 25
+        },
+        "crisis_recall": 0.133,
+        "crisis_or_elevated_recall": 1.0,
+        "ordinary_crisis_rate": 0.0
+      },
+      "tn_latn": {
+        "n_crisis": 15,
+        "n_ordinary": 10,
+        "crisis_detected": 1,
+        "crisis_or_elevated": 4,
+        "ordinary_flagged_crisis": 0,
+        "ordinary_flagged_elevated": 0,
+        "scored_as_injection": 0,
+        "not_understood": 0,
+        "routed": {
+          "en": 25
+        },
+        "crisis_recall": 0.067,
+        "crisis_or_elevated_recall": 0.267,
+        "ordinary_crisis_rate": 0.0
+      }
+    },
+    "overall": {
+      "crisis_recall": 0.267,
+      "crisis_or_elevated_recall": 0.717,
+      "ordinary_crisis_rate": 0.0,
+      "scored_as_injection": 43
+    }
+  }
+}

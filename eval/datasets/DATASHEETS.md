@@ -61,6 +61,14 @@ Known gaps: only 98 FAQ questions, so the `information` and `help_seeking` class
 | Our use | `eval/runners/cbt_extraction.py`: precision, recall and an "invented when absent" rate per field. It was also used to tune the extraction prompt, so its numbers are optimistic. A fresh held-out set (target about 150) is needed for an unbiased estimate. |
 | Biases | Short, explicit, single-situation messages in English. Real messages are longer and less tidy. |
 
+## Multilingual safety set (`data/eval/safety_multilingual/gold.jsonl`)
+| | |
+|---|---|
+| Content | **100** short messages: 15 crisis (11–12 ideation, 1–2 method requests, 2 concern for someone else) and 10 ordinary messages in each of four writing systems: French (`fr`), Arabic (`ar`), Tunisian Arabic in Arabic letters (`tn_arab`) and in Latin letters with digits (`tn_latn`, "Arabizi"). Each has an English gloss. |
+| Origin | Written by Claude (Fable 5) on 2026-11-13 as parallel versions of the same 25 meanings. **Reviewed by the user (native speaker) on 2026-11-14**, no changes needed. No real user text. |
+| Our use | `eval/runners/safety_multilingual.py`: crisis recall, crisis-or-elevated recall, crisis flag rate on ordinary messages and the number scored as prompt injection, per writing system, with and without language handling. |
+| Biases | Tiny, explicit and parallel: every crisis item is a clear statement. Real messages mix languages, are longer and are often indirect, so real recall will be lower. Use it as a regression check. |
+
 ## Synthetic histories (`src/lumina/memory/synthetic.py`)
 | | |
 |---|---|

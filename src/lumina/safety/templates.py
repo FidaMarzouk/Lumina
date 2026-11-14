@@ -47,3 +47,22 @@ def unavailable_reply(crisis: bool) -> str:
 def generic_fallback() -> str:
     return ("I want to make sure I respond carefully here. Could you tell me a little more about what's on your mind? "
             "I'm here to listen.")
+
+
+def unsupported_language_reply() -> str:
+    """For messages written in a way Lumina cannot read reliably (Arabic in Latin letters with digits).
+
+    Lumina does not guess at these: neither the safety models nor the chat model understand them.  The reply
+    is given in the three languages it can read, so the person can choose one, and points to "Get help".
+    """
+    return (
+        "I'm sorry, I can't reliably understand messages written this way yet, and I don't want to guess at "
+        "something important. Could you write to me in English, French, or Arabic in Arabic letters? "
+        "If you need help right now, tap \"Get help\" at the top of the screen.\n\n"
+        "Pardon, je ne comprends pas encore bien les messages écrits de cette façon, et je ne veux pas deviner. "
+        "Pouvez-vous m'écrire en français, en anglais ou en arabe (en lettres arabes) ? "
+        "Si vous avez besoin d'aide tout de suite, touchez « Get help » en haut de l'écran.\n\n"
+        "عذراً، لا أستطيع بعد أن أفهم جيداً الرسائل المكتوبة بهذه الطريقة، ولا أريد أن أخمّن. "
+        "هل يمكنك أن تكتب لي بالعربية بالحروف العربية، أو بالفرنسية أو الإنجليزية؟ "
+        "إذا كنت بحاجة إلى مساعدة الآن، اضغط على «Get help» في أعلى الشاشة."
+    )

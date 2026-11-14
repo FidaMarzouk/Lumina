@@ -72,6 +72,30 @@ The table at the top of this section predates both changes; the sweep is the cur
 
 All 15 are detected. 9 of 9 benign negatives are not flagged. 2 known false positives are kept as `xfail`.
 
+### Other languages (French, Arabic, Tunisian Arabic)
+The detectors are English models. `src/lumina/safety/language.py` routes each message by writing system;
+`eval/runners/safety_multilingual.py --baseline` measures it on 100 messages written for this test
+(15 crisis + 10 ordinary per writing system; reviewed by the user, a native speaker, on 2026-11-14).
+
+| Writing system | Crisis recall, before → after | Ordinary messages flagged crisis | Scored as injection, before → after |
+|---|---|---|---|
+| French | 6/15 → 15/15 | 0/10 | 1 → 0 |
+| Arabic | 7/15 → 15/15 | 0/10 | 20 → 0 |
+| Tunisian Arabic, Arabic letters | 2/15 → 15/15 | 2/10 | 22 → 0 |
+| Tunisian Arabic, Latin letters ("Arabizi") | 1/15 → 3/15 (15/15 at least elevated) | 0/10 | 0 → 0 |
+
+**How to read this:**
+- French and Arabic are translated by the chat LLM and assessed in English. This works.
+- Before, 42 of the 50 Arabic-script messages were scored as prompt injection, so a person writing "I am thinking
+  about suicide" in Arabic was told Lumina could not help with that request.
+- **Arabizi is not understood, and the table does not claim otherwise.** Both free local models (Llama 3.1 8B,
+  Qwen 2.5 7B) translate it into confident nonsense: neutral-prompt trials gave 0/15 and 1/15 crisis recall.
+  Lumina therefore does not guess: it recognises Arabizi by its digits (23 of 25 items; 0 of 3,329 English
+  messages), marks the turn "elevated", and answers with a fixed reply in English, French and Arabic asking for
+  one of those and pointing to "Get help". Arabizi written without digits is not recognised.
+- Tunisian Arabic in Arabic letters is translated loosely; 2 of 10 ordinary messages became a crisis flag.
+- The set is tiny, explicit and parallel. It is a regression check, not population recall.
+
 ## 2. Prompt-injection detection
 Model: `protectai/deberta-v3-base-prompt-injection-v2`, threshold 0.9.
 
