@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
@@ -86,18 +87,31 @@ def section(sid: str, title: str, intro: str, body: str) -> str:
 
 
 # ── safety ────────────────────────────────────────────────────────────────────
-def _policy(name: str) -> dict:
-    previous = name.startswith("current:")
-    name = name.removeprefix("current:").strip()
-    thr = float("0" + name.rsplit("p>=", 1)[1])
-    gated = "(guard&" in name
-    deployed = not previous and not gated and math.isclose(thr, config.RISK_THRESHOLD)
-    label = f"p ≥ {thr:.2f}" + (", guard needs p ≥ 0.10" if gated else "")
-    if previous:
-        label += " (previous)"
-    if deployed:
-        label = f"In use: {label}"
-    return {"label": label, "thr": thr, "gated": gated, "deployed": deployed}
+_POLICY_PARTS = [
+    (re.compile(r"^\(guard&p>=(\.\d+)\)$"), lambda m: f"guard needs p ≥ 0{m[1]}"),
+    (re.compile(r"^p>=(\.\d+)$"), lambda m: f"p ≥ 0{m[1]}"),
+    (re.compile(r"^\(r:self&p>=(\.\d+)\)$"), lambda m: f"reader “self” with p ≥ 0{m[1]}"),
+    (re.compile(r"^r:(\w+)$"), lambda m: {"other": "reader “someone else”", "method": "reader “method”",
+                                          "any": "reader, any reading"}.get(m[1], f"reader “{m[1]}”")),
+]
+
+
+def _policy(row: dict) -> dict:
+    """A readable label for one policy of eval/reports/safety_policy_sweep.json ("floor|guard|p>=.90|r:other …")."""
+    name, _, note = row["policy"].partition(" (")
+    parts = []
+    for token in name.split("|"):
+        if token in ("floor", "guard"):
+            continue
+        for pattern, fmt in _POLICY_PARTS:
+            if m := pattern.match(token):
+                parts.append(fmt(m))
+                break
+        else:
+            parts.append(token)
+    label = " + ".join(parts) + (f" ({note.rstrip(')')})" if note else "")
+    deployed = bool(row.get("deployed"))
+    return {"label": f"In use: {label}" if deployed else label, "deployed": deployed}
 
 
 def safety_section() -> tuple[str, dict]:
@@ -105,7 +119,7 @@ def safety_section() -> tuple[str, dict]:
     det = _json("safety_detection")
     pts, rows, deployed = [], [], None
     for p in sweep["policies"]:
-        meta = _policy(p["policy"])
+        meta = _policy(p)
         if meta["deployed"]:
             deployed = p
         tip = (f"{meta['label']}: catches {_pct(p['clinical_recall_crisis'], 1)} of crisis posts; banner on "
@@ -113,16 +127,19 @@ def safety_section() -> tuple[str, dict]:
         pts.append({"x": p["flag_rate_counselling_posts"], "y": p["clinical_recall_crisis"], "label": meta["label"],
                     "highlight": meta["deployed"], "tip": tip})
         rows.append([escape(meta["label"]), _pct(p["clinical_recall_crisis"], 1), _pct(p["clinical_recall_crisis_or_elevated"], 1),
-                     _pct(p["flag_rate_counselling_posts"], 1), _pct(p["flag_rate_everyday"], 1), _pct(p["flag_rate_hard_negatives"], 1)])
+                     _pct(p["flag_rate_counselling_posts"], 1), _pct(p["flag_rate_everyday"], 1), _pct(p["flag_rate_hard_negatives"], 1),
+                     escape(p.get("indirect_crisis_detected", "—")), escape(p.get("indirect_near_miss_flagged", "—"))])
     chart = charts.scatter(pts, "Crisis recall against false alarms for each crisis policy", (0, 0.25), (0.8, 1.0),
                            0.05, 0.05, "Crisis banner shown on ordinary counselling posts", "Crisis posts caught")
     fig1 = figure(
         "Catching crises costs false alarms",
-        f"Each dot is a crisis policy: the explicit floor, Llama Guard and the risk classifier combined, with a different "
-        f"threshold on the classifier. Up is safer; left is fewer needless crisis banners. Clinical test subsample n = "
-        f"{sweep['n_clinical_subsample']}, counselling posts n = {sweep['n_counselling']}.",
-        chart, table(["Policy", "Crisis caught", "Crisis or elevated", "Banner: counselling", "Banner: everyday", "Banner: hard negatives"],
-                     rows, (1, 2, 3, 4, 5)))
+        f"Each dot is a crisis policy: the explicit floor and Llama Guard always, plus the risk classifier (p) at a "
+        f"threshold and, in some, the LLM risk reader. Up is safer; left is fewer needless crisis banners. Clinical test "
+        f"subsample n = {sweep['n_clinical_subsample']}, counselling posts n = {sweep['n_counselling']}; the last two columns "
+        f"are {sweep.get('n_indirect', 0) // 2} indirect or third-party crisis messages and as many harmless near-misses.",
+        chart, table(["Policy", "Crisis caught", "Crisis or elevated", "Banner: counselling", "Banner: everyday",
+                      "Banner: hard negatives", "Indirect caught", "Near-misses flagged"],
+                     rows, (1, 2, 3, 4, 5, 6, 7)))
 
     inj = det["injection"]
     inj_rows = [[f"{float(k.split('_')[1]):.2f}" + (" (in use)" if math.isclose(float(k.split('_')[1]), config.INJECTION_THRESHOLD) else ""),

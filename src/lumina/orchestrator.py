@@ -89,6 +89,14 @@ def _remember(session: SessionContext, message: str, safety: SafetyAssessment, a
         log.warning("Recording the turn failed: %s", type(exc).__name__)
 
 
+def _settle(future) -> None:
+    """Wait for background work whose result is not needed; its failure must not affect the reply."""
+    try:
+        future.result()
+    except Exception as exc:
+        log.warning("Background analysis failed: %s", type(exc).__name__)
+
+
 def respond(message: str, history: list | None = None, persona: str = "listener",
             session: SessionContext | None = None, weather: str | None = None) -> TurnResult:
     turns = normalize_history(history)
@@ -98,8 +106,10 @@ def respond(message: str, history: list | None = None, persona: str = "listener"
     log.info("Safety — risk=%s subtype=%s injection=%s degraded=%s",
              safety.risk_level, safety.crisis_subtype, safety.injection, safety.signals.get("degraded"))
 
-    # Method requests never reach the LLM.
+    # Method requests never reach the LLM.  Templated turns still let the analysis finish (it is done long
+    # before the ~2 s assessment), so no work is left running after the reply.
     if safety.crisis_subtype == "method":
+        _settle(analysis_future)
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.method_reply(), "crisis", "neutral", "neutral", True, "method",
@@ -107,6 +117,7 @@ def respond(message: str, history: list | None = None, persona: str = "listener"
 
     # Written in a way neither the safety models nor the LLM can read (Arabizi): say so, don't guess.
     if not safety.understood and not safety.is_crisis:
+        _settle(analysis_future)
         if session is not None:
             _remember(session, message, safety, None, False)
         return TurnResult(templates.unsupported_language_reply(), "unsupported_language", "neutral", "neutral",

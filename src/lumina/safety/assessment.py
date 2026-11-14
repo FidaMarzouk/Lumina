@@ -5,10 +5,18 @@
     crisis    if  floor triggered
               or  guard flags method / ideation / third_party
               or  P(risk | message) >= RISK_THRESHOLD
+              or  the LLM reader says "other" or "method"
+              or  the LLM reader says "self" and P(risk | message) >= SAFETY_READER_SELF_MIN_P
     elevated  if  P(risk | message) >= RISK_ELEVATED_THRESHOLD
+              or  the LLM reader says "self" (below the threshold above)
               or  P(risk | recent user turns + message) >= RISK_THRESHOLD   (risk spread over turns)
               or  a recent turn was a crisis
     none      otherwise
+
+    The LLM reader (lumina/safety/reader.py) reads English messages for indirect risk the classifiers miss
+    ("my brother texted goodbye to everyone and now he isn't answering").  Its "self" reading alone flags 51%
+    of the r/SuicideWatch posts without ideation, so on its own it only raises risk to "elevated"; the
+    policy was chosen in eval/runners/safety_policy_sweep.py.
 
     subtype:  method       — explicit method request caught by the floor (fully templated, no LLM).
                              Llama Guard's "method" label is NOT used for this: it misfired on e.g. a
@@ -43,7 +51,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Callable, Literal
 
-from ..config import RECENT_RISK_TURNS, RISK_ELEVATED_THRESHOLD, RISK_THRESHOLD
+from ..config import RECENT_RISK_TURNS, RISK_ELEVATED_THRESHOLD, RISK_THRESHOLD, SAFETY_READER_SELF_MIN_P
 from . import floor
 
 log = logging.getLogger(__name__)
@@ -103,17 +111,18 @@ class Detectors:
     injection_threshold: float
     language: Callable[[str], str] = lambda text: "en"
     translate: Callable[[str], "object"] = lambda text: None      # → language.Translation | None
+    read_risk: Callable[[str], "str | None"] | None = None       # → reader.RISKS | None; None = no reader
     seen: SeenCrisis = field(default_factory=SeenCrisis)
 
     @classmethod
     def default(cls) -> "Detectors":
-        from ..config import INJECTION_THRESHOLD
-        from . import language
+        from ..config import INJECTION_THRESHOLD, SAFETY_READER
+        from . import language, reader
         from .guard import classify_user_risk
         from .injection import injection_probability
         from .risk_model import risk_probability
         return cls(classify_user_risk, risk_probability, injection_probability, INJECTION_THRESHOLD,
-                   language.detect, language.translate)
+                   language.detect, language.translate, reader.read_risk if SAFETY_READER else None)
 
 
 _DEFAULT: Detectors | None = None
@@ -151,10 +160,13 @@ def assess(message: str, history: list[dict] | None = None, detectors: Detectors
     prev_user = [t["content"] for t in recent if t["role"] == "user"][-RECENT_RISK_TURNS:]
     lang = _safe(d.language, message, default="en")
 
-    # The guard is an HTTP call to Ollama (~2 s) and the translation an LLM call: start both first and
-    # compute the local layers meanwhile.
+    # The guard is an HTTP call to Ollama (~2 s), the translation or the risk reader an LLM call (~0.4 s):
+    # start them first and compute the local layers meanwhile.  French and Arabic get the translator, whose
+    # own risk reading replaces the reader's; Arabizi gets neither (nothing can read it).
     guard_future = _POOL.submit(_safe, d.guard, recent + [{"role": "user", "content": message}], default=None)
     translation_future = _POOL.submit(_safe, d.translate, message, default=None) if lang in _TRANSLATED else None
+    use_reader = lang == "en" and d.read_risk is not None
+    reader_future = _POOL.submit(_safe, d.read_risk, message, default=None) if use_reader else None
 
     fl = floor.check(message)
     p_msg = _safe(d.risk_probability, message, default=None)
@@ -165,6 +177,7 @@ def assess(message: str, history: list[dict] | None = None, detectors: Detectors
     translation = translation_future.result() if translation_future is not None else None
     english = getattr(translation, "english", None)
     llm_risk = getattr(translation, "risk", "none") if translation is not None else "none"
+    reader_risk = reader_future.result() if reader_future is not None else None
     p_mid = p_msg                                 # the score read for the "elevated" band
     if english:                                   # the same layers on the English; they can only raise risk
         fl_en = floor.check(english)
@@ -194,15 +207,16 @@ def assess(message: str, history: list[dict] | None = None, detectors: Detectors
     understood = lang != "arabizi"
     unread = not understood or (lang in _TRANSLATED and not english)     # nothing could read this message
 
+    reader_self_high = (reader_risk == "self" and p_msg is not None and p_msg >= SAFETY_READER_SELF_MIN_P)
     first_person = (fl.triggered or bool(guard_cats & {"method", "ideation"}) or msg_high
-                    or llm_risk in ("self", "method"))
+                    or llm_risk in ("self", "method") or reader_risk == "method" or reader_self_high)
     if fl.method:
         level, subtype = "crisis", "method"
     elif first_person:
         level, subtype = "crisis", "ideation"
-    elif "third_party" in guard_cats or llm_risk == "other":
+    elif "third_party" in guard_cats or llm_risk == "other" or reader_risk == "other":
         level, subtype = "crisis", "third_party"
-    elif msg_mid or ctx_high or history_crisis or unread:
+    elif msg_mid or ctx_high or history_crisis or unread or reader_risk == "self":
         level, subtype = "elevated", "none"
     else:
         level, subtype = "none", "none"
@@ -219,8 +233,10 @@ def assess(message: str, history: list[dict] | None = None, detectors: Detectors
         "language": lang,
         "translated": bool(english),
         "llm_risk": llm_risk,
+        "reader": reader_risk,
         "degraded": [n for n, ok in (("guard", guard_ok), ("risk_model", p_msg is not None),
                                      ("injection_model", p_inj is not None or inj_text is None),
-                                     ("translator", lang not in _TRANSLATED or bool(english))) if not ok],
+                                     ("translator", lang not in _TRANSLATED or bool(english)),
+                                     ("reader", not use_reader or reader_risk is not None)) if not ok],
     }
     return SafetyAssessment(level, subtype, injection, signals, language=lang, understood=understood)

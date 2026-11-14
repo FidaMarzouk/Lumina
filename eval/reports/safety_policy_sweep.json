@@ -1,47 +1,102 @@
 {
   "n_clinical_subsample": 298,
   "n_counselling": 150,
+  "n_indirect": 30,
   "guard_flag_rate_counselling": 0.06,
+  "reader_flag_rate_counselling": 0.14,
+  "reader_alone": {
+    "clinical_recall": 0.993,
+    "flag_rate_hard_negatives": 0.576,
+    "flag_rate_everyday": 0.02
+  },
   "policies": [
     {
-      "policy": "current: floor|guard|p>=.45",
+      "policy": "floor|guard|p>=.45 (first policy)",
+      "deployed": false,
       "clinical_recall_crisis": 0.964,
-      "clinical_recall_crisis_or_elevated": 0.971,
+      "clinical_recall_crisis_or_elevated": 1.0,
       "flag_rate_counselling_posts": 0.213,
       "flag_rate_everyday": 0.05,
-      "flag_rate_hard_negatives": 0.61
+      "flag_rate_hard_negatives": 0.61,
+      "indirect_crisis_detected": "12/15",
+      "indirect_near_miss_flagged": "3/15"
     },
     {
-      "policy": "floor|guard|p>=.90",
+      "policy": "floor|guard|p>=.90 (before S4)",
+      "deployed": false,
       "clinical_recall_crisis": 0.92,
-      "clinical_recall_crisis_or_elevated": 0.971,
+      "clinical_recall_crisis_or_elevated": 1.0,
       "flag_rate_counselling_posts": 0.107,
       "flag_rate_everyday": 0.0,
-      "flag_rate_hard_negatives": 0.475
+      "flag_rate_hard_negatives": 0.475,
+      "indirect_crisis_detected": "10/15",
+      "indirect_near_miss_flagged": "1/15"
     },
     {
       "policy": "floor|guard|p>=.98",
+      "deployed": false,
       "clinical_recall_crisis": 0.841,
-      "clinical_recall_crisis_or_elevated": 0.971,
+      "clinical_recall_crisis_or_elevated": 1.0,
       "flag_rate_counselling_posts": 0.06,
       "flag_rate_everyday": 0.0,
-      "flag_rate_hard_negatives": 0.322
-    },
-    {
-      "policy": "floor|(guard&p>=.10)|p>=.98",
-      "clinical_recall_crisis": 0.819,
-      "clinical_recall_crisis_or_elevated": 0.949,
-      "flag_rate_counselling_posts": 0.04,
-      "flag_rate_everyday": 0.0,
-      "flag_rate_hard_negatives": 0.305
+      "flag_rate_hard_negatives": 0.322,
+      "indirect_crisis_detected": "4/15",
+      "indirect_near_miss_flagged": "0/15"
     },
     {
       "policy": "floor|(guard&p>=.10)|p>=.90",
+      "deployed": false,
       "clinical_recall_crisis": 0.899,
-      "clinical_recall_crisis_or_elevated": 0.949,
+      "clinical_recall_crisis_or_elevated": 1.0,
       "flag_rate_counselling_posts": 0.087,
       "flag_rate_everyday": 0.0,
-      "flag_rate_hard_negatives": 0.458
+      "flag_rate_hard_negatives": 0.458,
+      "indirect_crisis_detected": "10/15",
+      "indirect_near_miss_flagged": "1/15"
+    },
+    {
+      "policy": "floor|guard|p>=.90|r:other",
+      "deployed": false,
+      "clinical_recall_crisis": 0.92,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.14,
+      "flag_rate_everyday": 0.01,
+      "flag_rate_hard_negatives": 0.492,
+      "indirect_crisis_detected": "13/15",
+      "indirect_near_miss_flagged": "1/15"
+    },
+    {
+      "policy": "floor|guard|p>=.90|r:any",
+      "deployed": false,
+      "clinical_recall_crisis": 1.0,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.213,
+      "flag_rate_everyday": 0.02,
+      "flag_rate_hard_negatives": 0.661,
+      "indirect_crisis_detected": "15/15",
+      "indirect_near_miss_flagged": "1/15"
+    },
+    {
+      "policy": "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.10)",
+      "deployed": false,
+      "clinical_recall_crisis": 0.978,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.173,
+      "flag_rate_everyday": 0.02,
+      "flag_rate_hard_negatives": 0.559,
+      "indirect_crisis_detected": "14/15",
+      "indirect_near_miss_flagged": "1/15"
+    },
+    {
+      "policy": "floor|guard|p>=.90|r:other|r:method|(r:self&p>=.45)",
+      "deployed": true,
+      "clinical_recall_crisis": 0.971,
+      "clinical_recall_crisis_or_elevated": 1.0,
+      "flag_rate_counselling_posts": 0.147,
+      "flag_rate_everyday": 0.01,
+      "flag_rate_hard_negatives": 0.525,
+      "indirect_crisis_detected": "14/15",
+      "indirect_near_miss_flagged": "1/15"
     }
   ]
 }

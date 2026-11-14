@@ -310,3 +310,49 @@ def test_language_signals_hold_no_text():
 def test_unsupported_language_reply_has_no_numbers():
     t = templates.unsupported_language_reply()
     assert "Get help" in t and not output_guard.has_phone_number(t) and not output_guard._SHORT_CODE.search(t)
+
+
+# ─────────────────────────── LLM risk reader ───────────────────────────
+from lumina.safety import reader  # noqa: E402
+
+
+def test_reader_parses_and_validates_the_llm_json():
+    assert reader.read_risk("x", complete=lambda m, **k: 'ok {"risk": "other"}') == "other"
+    assert reader.read_risk("x", complete=lambda m, **k: '{"risk": "banana"}') == "none"
+    assert reader.read_risk("x", complete=lambda m, **k: "no json here") is None
+
+    def down(messages, **kwargs):
+        raise RuntimeError("llm down")
+    assert reader.read_risk("x", complete=down) is None
+
+
+def _reader_det(reading, p=0.0, lang="en"):
+    d = _det(p=p)
+    d.read_risk, d.language = (lambda t: reading), (lambda t: lang)
+    return d
+
+
+def test_reader_other_or_method_raises_crisis():
+    assert assess("my brother texted goodbye to everyone", [], _reader_det("other")).crisis_subtype == "third_party"
+    a = assess("x", [], _reader_det("method"))
+    assert a.crisis_subtype == "ideation"            # templated only when the explicit floor fires
+
+
+def test_reader_self_needs_the_classifier_to_agree_for_crisis():
+    assert assess("x", [], _reader_det("self", p=0.5)).crisis_subtype == "ideation"
+    a = assess("x", [], _reader_det("self", p=0.05))
+    assert a.risk_level == "elevated"                 # alone it only raises the tone
+    assert assess("x", [], _reader_det("none", p=0.05)).risk_level == "none"
+
+
+def test_reader_never_lowers_risk_and_failure_degrades():
+    assert assess("i want to kill myself", [], _reader_det("none")).is_crisis
+    a = assess("hello", [], _reader_det(None))
+    assert a.risk_level == "none" and "reader" in a.signals["degraded"]
+
+
+def test_reader_runs_on_english_only():
+    called = []
+    d = _lang_det("fr", Translation("hello", "none"))
+    d.read_risk = lambda t: called.append(t) or "other"
+    assert assess("bonjour", [], d).risk_level == "none" and called == []
