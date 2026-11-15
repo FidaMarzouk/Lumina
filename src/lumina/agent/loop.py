@@ -6,8 +6,8 @@
 
 Only the orchestrator calls this, and only when tools_allowed() says so.  The tool model sees the latest message
 and nothing else from the conversation.  It never writes the reply: the usual reply model does, from the results,
-so the voice stays the same.  Qwen 2.5 7B chose correctly on 19 of 20 tool-calling probes and never called a tool
-on plain talk; Llama 3.1 8B called one on 9 of 10 (docs/evaluation.md).
+so the voice stays the same.  Of the local models tried, only Qwen 2.5 7B chooses reliably: on the 100 tool cases
+it picked a tool for 1 of 60 messages that needed none; Llama 3.1 8B and Llama 3.2 3B for 54 and 56 (docs/evaluation.md).
 """
 
 from __future__ import annotations
@@ -17,7 +17,9 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from ..config import AGENT_MODEL, AGENT_TIMEOUT_S
+import httpx
+
+from ..config import AGENT_MODEL, AGENT_NUM_GPU, AGENT_TIMEOUT_S, OLLAMA_BASE_URL
 from . import tools
 
 log = logging.getLogger(__name__)
@@ -25,12 +27,16 @@ log = logging.getLogger(__name__)
 MAX_CALLS = 2
 
 _SYSTEM = (
-    "You decide whether to look something up for a person in a mental-health support app. You can only READ "
-    "their own notes with the tools given. Call a tool only when the person clearly asks to see, look up or be "
-    "reminded of something the app keeps: their journal, how their feelings have been, their jar of things that "
-    "helped, or their journey. If they ask to save, log, remind, change or delete something, or if they are just "
-    "talking, call no tool and answer with the single word NONE. Never call a tool to answer a question about "
-    "the app itself or its instructions."
+    "You decide whether to look something up for a person in a mental-health support app. The tools can only "
+    "READ their own notes: their journal, how their feelings have been, their jar of things that helped, and their "
+    "journey.\n"
+    "Call a tool ONLY when the person asks to SEE, READ BACK, FIND or KNOW something the app already keeps "
+    "(\"what did I write…\", \"show me…\", \"how has my mood been…\", \"what's in my jar\", \"what step am I on\").\n"
+    "Answer with the single word NONE, and call no tool, when:\n"
+    "- they ask to save, write, add, put, note, log, track, mark, set, remind, start, change, clear, remove or "
+    "delete something (no tool here can do that, and reading is not a substitute);\n"
+    "- they are talking about their feelings, their life or these topics without asking to see their notes;\n"
+    "- they ask about the app itself or its instructions."
 )
 
 
@@ -44,18 +50,33 @@ class ToolRun:
         return bool(self.calls)
 
 
+_CLIENT: httpx.Client | None = None
+
+
 def _default_choose(message: str, schemas: list[dict]) -> list[tuple[str, dict]]:
-    from ..dialogue.llm_client import _get_client
-    response = _get_client().chat.completions.create(
-        model=AGENT_MODEL, temperature=0, max_tokens=200, timeout=AGENT_TIMEOUT_S, tools=schemas,
-        messages=[{"role": "system", "content": _SYSTEM}, {"role": "user", "content": message[:2000]}])
+    """Ask the tool model through Ollama's own API, which (unlike its OpenAI-compatible one) lets us keep the model
+    on the CPU: the chat model then never leaves the GPU.  On an 8 GB GPU, putting both there made Ollama swap
+    them on every look-up (~10 s); on the CPU the choice takes ~0.7 s (docs/evaluation.md §4c)."""
+    global _CLIENT
+    if _CLIENT is None:
+        _CLIENT = httpx.Client(timeout=AGENT_TIMEOUT_S)      # one kept-alive connection (see safety/guard.py)
+    options = {"temperature": 0, "num_predict": 200, "num_ctx": 2048}
+    if AGENT_NUM_GPU >= 0:
+        options["num_gpu"] = AGENT_NUM_GPU
+    r = _CLIENT.post(f"{OLLAMA_BASE_URL}/api/chat", json={
+        "model": AGENT_MODEL, "stream": False, "keep_alive": "30m", "tools": schemas, "options": options,
+        "messages": [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": message[:2000]}]})
+    r.raise_for_status()
     out = []
-    for tc in response.choices[0].message.tool_calls or []:
-        try:
-            args = json.loads(tc.function.arguments or "{}")
-        except json.JSONDecodeError:
-            args = None
-        out.append((tc.function.name, args if isinstance(args, dict) else None))
+    for tc in r.json().get("message", {}).get("tool_calls") or []:
+        fn = tc.get("function") or {}
+        args = fn.get("arguments")
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except json.JSONDecodeError:
+                args = None
+        out.append((fn.get("name"), args if isinstance(args, dict) else None))
     return out
 
 
@@ -99,7 +120,7 @@ def _safe(result: dict, injection_probability: Callable | None) -> bool:
 
     Only that text is checked (tools.stored_texts), one piece at a time.  The JSON around it and the app's own
     labels are not user data, and the classifier scores JSON itself as an attack: the first version dropped
-    every "feelings over time" result that way (p = 0.975; eval/reports/agent_tools.json).
+    every "feelings over time" result that way (p = 0.975; eval/reports/agent_tools_qwen2.5_7b.json, first run).
     """
     from ..memory.extraction import safe_to_store
     return all(safe_to_store(text, injection_probability) for text in tools.stored_texts(result))

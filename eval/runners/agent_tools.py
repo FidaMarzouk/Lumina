@@ -9,7 +9,7 @@ and an active journey:
                        anything (writing is A3)
     40 plain talk    about the same things (sleep, journals, memories…): no tool should run
 
-Run:  python eval/runners/agent_tools.py [--model qwen2.5:7b]      Writes eval/reports/agent_tools[_<model>].json
+Run:  python eval/runners/agent_tools.py [--model qwen2.5:3b]      Writes eval/reports/agent_tools_<model>.json
 """
 
 from __future__ import annotations
@@ -93,7 +93,7 @@ def main(model: str) -> dict:
                        "turn_median_without": round(statistics.median(r["ms_total"] for r in rows if r["ms_tools"] is None))},
         "rows": rows,
     }
-    out = ROOT / "eval" / "reports" / ("agent_tools.json" if model == "qwen2.5:7b" else f"agent_tools_{model.replace(':', '_')}.json")
+    out = ROOT / "eval" / "reports" / f"agent_tools_{model.replace(':', '_')}.json"
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("tool_model", "read", "write", "talk", "latency_ms")}, indent=1))
     return report
@@ -101,5 +101,6 @@ def main(model: str) -> dict:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="qwen2.5:7b")
+    from lumina.config import AGENT_MODEL
+    ap.add_argument("--model", default=AGENT_MODEL)
     main(ap.parse_args().model)

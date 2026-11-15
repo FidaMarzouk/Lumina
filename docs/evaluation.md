@@ -328,12 +328,14 @@ picks a read tool the turn proceeds as a look-up, otherwise it stays an injectio
 (pending the user's review): 40 look-ups, 20 write requests (writing is A3) and 40 plain messages on the same
 topics.
 
-| | First run | **After fixes** |
-|---|---|---|
-| Look-ups answered with the right tool | 14 / 40 | **31 / 40** (feelings 8/8, jar 7/8, journey 7/9, journal 9/15) |
-| Write requests whose reply claims it was done | 0 / 20 | **0 / 20** |
-| Plain messages that ran a tool | 0 / 40 | **0 / 40** |
-| Turn time with the tool step (median) | 13.2 s | 13.5 s (3.2 s without) |
+| Tool model | Look-ups with the right tool | Tool on a write request / plain message | Claims an action was done | Look-up turn (median) |
+|---|---|---|---|---|
+| 7B on the GPU, first run | 14 / 40 | 0 / 20 · 0 / 40 | 0 / 20 | 13.2 s |
+| 7B on the GPU, after fixes | 31 / 40 | 1 / 20 · 0 / 40 | 0 / 20 | 13.5 s |
+| 7B on the CPU | 30 / 40 | 0 / 20 · 0 / 40 | 0 / 20 | 11.7 s (paging) |
+| **3B on the CPU (default)** | **30 / 40** | **1 / 20 · 2 / 40** | **0 / 20** | **4.3 s** |
+
+A turn without a look-up takes about 3.2 s. Reports: `eval/reports/agent_tools_<model>.json`.
 
 **How to read this:**
 - **Which tool model.** Choosing tools directly on all 100 messages: Qwen 2.5 7B picked the right one for 38 of
@@ -345,8 +347,12 @@ topics.
   old, so the most recent page is now returned too; replies leaked "your journal search… last 1 days".
 - **Remaining misses:** 6 of the 9 are look-ups the router sends to plain talk ("find my entries about exams");
   one asked to "start the sleep journey", which only a write tool can do, and got journey_status.
-- **Cost: about 10 s per look-up.** Qwen 2.5 7B and Llama 3.1 8B do not fit on the 8 GB GPU together, so Ollama
-  swaps them on every look-up (the tool choice itself takes 0.08 s once loaded).
+- **Speed: the tool model runs on the CPU.** Qwen 2.5 7B and Llama 3.1 8B do not fit on the 8 GB GPU together, so
+  Ollama swapped them on every look-up (~10 s). Qwen 2.5 3B does not fit next to Llama 3.1 either (5.3 GB). On the
+  CPU, through Ollama's own API (`num_gpu: 0`), the chat model never leaves the GPU: the 7B chose in 0.68 s and the
+  3B in 0.30 s in isolation. Inside the full app on a 16 GB machine the 7B was paged out of RAM (6 s per choice),
+  so the default is the 3B (~1.8 s per choice, ~1 s added to a look-up turn). Its 3 wrong picks only read data
+  (journey progress for "I slept badly again"); the 7B made none and suits a machine with RAM to spare.
 - Once, with nothing found ("what have I said about my parents?"), the reply hedged that they had "mentioned
   them briefly a long time ago": the prompt forbids inventing, but the 8B model can still slip.
 

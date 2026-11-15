@@ -34,7 +34,7 @@ ACTIONS = {
     "look_up": "asks the app to show, read back or look up what they wrote, logged or tracked before",
     "forget": "asks the app to delete, remove or forget something it keeps about them",
     # A2: the read tools answer these; v2's first training data had almost none, so the router sent "what's in
-    # my jar?" or "what step am I on?" to plain talk (eval/reports/agent_tools.json).
+    # my jar?" or "what step am I on?" to plain talk (eval/reports/agent_tools_qwen2.5_7b.json, first run).
     "look_up_jar": "asks the app to show what is in their jar of things that helped, or what helped them before",
     "look_up_journey": "asks the app which guided journey or step they are on, or what their next step is",
     "look_up_feelings": "asks the app how their mood or feelings have been over recent days or weeks",

@@ -189,8 +189,11 @@ JOURNEYS_DIR            = PROJECT_ROOT / "configs" / "journeys"
 # On "act" turns of signed-in people (risk "none", no crisis in the last turns), a tool model may look up their
 # own notes: journal pages, feelings over time, the jar, journey progress.  Off until switched on.
 AGENT_TOOLS      = os.getenv("AGENT_TOOLS", "0") != "0"
-AGENT_MODEL      = os.getenv("AGENT_MODEL", "qwen2.5:7b")    # chose tools far better than llama3.1 (evaluation.md)
+AGENT_MODEL      = os.getenv("AGENT_MODEL", "qwen2.5:3b")    # on the CPU: ~1 s per look-up, ~2 GB RAM.  qwen2.5:7b is
+                                                            # more careful (0 vs 3 wrong picks in 60) but needs ~5 GB RAM
 AGENT_TIMEOUT_S  = float(os.getenv("AGENT_TIMEOUT_S", "30"))
+AGENT_NUM_GPU    = int(os.getenv("AGENT_NUM_GPU", "0"))   # 0 = tool model on the CPU, so the chat model stays on an 8 GB GPU
+                                                        # (both on the GPU: Ollama swapped them, ~10 s per look-up); -1 = Ollama decides
 
 # ── Turn traces (lumina/observability.py) ─────────────────────────────────────
 # Per turn: stage timings, safety outcome, reply path, guard reasons.  No text and no user or session id; a
