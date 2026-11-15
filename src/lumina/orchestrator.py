@@ -7,6 +7,10 @@
                                         → "act"    the person asks the app to do something (Q3; tools: A2)
                                         → "talk"   everything else
     3 context   [signed-in, risk "none", no injection: memory]  [weather check-in]
+    3b tools    [AGENT_TOOLS on, "act" route, signed in, risk "none"] read tools chosen by the tool model
+                (lumina/agent).  An action request flagged as injection is let through to the tools; if the tool
+                model picks a read tool, the turn becomes "act" (the flag misfires on "read me back what I
+                wrote"); otherwise it stays "injection".
     4 prompt    empathy_engine.build_prompt (its category always agrees with the route)
     5 generate  whole reply (respond)  |  sentence by sentence on ordinary turns (respond_stream)
     6 guard     OUTPUT GUARD: whole reply, or every sentence before it is sent
@@ -35,16 +39,18 @@ import re
 import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from typing import Literal
 
 from . import observability
-from .config import HISTORY_WINDOW, MAX_HISTORY_CHARS, MAX_HISTORY_TURNS
+from .agent import loop as agent_loop
+from .agent import tools as agent_tools
+from .config import AGENT_TOOLS, HISTORY_WINDOW, MAX_HISTORY_CHARS, MAX_HISTORY_TURNS
 from .dialogue import llm_client
 from .dialogue.empathy_engine import analyze, build_prompt
 from .memory import service as memory
 from .memory.service import SessionContext
-from .memory.store import default_store
+from .memory.store import default_store, utcnow
 from .safety import output_guard, templates
 from .safety.assessment import SafetyAssessment, assess
 
@@ -184,6 +190,7 @@ def _trace(result: TurnResult, session: SessionContext | None, usage: dict) -> d
             "language": signals.get("language"), "reader": signals.get("reader"), "intent": result.intent,
             "intent_category": debug.get("intent_category"), "rag_hits": debug.get("rag_hits"),
             "replaced": debug.get("path") in ("llm", "llm_stream") and bool(reasons), "guard_reasons": reasons,
+            "tools": debug.get("tools", []),
             "degraded": signals.get("degraded", []), "tokens_in": usage.get("in"), "tokens_out": usage.get("out")}
 
 
@@ -247,8 +254,23 @@ def _prepare(message: str, history: list | None, persona: str, session: SessionC
     with sw.stage("analysis"):          # only the wait left after the assessment
         analysis = analysis_future.result()
     turn_route = route(safety, analysis[0]["intent"])
+    prompt_safety, tool_names = safety, []
+    offered = _tools_allowed(safety, session)
+    if offered and (turn_route == "act" or (turn_route == "injection" and analysis[0]["intent"] == "action_request")):
+        with sw.stage("tools"):
+            run = agent_loop.run(message, agent_tools.ToolContext(default_store(), session.user_id,
+                                                                  session.memory_enabled, utcnow(), embed=_embed),
+                                 allowed=offered)
+        if run.used:
+            tool_names = [c["name"] for c in run.calls]
+            context = {**(context or {}), "tool_results": agent_loop.prompt_block(run)}
+            if turn_route == "injection":
+                # Read tools only return the person's own notes, so a look-up the injection classifier misread
+                # goes ahead.  The result still reports injection_detected, and the reply is never streamed.
+                turn_route, prompt_safety = "act", replace(safety, injection=False)
     with sw.stage("prompt"):            # includes knowledge retrieval
-        prompt = build_prompt(message, safety, analysis, persona=persona, memory=context)
+        prompt = build_prompt(message, prompt_safety, analysis, persona=persona, memory=context)
+    prompt["tools"] = tool_names
     # The prompt builder decides its category from the same inputs; a disagreement is a bug in one of them.
     # Logged, not raised: the prompt builder applies safety on its own, and a failed turn helps nobody.  The
     # golden-turn tests check that they agree.
@@ -258,6 +280,23 @@ def _prepare(message: str, history: list | None, persona: str, session: SessionC
     messages += turns[-HISTORY_WINDOW:]
     messages.append({"role": "user", "content": prompt["user_message"]})
     return _Prepared(message, session, safety, turn_route, analysis, prompt, messages, context, connections)
+
+
+def _tools_allowed(safety: SafetyAssessment, session: SessionContext | None) -> tuple[str, ...]:
+    """The read tools this turn may use (empty: none).  Never for guests, in a crisis, or within the recent turns
+    after one.  At "elevated" risk only the jar and journey progress (tools.ELEVATED_SAFE); all at risk "none"."""
+    if not AGENT_TOOLS or session is None or safety.is_crisis or safety.signals.get("history_crisis"):
+        return ()
+    if safety.risk_level == "none":
+        return tuple(agent_tools.READ_TOOLS)
+    if safety.risk_level == "elevated":
+        return agent_tools.ELEVATED_SAFE
+    return ()
+
+
+def _embed(text: str):
+    from .memory.embeddings import embed
+    return embed(text)
 
 
 def _llm_unavailable_reply(safety: SafetyAssessment) -> str:
@@ -375,7 +414,8 @@ def _finish(p: _Prepared, reply: str, path: str, reasons: tuple, replaced: bool)
         crisis_subtype=safety.crisis_subtype,
         risk_level=safety.risk_level,
         injection_detected=safety.injection,
-        debug={"safety": safety.signals, "path": path, "route": p.route, "guard_reasons": list(reasons),
+        debug={"safety": safety.signals, "path": path, "route": p.route, "tools": prompt.get("tools", []),
+               "guard_reasons": list(reasons),
                "intent_category": prompt["intent_category"], "rag_hits": prompt["rag_hits"],
                "memory": sorted(p.context) if p.context else []},
         insight=insight,

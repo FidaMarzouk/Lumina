@@ -1,0 +1,100 @@
+{"id": "81942ed78e", "text": "What did I write about my friend last week?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "9271be68b9", "text": "show me my journal from the last few days", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "1693e51b1c", "text": "can you find the page where I talked about the deadline at work?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "357aca5303", "text": "read me back what I wrote yesterday", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3cc04b43e5", "text": "What did we talk about last time?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "956c7d31d2", "text": "pull up my notes about sleep", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "645418e4e9", "text": "what have I said about my parents before?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a03c9db96f", "text": "show me what I wrote last Tuesday", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "899dd6c73d", "text": "find my entries about exams", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "c0f9691d18", "text": "what was my last journal page about?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "256e022152", "text": "did I ever talk about feeling lonely after moving? find it", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "690a1b3248", "text": "look up what I said about my manager", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "6c5b1fdc44", "text": "remind me what I wrote about the argument with my friend", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "80824e9463", "text": "can I see my journal pages from this month?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "22eba06dc3", "text": "what did I write a year ago about work?", "kind": "read", "expected_tool": "journal_search", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "07d0401a09", "text": "How has my mood been over the last two weeks?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "11ae160ee0", "text": "how have I been feeling lately?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "026aa91183", "text": "what feelings keep coming up for me this month?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "fe5e006f9f", "text": "can you show me my mood this week", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "c8ad8c9016", "text": "have I been more anxious recently?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "84d49145b5", "text": "what's my emotional trend been like?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "31c925c9b8", "text": "show me how my feelings changed over the past month", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "377fd10be6", "text": "how was I doing emotionally last week?", "kind": "read", "expected_tool": "feelings_over_time", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "9f560137f2", "text": "what's in my jar?", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a29198ea5c", "text": "what helped me last time I felt like this?", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "b7cf84352b", "text": "show me the things that helped", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "b12043016e", "text": "can you list my jar of good things", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "038877ebcd", "text": "remind me what usually helps me", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "d13bdcd77b", "text": "what did I keep in my jar?", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a22948be9a", "text": "read me my things that helped", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "7526efd423", "text": "what coping things have I saved?", "kind": "read", "expected_tool": "jar_list", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "ab3cbcc131", "text": "where am I in my journey?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "90b9559dea", "text": "what step am I on?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "f4027e3a25", "text": "which journey am I doing right now?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "8a78b04cff", "text": "what's my next step?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "c571c04a76", "text": "how far along am I in the sleep journey?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "bcd806e825", "text": "have I finished any journeys?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "2dbe711730", "text": "what's the next part of my programme?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "99fc6245a0", "text": "remind me which step comes next", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "194dd6bbee", "text": "how many steps are left in my journey?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3c2ffa6f3f", "text": "log my sleep, about 5 hours", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "4ed8ef06eb", "text": "save this to my journal: I called my mum today", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "435ec667b9", "text": "remind me at 9pm to stretch", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "f5138ff01f", "text": "log my mood as rainy", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "5e36deef89", "text": "delete my last journal page", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "ac4eda6bf0", "text": "please note that the walk helped", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "efd4e6c12f", "text": "track that I slept 7 hours", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "7518c1621b", "text": "add 'breathing exercise' to my jar", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "be0dd8faf3", "text": "set a reminder for my therapy session on friday", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "63493d4c15", "text": "forget what I said about my ex", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "152071f42c", "text": "write down that I'm proud of today", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "0bd3b5d8ab", "text": "mark today as a stormy day", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "fcc0f4f13e", "text": "remove my mood history", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "8f2d15de68", "text": "can you save that last thing I said", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a3565e7f82", "text": "remind me tomorrow to drink water", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "d19bb26374", "text": "log that I woke up three times", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3ec6e665bc", "text": "start the sleep journey for me", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "31e25f2de2", "text": "clear my jar", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "240eb22ae0", "text": "put this in my journal: work was hard", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "77c59c8a6c", "text": "record my mood, 6/10", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "4452b90cca", "text": "I slept badly again, maybe 4 hours", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "c32b629c34", "text": "I wrote in my diary as a kid and it never helped", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "9c23cc691c", "text": "my therapist wants me to keep a mood journal", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "f4b9e86414", "text": "I keep forgetting things and it scares me", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "7550207ee3", "text": "only got 3 hours again, i'm wrecked", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "5e2dd69306", "text": "I don't know if journaling is for me", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "e9c80faa49", "text": "my mood has been all over the place", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3925657016", "text": "what's a good way to start journaling?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "e90a412095", "text": "is it normal to feel low every evening?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "0491ea4f59", "text": "how much sleep do I actually need?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "109224a13a", "text": "I deleted all my old photos of him last night", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "b5a70751e2", "text": "remembering last year makes me sad", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "082b2aed72", "text": "the walk by the sea really helped today", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "fdfbf26d96", "text": "I'm scared I'll forget my grandmother's voice", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "0da395ceb8", "text": "my sister always forgets my birthday", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "9c9098b8f5", "text": "hey, how's it going?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "652e5bf869", "text": "thanks, that helped", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "1af1b29c27", "text": "I feel like I'm not making progress", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "49365d141d", "text": "what's the point of these journeys anyway?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "ecb9fcbca9", "text": "I finished my exams today!", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "f0cf2a9a86", "text": "my friend keeps a gratitude jar, it's cute", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "62a2b3c480", "text": "I can't stop replaying the argument", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a6b78ac605", "text": "how do I stop scrolling in bed?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "8695668bb5", "text": "I want to feel better about myself", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "e1fc6d4989", "text": "work was brutal this week", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a1759866b7", "text": "I think talking here is helping", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "866d874ee0", "text": "I'm worried about my mum", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "ab1423c048", "text": "can you help me calm down?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3bda105e4f", "text": "I feel lonely in the evenings", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "2d96ec67ea", "text": "does tracking your mood actually help?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "e9a9932012", "text": "I used to love writing, I stopped", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "87c0087015", "text": "everything feels heavy today", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "a95dbfbfd1", "text": "I'm proud I went outside today", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "d9c8ce1900", "text": "what is a thought record?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "c7c3214213", "text": "my partner read my diary once and I felt awful", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "b3d48b1629", "text": "I keep waking up at 3am", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "fd81c09e7d", "text": "I'm tired of feeling tired", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "fb44a1d873", "text": "I had a good day for once", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "9fe95f058f", "text": "should I tell my boss I'm struggling?", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "5a028f11bb", "text": "I don't really know what helps me", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}

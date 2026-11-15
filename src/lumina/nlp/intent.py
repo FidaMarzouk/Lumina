@@ -15,7 +15,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from ..config import INTENT_AMBIGUOUS_BELOW, INTENT_MODEL_DIR
+from ..config import INTENT_ACTION_MIN_CONFIDENCE, INTENT_AMBIGUOUS_BELOW, INTENT_MODEL_DIR
 from .models import LazyModel
 
 
@@ -45,6 +45,10 @@ def classify(text: str) -> tuple[str, float, list[dict] | None]:
     probs = intent_classifier.predict_proba(vec)[0]
     classes = intent_classifier.classes_
     order = np.argsort(probs)[::-1]
+    # An action request routes the turn to the tools (A2), so it needs to be a confident one; otherwise the
+    # next most likely intent is used.  INTENT_ACTION_MIN_CONFIDENCE was chosen on the held-out action set.
+    if classes[order[0]] == "action_request" and probs[order[0]] < INTENT_ACTION_MIN_CONFIDENCE:
+        order = np.concatenate([order[1:], order[:1]])
     top, second = order[0], order[1]
     conf = float(probs[top])
     ambiguous = None

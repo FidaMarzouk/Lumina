@@ -42,6 +42,8 @@ NLP_DEVICE = os.getenv("NLP_DEVICE", "cpu").lower()
 # Intent classifier — trained (embeddings + logistic regression); see eval/runners/intent_classifier.py
 INTENT_MODEL_DIR      = MODELS_DIR / "intent" / "v2"   # Q3: + action_request, labels both LLMs agree on
 INTENT_AMBIGUOUS_BELOW = 0.45   # top-class probability below this → reported as ambiguous (top-2)
+INTENT_ACTION_MIN_CONFIDENCE = 0.6   # action_request below this → the next intent (A2; held-out action set:
+                                     # 35/40 requests kept, 1/40 near-misses and 1/300 real messages misread)
 INTENT_MODEL    = "facebook/bart-large-mnli"   # legacy zero-shot; used only until the trained model ships
 
 # Sentiment analysis
@@ -182,6 +184,13 @@ JOURNEY_STEP_MIN_TURNS  = 3      # user turns in a guided session before its ste
 SESSION_IDLE_HOURS      = 6      # an open session with no turn for this long is closed (summary + next step)
 SESSION_SWEEP_MINUTES   = 30     # how often the API looks for idle sessions
 JOURNEYS_DIR            = PROJECT_ROOT / "configs" / "journeys"
+
+# ── Read tools (lumina/agent; roadmap A2) ─────────────────────────────────────
+# On "act" turns of signed-in people (risk "none", no crisis in the last turns), a tool model may look up their
+# own notes: journal pages, feelings over time, the jar, journey progress.  Off until switched on.
+AGENT_TOOLS      = os.getenv("AGENT_TOOLS", "0") != "0"
+AGENT_MODEL      = os.getenv("AGENT_MODEL", "qwen2.5:7b")    # chose tools far better than llama3.1 (evaluation.md)
+AGENT_TIMEOUT_S  = float(os.getenv("AGENT_TIMEOUT_S", "30"))
 
 # ── Turn traces (lumina/observability.py) ─────────────────────────────────────
 # Per turn: stage timings, safety outcome, reply path, guard reasons.  No text and no user or session id; a

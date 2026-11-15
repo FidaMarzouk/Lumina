@@ -43,7 +43,7 @@ re-training the intent classifier without them, and replacing them in the evalua
 | `silver.jsonl` | Training labels from **Llama 3.1 8B** (local, temperature 0), following the definitions in `chatbot/nlp/intent_taxonomy.py` (`silver_label.py`). Machine-generated and unreviewed. |
 | `gold.jsonl` | **300** held-out messages, stratified by source (seed 2026), labelled independently by Claude (Opus 5.5) using the same definitions. **40 are flagged `ambiguous`.** Reviewed by the user on 2026-10-12 (ambiguous items set to `venting`). Never used for training or model selection. |
 | `silver_qwen.jsonl` | Second set of training labels for the same pool, from **Qwen 2.5 7B** with the same prompt and the 8-intent taxonomy (`silver_label.py --model qwen2.5:7b --out …`, 2026-11-14). Training (v2) keeps only messages where it agrees with `silver.jsonl`. Machine-generated and unreviewed. |
-| `actions_train.jsonl` | **627 generated** training examples (`generate_actions.py`, Qwen 2.5 7B, temperature 0.9, 2026-11-14): `action_request` messages across six kinds of action and five writing styles, plus near-misses on the same topics labelled with the intent they were written as. Silver quality: some are mislabelled (e.g. a look-up filed as a log). Items within cosine 0.85 of a test item were dropped. |
+| `actions_train.jsonl` | **757 generated** training examples (`generate_actions.py`, Qwen 2.5 7B, temperature 0.9, 2026-11-15): `action_request` messages across nine kinds of action (six from Q3, plus look-ups of the jar, journeys and feelings added in A2) and five writing styles, plus near-misses on the same topics labelled with the intent they were written as. Silver quality: some are mislabelled (e.g. a look-up filed as a log). Items within cosine 0.85 of a test item were dropped. |
 | `gold_actions.jsonl` | **80 hand-written** test items (Claude, 2026-11-14): 40 action requests (journal, sleep, mood, reminders, look-ups, deletions, some wrapped in feelings or typos) and 40 near-misses with their true intent. Written before the training examples were generated. Status: *pending user review*. Never used for training or model selection. |
 
 Pool sources:
@@ -79,6 +79,13 @@ Known gaps: only 98 FAQ questions, so the `information` and `help_seeking` class
 | Origin | Written by Claude (Fable 5) on 2026-11-13 as parallel versions of the same 25 meanings. **Reviewed by the user (native speaker) on 2026-11-14**, no changes needed. No real user text. |
 | Our use | `eval/runners/safety_multilingual.py`: crisis recall, crisis-or-elevated recall, crisis flag rate on ordinary messages and the number scored as prompt injection, per writing system, with and without language handling. |
 | Biases | Tiny, explicit and parallel: every crisis item is a clear statement. Real messages mix languages, are longer and are often indirect, so real recall will be lower. Use it as a regression check. |
+
+## Read-tool cases (`data/eval/agent_tools/cases.jsonl`)
+| | |
+|---|---|
+| Content | **100** English messages: 40 look-ups with the read tool that should answer them (journal 15, feelings 8, jar 8, journey 9), 20 write requests that no read tool should answer, and 40 plain messages on the same topics. |
+| Origin | Written by Claude (Fable 5.1) on 2026-11-14. **Status: not yet reviewed by the user.** No real user text. |
+| Our use | `eval/runners/agent_tools.py`, end to end against a seeded synthetic account. Failures on this set were read and fixed (A2), so its numbers are optimistic. |
 
 ## Synthetic histories (`src/lumina/memory/synthetic.py`)
 | | |

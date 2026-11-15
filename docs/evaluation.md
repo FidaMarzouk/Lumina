@@ -222,6 +222,12 @@ or small talk. v2 adds `action_request` and changes the training labels.
   tools exist, an action request gets an honest "I can't do that yet" reply that never claims anything was
   saved, and that prompt tells the LLM to ignore it when the message is not really a request: in three tries,
   that message got an ordinary, caring reply. With the tools (A2), the tool-calling model makes the final call.
+- **Retrained in A2** with generated look-up requests (the jar, journeys, feelings), which v2's first data
+  lacked: the router had sent "what's in my jar?" to plain talk. On the hand-written tests: real messages 0.620,
+  action items 0.731, both 0.669 (still above the 0.65 target; slightly below the figures above). An action
+  request now also needs a probability of at least 0.6 (`INTENT_ACTION_MIN_CONFIDENCE`), chosen on the held-out
+  action items: 35 of 40 requests kept, 1 of 40 near-misses and 1 of the 300 real messages misread. Below it the
+  next most likely intent is used.
 - **Found on the way:** "show me what I wrote last Tuesday" is flagged as prompt injection by the injection
   classifier, so it gets the injection reply. It must be handled before the read tools ship (A2).
 - The action test items were written by Claude and are **pending the user's review**.
@@ -304,6 +310,45 @@ Safety outcome, analysis, model and seed are the same for both versions.
 - Known gaps: information answers still run long (8 of 10 over their 5-sentence budget); the model sometimes
   gives advice nobody asked for on "sharing" messages; and a first draft of the prompts had one reply replaced
   by Llama Guard as "specialized advice" (body image), a guard false alarm.
+
+## 4c. Read tools (A2)
+On an "act" turn of a signed-in person, a tool model chooses read tools that look up their own notes
+(`src/lumina/agent/`): `journal_search` (session summaries, by meaning or recency), `feelings_over_time` (the
+feelings *detected* in their conversations, labelled as such), `jar_list` and `journey_status`. Tools never take
+a user id (it comes from the session), arguments are validated, every text taken from stored notes passes the
+injection check before it reaches the reply prompt, and the usual reply model writes the answer from the results.
+They are **off unless `AGENT_TOOLS=1`**.
+
+Boundaries: no tools for guests, in a crisis, or in the turns after one; at "elevated" risk only the jar and
+journey progress are offered (journal pages and feelings can bring back hard material). An action request that
+the injection classifier flags ("read me back what I wrote yesterday" scores 1.000) goes to the tool model; if it
+picks a read tool the turn proceeds as a look-up, otherwise it stays an injection turn.
+
+`eval/runners/agent_tools.py`: 100 hand-written messages through the full pipeline against a seeded account
+(pending the user's review): 40 look-ups, 20 write requests (writing is A3) and 40 plain messages on the same
+topics.
+
+| | First run | **After fixes** |
+|---|---|---|
+| Look-ups answered with the right tool | 14 / 40 | **31 / 40** (feelings 8/8, jar 7/8, journey 7/9, journal 9/15) |
+| Write requests whose reply claims it was done | 0 / 20 | **0 / 20** |
+| Plain messages that ran a tool | 0 / 40 | **0 / 40** |
+| Turn time with the tool step (median) | 13.2 s | 13.5 s (3.2 s without) |
+
+**How to read this:**
+- **Which tool model.** Choosing tools directly on all 100 messages: Qwen 2.5 7B picked the right one for 38 of
+  40 look-ups and a tool for 3 of 60 other messages; Llama 3.1 8B and Llama 3.2 3B picked one for 54 and 56 of
+  those 60 ("log my sleep" → journal_search). Only Qwen is usable.
+- **The fixes, all found by reading the failures:** the injection check scored each result's JSON (0.975 on
+  feelings) and dropped it, so only stored text is checked now; the intent router missed jar, journey and
+  feelings look-ups (retrained, above); a look-up for "yesterday" found nothing when the last page was 30 hours
+  old, so the most recent page is now returned too; replies leaked "your journal search… last 1 days".
+- **Remaining misses:** 6 of the 9 are look-ups the router sends to plain talk ("find my entries about exams");
+  one asked to "start the sleep journey", which only a write tool can do, and got journey_status.
+- **Cost: about 10 s per look-up.** Qwen 2.5 7B and Llama 3.1 8B do not fit on the 8 GB GPU together, so Ollama
+  swaps them on every look-up (the tool choice itself takes 0.08 s once loaded).
+- Once, with nothing found ("what have I said about my parents?"), the reply hedged that they had "mentioned
+  them briefly a long time ago": the prompt forbids inventing, but the 8B model can still slip.
 
 ## 5. Speed and routing (turn traces)
 Every turn leaves a trace (`src/lumina/observability.py`) in its own SQLite file, `data/user/traces.db`: time

@@ -31,7 +31,7 @@ from .config import PROJECT_ROOT, TRACE_DB_PATH, TRACE_RETENTION_DAYS, TRACES_EN
 
 log = logging.getLogger(__name__)
 
-STAGES = ("safety", "analysis", "memory", "prompt", "first_text", "llm", "output_guard", "total")
+STAGES = ("safety", "analysis", "memory", "tools", "prompt", "first_text", "llm", "output_guard", "total")
 
 # Every column is a label, a number or a list of labels.  Adding a free-text column would break the
 # promise above: `test_traces_hold_no_text` checks the schema.
@@ -54,13 +54,15 @@ CREATE TABLE IF NOT EXISTS turn_traces (
     degraded        TEXT NOT NULL DEFAULT '[]',
     tokens_in       INTEGER,
     tokens_out      INTEGER,
-    ms              TEXT NOT NULL DEFAULT '{}'
+    ms              TEXT NOT NULL DEFAULT '{}',
+    tools           TEXT NOT NULL DEFAULT '[]'
 );
 CREATE INDEX IF NOT EXISTS turn_traces_ts ON turn_traces(ts);
 """
 _COLUMNS = ("signed_in", "path", "risk_level", "crisis_subtype", "injection", "language", "reader", "intent",
-            "intent_category", "rag_hits", "replaced", "guard_reasons", "degraded", "tokens_in", "tokens_out")
-_JSON = {"guard_reasons", "degraded", "ms"}
+            "intent_category", "rag_hits", "replaced", "guard_reasons", "degraded", "tokens_in", "tokens_out",
+            "tools")
+_JSON = {"guard_reasons", "degraded", "ms", "tools"}
 
 
 class Stopwatch:
@@ -90,6 +92,8 @@ class TraceStore:
             self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._conn() as c:
             c.executescript(_SCHEMA)
+            if "tools" not in {r[1] for r in c.execute("PRAGMA table_info(turn_traces)")}:   # traces from before A2
+                c.execute("ALTER TABLE turn_traces ADD COLUMN tools TEXT NOT NULL DEFAULT '[]'")
 
     @contextmanager
     def _conn(self):
@@ -105,7 +109,7 @@ class TraceStore:
         row = {k: fields.get(k) for k in _COLUMNS}
         for k in ("signed_in", "injection", "replaced"):
             row[k] = int(bool(row[k]))
-        for k in ("guard_reasons", "degraded"):
+        for k in ("guard_reasons", "degraded", "tools"):
             row[k] = json.dumps(sorted(row[k] or []))
         ts = (now or datetime.now(timezone.utc)).isoformat(timespec="seconds")
         with self._conn() as c:
@@ -190,6 +194,7 @@ def summarise(rows: list[dict]) -> dict:
         "intent": dict(Counter(r["intent"] for r in rows if r["intent"]).most_common()),
         "replaced_by_output_guard": round(sum(r["replaced"] for r in llm_rows) / len(llm_rows), 3) if llm_rows else None,
         "guard_reasons": dict(Counter(g for r in rows for g in r["guard_reasons"]).most_common()),
+        "tools": dict(Counter(t for r in rows for t in r.get("tools", [])).most_common()),
         "turns_with_a_degraded_layer": round(sum(bool(r["degraded"]) for r in rows) / n, 3),
         "degraded_layers": dict(Counter(d for r in rows for d in r["degraded"]).most_common()),
         "tokens_per_reply": ({"in_p50": statistics.median(r["tokens_in"] for r in tokens),

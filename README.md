@@ -115,6 +115,7 @@ python eval/runners/insight_quality.py     # weekly insights for synthetic users
 python eval/runners/journey_recommendation.py  # why pain-point labels were retired; journey matching on synthetic histories
 python eval/runners/reply_quality.py generate  # reply prompts before/after on 59 real messages + reports/reply_rating.html (blind)
 python eval/runners/reply_quality.py score ratings.json   # add your blind ratings from that page
+python eval/runners/agent_tools.py         # read tools end to end: 100 messages, seeded account (live LLMs)
 python eval/runners/latency.py             # time per stage of a turn, scripted messages (live LLM) → turn_traces.json
 python -m lumina.observability             # the same summary from real traffic (last 7 days of traces)
 python -m lumina.reporting                 # re-render reports/lumina_report.html after any of the above

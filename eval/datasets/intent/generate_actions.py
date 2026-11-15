@@ -33,6 +33,11 @@ ACTIONS = {
     "reminder": "asks the app to remind them to do something at a time or on a day",
     "look_up": "asks the app to show, read back or look up what they wrote, logged or tracked before",
     "forget": "asks the app to delete, remove or forget something it keeps about them",
+    # A2: the read tools answer these; v2's first training data had almost none, so the router sent "what's in
+    # my jar?" or "what step am I on?" to plain talk (eval/reports/agent_tools.json).
+    "look_up_jar": "asks the app to show what is in their jar of things that helped, or what helped them before",
+    "look_up_journey": "asks the app which guided journey or step they are on, or what their next step is",
+    "look_up_feelings": "asks the app how their mood or feelings have been over recent days or weeks",
 }
 STYLES = {
     "curt": "short and to the point, like a command typed on a phone",
@@ -69,7 +74,11 @@ def ask(client: httpx.Client, model: str, instruction: str, n: int) -> list[str]
             f'Return JSON only: {{"messages": [{n} strings]}}')},
             {"role": "user", "content": instruction}]})
     r.raise_for_status()
-    out = json.loads(r.json()["message"]["content"]).get("messages", [])
+    try:
+        out = json.loads(r.json()["message"]["content"]).get("messages", [])
+    except (json.JSONDecodeError, AttributeError):       # one malformed answer: skip it, don't lose the run
+        print("  (skipped a malformed answer)", flush=True)
+        return []
     return [" ".join(str(m).split()) for m in out if isinstance(m, str) and 3 <= len(m) <= 300]
 
 
