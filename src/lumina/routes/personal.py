@@ -179,3 +179,51 @@ def keep_in_jar(item_id: str, user: dict = Depends(current_user), store: Store =
 def remove_from_jar(item_id: str, user: dict = Depends(current_user), store: Store = Depends(get_store)):
     if not store.delete_jar_item(item_id, user["id"]):
         raise HTTPException(status_code=404, detail="Not found.")
+
+
+# ── saves the person confirms, and their own entries (A3) ────────────────────
+@router.post("/actions/{action_id}/confirm")
+def confirm_action(action_id: str, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    """Run a save Lumina proposed in the chat.  Only the owner can confirm it, once, within PENDING_ACTION_MINUTES."""
+    from ..agent import tools
+    from ..memory.store import utcnow
+    pending = store.take_pending(action_id, user["id"])
+    if pending is None or pending["tool"] not in tools.WRITE_TOOLS:
+        raise HTTPException(status_code=404, detail="That is no longer waiting to be saved. Please ask again.")
+    ctx = tools.ToolContext(store, user["id"], bool(user["memory_enabled"]), utcnow())
+    item = tools.WRITE_TOOLS[pending["tool"]].run(ctx, pending["args"])
+    return {"done": True, "tool": pending["tool"], "item": item}
+
+
+@router.post("/actions/{action_id}/cancel", status_code=204)
+def cancel_action(action_id: str, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    store.take_pending(action_id, user["id"])          # nothing is saved; unknown or expired is fine too
+
+
+
+@router.get("/journal/entries")
+def journal_entries(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return {"entries": store.journal_entries(user["id"])}
+
+
+@router.get("/logs/sleep")
+def sleep_logs(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return {"nights": store.sleep_logs(user["id"])}
+
+
+@router.get("/logs/mood")
+def mood_logs(user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return {"days": store.mood_logs(user["id"])}
+
+
+@router.delete("/journal/entries/{item_id}", status_code=204)
+def delete_journal_entry(item_id: str, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    if not store.delete_own("journal", item_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Not found.")
+
+
+@router.delete("/logs/{kind}/{item_id}", status_code=204)
+def delete_log(kind: Literal["sleep", "mood"], item_id: str, user: dict = Depends(current_user),
+               store: Store = Depends(get_store)):
+    if not store.delete_own(kind, item_id, user["id"]):
+        raise HTTPException(status_code=404, detail="Not found.")

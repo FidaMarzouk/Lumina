@@ -1,9 +1,10 @@
 import InsightChain from '../insights/InsightChain'
+import ProposalSlip from './ProposalSlip'
 import { SpeakerIcon } from '../ui/Icons'
 
 // Lumina's replies are ink straight on the page; the person's own words are butter-coloured slips.
 // `signed` adds Lumina's handwritten name above the opening line.
-function MessageBubble({ message, onListen, signed = false }) {
+function MessageBubble({ message, onListen, onProposal, signed = false }) {
   const isUser = message.role === 'user'
   return (
     // aria-busy while a reply streams in: screen readers read it once, when it is complete.
@@ -13,6 +14,9 @@ function MessageBubble({ message, onListen, signed = false }) {
       {signed && !isUser && <span className="hand msg-who" aria-hidden="true">Lumina</span>}
       <div className="msg-text">{message.text}</div>
       {!isUser && message.insight && <InsightChain insight={message.insight} />}
+      {!isUser && message.proposal && onProposal && (
+        <ProposalSlip proposal={message.proposal} onAnswer={save => onProposal(message.id, save)} />
+      )}
       {!isUser && onListen && !message.streaming && (
         <button type="button" className="msg-listen" onClick={() => onListen(message.text)}>
           <SpeakerIcon /><span>Listen</span>

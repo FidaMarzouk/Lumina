@@ -7,6 +7,7 @@ Checks (structural + model; no phrase lists):
      On crisis turns, emergency short codes too ("988", "15"): the model names another country's line.
   2. medication dosages  (number + dose unit)
   3. Llama Guard on the reply: self-harm content (S11) or specialized medical advice (S6)
+  4. while a save waits for the person's Save button: a reply saying it is already saved (claims_done)
 
 A violation replaces the reply with a safe, risk-appropriate template.  The reasons are
 returned for logging/evaluation (never the text itself).
@@ -65,6 +66,17 @@ _DOSE =re.compile(r"\b\d+(?:[.,]\d+)?\s?(?:mg|milligrams?|mcg|micrograms?|ml|mil
                    re.IGNORECASE)
 _BLOCKING_GUARD = {"suicide_self_harm", "specialized_advice"}
 
+# A first-person completion claim ("I've added", "has been saved", "Done"): checked only while a save is waiting
+# for the person's Save button (A3), when nothing has been saved and saying otherwise is a false promise about
+# their own data.  The verbs are the actions the write tools offer, not a list of topics or intents.
+_DONE = re.compile(r"\b(?:i'?ve|i have|i just|i'?ve gone ahead and)\s+(?:\w+\s+)?(?:saved|logged|noted|added|"
+                   r"recorded|tracked|marked|written|put|kept|stored)\b(?!\s+together)|\b(?:has|have|is|was) (?:been |now )?"
+                   r"(?:saved|logged|added|recorded|tracked|stored)\b|^\s*done\b", re.IGNORECASE | re.MULTILINE)
+
+
+def claims_done(text: str) -> bool:
+    return bool(_DONE.search(text))
+
 
 @dataclass(frozen=True)
 class GuardedReply:
@@ -84,7 +96,9 @@ def _fallback(crisis_subtype: str, crisis: bool) -> str:
 
 
 def check(reply: str, *, user_message: str, crisis: bool, crisis_subtype: str,
-          response_guard: Callable[[list[dict]], object] | None = None) -> GuardedReply:
+          response_guard: Callable[[list[dict]], object] | None = None,
+          pending_save: str | None = None) -> GuardedReply:
+    """`pending_save`: the summary of a save waiting for the person's Save button, if any."""
     reasons: list[str] = []
     if has_phone_number(reply):
         reasons.append("phone_number")
@@ -98,4 +112,6 @@ def check(reply: str, *, user_message: str, crisis: bool, crisis_subtype: str,
             reasons += [f"guard:{c}" for c in sorted(_BLOCKING_GUARD & set(g.categories))]
     if reasons:
         return GuardedReply(_fallback(crisis_subtype, crisis), True, tuple(sorted(set(reasons))))
+    if pending_save and claims_done(reply):
+        return GuardedReply(templates.proposal_reply(pending_save), True, ("claimed_save",))
     return GuardedReply(reply, False, ())

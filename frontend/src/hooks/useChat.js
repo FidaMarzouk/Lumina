@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { cancelAction, confirmAction } from '../api/actions.js'
 import { endSession, sendMessage, startSession, streamMessage } from '../api/chat.js'
 import { withWeather } from '../components/chat/weather.js'
 import { moreUrgent } from '../components/ui/helpLines.js'
@@ -119,7 +120,11 @@ export function useChat(persona = 'listener', { token = null, active = false } =
       if (typeof response.reply !== 'string' || !response.reply) throw new Error('Empty reply from server')
 
       if (response.crisis_flag) setCrisis(c => moreUrgent(c, response.crisis_subtype || 'ideation'))
-      const final = { text: response.reply, streaming: false, isCrisis: response.crisis_flag, insight: response.insight ?? null }
+      // A save Lumina prepared waits under the reply for the person's Save / Not now ('waiting' → 'saving' →
+      // 'saved' | 'dismissed' | 'gone').
+      const proposal = response.proposal ? { ...response.proposal, state: 'waiting' } : null
+      const final = { text: response.reply, streaming: false, isCrisis: response.crisis_flag,
+                      insight: response.insight ?? null, proposal }
       setMessages(prev => (prev.some(m => m.id === replyId)
         ? prev.map(m => (m.id === replyId ? { ...m, ...final } : m))
         : [...prev, message('ai', response.reply, { id: replyId, ...final })]))
@@ -132,6 +137,27 @@ export function useChat(persona = 'listener', { token = null, active = false } =
       setIsTyping(false)
     }
   }, [persona, openSession])
+
+  // The person's answer to a prepared save. Nothing is written unless they press Save.
+  const resolveProposal = useCallback(async (messageId, save) => {
+    const target = messagesRef.current.find(m => m.id === messageId)?.proposal
+    if (!target || target.state !== 'waiting' || !token) return
+    const setState = (state, extra = {}) => setMessages(prev => prev.map(m => (
+      m.id === messageId && m.proposal ? { ...m, proposal: { ...m.proposal, state, ...extra } } : m)))
+    if (!save) {
+      setState('dismissed')
+      cancelAction(token, target.id).catch(() => { /* it expires on its own */ })
+      return
+    }
+    setState('saving')
+    try {
+      await confirmAction(token, target.id)
+      setState('saved')
+    } catch (err) {
+      if (err.status === 404) setState('gone', { note: err.detail })
+      else setState('waiting', { note: "That didn't save. Check your connection and try again." })
+    }
+  }, [token])
 
   // The inner-weather check-in: retunes the opening line, until the person has said anything.
   const setWeather = useCallback(weather => {
@@ -166,5 +192,5 @@ export function useChat(persona = 'listener', { token = null, active = false } =
   }, [resetSession])
 
   return { messages, isTyping, crisis, error, session, sendUserMessage, resetSession, startWith,
-           setWeather, addLuminaLine, endConversation: closeSession }
+           setWeather, addLuminaLine, resolveProposal, endConversation: closeSession }
 }

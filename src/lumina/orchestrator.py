@@ -92,6 +92,7 @@ class TurnResult:
     injection_detected: bool
     debug: dict = field(default_factory=dict)        # never sent to the client
     insight: dict | None = None                      # in-session thought → feeling → behaviour link, when offered
+    proposal: dict | None = None                     # a save waiting for the person's yes: {"id", "tool", "summary"}
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -254,7 +255,7 @@ def _prepare(message: str, history: list | None, persona: str, session: SessionC
     with sw.stage("analysis"):          # only the wait left after the assessment
         analysis = analysis_future.result()
     turn_route = route(safety, analysis[0]["intent"])
-    prompt_safety, tool_names = safety, []
+    prompt_safety, tool_names, proposal = safety, [], None
     offered = _tools_allowed(safety, session)
     if offered and (turn_route == "act" or (turn_route == "injection" and analysis[0]["intent"] == "action_request")):
         with sw.stage("tools"):
@@ -262,15 +263,20 @@ def _prepare(message: str, history: list | None, persona: str, session: SessionC
                                                                   session.memory_enabled, utcnow(), embed=_embed),
                                  allowed=offered)
         if run.used:
-            tool_names = [c["name"] for c in run.calls]
-            context = {**(context or {}), "tool_results": agent_loop.prompt_block(run)}
+            tool_names = [c["name"] for c in run.calls] + ([run.proposal["tool"]] if run.proposal else [])
+            if run.calls:
+                context = {**(context or {}), "tool_results": agent_loop.prompt_block(run)}
+            if run.proposal:
+                context = {**(context or {}), "proposal": run.proposal["summary"]}
+                proposal = run.proposal
             if turn_route == "injection":
-                # Read tools only return the person's own notes, so a look-up the injection classifier misread
-                # goes ahead.  The result still reports injection_detected, and the reply is never streamed.
+                # Read tools only return the person's own notes, and a save waits for their own Save button, so
+                # a request the injection classifier misread goes ahead.  The result still reports
+                # injection_detected, and the reply is never streamed.
                 turn_route, prompt_safety = "act", replace(safety, injection=False)
     with sw.stage("prompt"):            # includes knowledge retrieval
         prompt = build_prompt(message, prompt_safety, analysis, persona=persona, memory=context)
-    prompt["tools"] = tool_names
+    prompt["tools"], prompt["proposal"] = tool_names, proposal
     # The prompt builder decides its category from the same inputs; a disagreement is a bug in one of them.
     # Logged, not raised: the prompt builder applies safety on its own, and a failed turn helps nobody.  The
     # golden-turn tests check that they agree.
@@ -288,7 +294,7 @@ def _tools_allowed(safety: SafetyAssessment, session: SessionContext | None) -> 
     if not AGENT_TOOLS or session is None or safety.is_crisis or safety.signals.get("history_crisis"):
         return ()
     if safety.risk_level == "none":
-        return tuple(agent_tools.READ_TOOLS)
+        return tuple(agent_tools.ALL_TOOLS)
     if safety.risk_level == "elevated":
         return agent_tools.ELEVATED_SAFE
     return ()
@@ -307,6 +313,11 @@ def _llm_unavailable_reply(safety: SafetyAssessment) -> str:
     return templates.unavailable_reply(crisis=False)
 
 
+def _pending_summary(p: _Prepared) -> str | None:
+    proposal = p.prompt.get("proposal")
+    return proposal["summary"] if proposal else None
+
+
 def _whole_reply(p: _Prepared, sw: observability.Stopwatch, usage: dict) -> tuple[str, str, tuple, bool]:
     """The reply written in one go and checked whole: (reply, path, guard reasons, replaced)."""
     safety = p.safety
@@ -317,7 +328,8 @@ def _whole_reply(p: _Prepared, sw: observability.Stopwatch, usage: dict) -> tupl
         model_check = _response_guard() if safety.risk_level != "none" else None
         with sw.stage("output_guard"):
             guarded = output_guard.check(reply, user_message=p.message, crisis=safety.is_crisis,
-                                         crisis_subtype=safety.crisis_subtype, response_guard=model_check)
+                                         crisis_subtype=safety.crisis_subtype, response_guard=model_check,
+                                         pending_save=_pending_summary(p))
         if guarded.replaced:
             log.warning("Output guard replaced the reply — reasons=%s", ",".join(guarded.reasons))
         return guarded.text, "llm", guarded.reasons, guarded.replaced
@@ -351,7 +363,8 @@ def _stream_reply(p: _Prepared, sw: observability.Stopwatch, usage: dict, outcom
     outcome.update(reply="", path="llm_stream", reasons=(), replaced=False)
 
     def check(text: str):
-        return output_guard.check(text, user_message=p.message, crisis=False, crisis_subtype="none")
+        return output_guard.check(text, user_message=p.message, crisis=False, crisis_subtype="none",
+                                  pending_save=_pending_summary(p))
 
     try:
         with sw.stage("llm"):
@@ -419,4 +432,5 @@ def _finish(p: _Prepared, reply: str, path: str, reasons: tuple, replaced: bool)
                "intent_category": prompt["intent_category"], "rag_hits": prompt["rag_hits"],
                "memory": sorted(p.context) if p.context else []},
         insight=insight,
+        proposal=prompt.get("proposal"),
     )

@@ -37,6 +37,7 @@ llm = [
 api = [
     "fastapi>=0.111",
     "uvicorn[standard]>=0.30",
+    "cryptography>=44",      # journal entries and mood notes are encrypted at rest (lumina/memory/crypto.py)
 ]
 voice = [
     "kokoro>=0.9.4",         # Kokoro-82M (Apache-2.0): local, natural text-to-speech

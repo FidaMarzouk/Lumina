@@ -81,7 +81,7 @@ function GuidedBar({ step, onLeave }) {
   )
 }
 
-function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSuggest, onLeaveGuided, onWeather, onTear, helped = [], night = false }) {
+function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSuggest, onLeaveGuided, onWeather, onTear, onProposal, helped = [], night = false }) {
   const end = useRef(null)
   const guided = session?.mode === 'guided' && session.step
   const notStarted = messages.length === 1 && !isTyping
@@ -100,7 +100,8 @@ function ChatWindow({ messages, isTyping, onListen, session, onStarter, onSugges
       <div className="transcript" role="log" aria-live="polite" aria-label="Conversation with Lumina">
         <div className="transcript-inner">
           {notStarted && onWeather && <WeatherCheck value={messages[0].weather ?? null} onChange={onWeather} />}
-          {messages.map((m, i) => <MessageBubble key={m.id} message={m} onListen={onListen} signed={i === 0} />)}
+          {messages.map((m, i) => <MessageBubble key={m.id} message={m} onListen={onListen} signed={i === 0}
+                                                         onProposal={onProposal} />)}
           {notStarted && HARD_DAYS.includes(messages[0].weather) && helped.length > 0 && <JarTip items={helped} />}
           {/* "Thinking" until the first sentence of the reply arrives */}
           {isTyping && !messages[messages.length - 1]?.streaming && <TypingIndicator />}

@@ -15,6 +15,19 @@ def user_store(tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def data_key(monkeypatch, tmp_path):
+    """Every test encrypts with its own throwaway key (never creates data/user/data.key)."""
+    from cryptography.fernet import Fernet
+
+    from lumina.memory import crypto
+    monkeypatch.setenv("LUMINA_DATA_KEY", Fernet.generate_key().decode())
+    monkeypatch.setattr(crypto, "DATA_KEY_PATH", tmp_path / "data.key")
+    crypto.reset_for_tests()
+    yield
+    crypto.reset_for_tests()
+
+
+@pytest.fixture(autouse=True)
 def trace_store(tmp_path):
     """Every test gets its own empty turn-trace database (never data/user/traces.db)."""
     from lumina.observability import TraceStore, set_default_traces

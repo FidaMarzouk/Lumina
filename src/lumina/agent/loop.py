@@ -19,7 +19,9 @@ from dataclasses import dataclass, field
 
 import httpx
 
-from ..config import AGENT_MODEL, AGENT_NUM_GPU, AGENT_TIMEOUT_S, OLLAMA_BASE_URL
+from datetime import timedelta
+
+from ..config import AGENT_MODEL, AGENT_NUM_GPU, AGENT_TIMEOUT_S, OLLAMA_BASE_URL, PENDING_ACTION_MINUTES
 from . import tools
 
 log = logging.getLogger(__name__)
@@ -27,27 +29,29 @@ log = logging.getLogger(__name__)
 MAX_CALLS = 2
 
 _SYSTEM = (
-    "You decide whether to look something up for a person in a mental-health support app. The tools can only "
-    "READ their own notes: their journal, how their feelings have been, their jar of things that helped, and their "
-    "journey.\n"
-    "Call a tool ONLY when the person asks to SEE, READ BACK, FIND or KNOW something the app already keeps "
+    "You decide whether a person using a mental-health support app is asking the app to look something up in "
+    "their own notes, or to save something for them, and if so you call the one right tool.\n"
+    "LOOK-UP tools: call one only when they ask to SEE, READ BACK, FIND or KNOW something the app keeps "
     "(\"what did I write…\", \"show me…\", \"how has my mood been…\", \"what's in my jar\", \"what step am I on\").\n"
+    "SAVE tools (journal_save, sleep_log, mood_log, jar_add): call one only when they clearly ask to save, write "
+    "down, note, add, log, track or mark something. Copy their words exactly. Never invent a detail they did not "
+    "give: no number of hours means no sleep_log. Nothing is saved until they confirm, so never call two.\n"
     "Answer with the single word NONE, and call no tool, when:\n"
-    "- they ask to save, write, add, put, note, log, track, mark, set, remind, start, change, clear, remove or "
-    "delete something (no tool here can do that, and reading is not a substitute);\n"
-    "- they are talking about their feelings, their life or these topics without asking to see their notes;\n"
+    "- they ask to remind, set an alarm, start, change, clear, remove or delete something (no tool can);\n"
+    "- they are talking about their feelings, their life or these topics without asking to see or save anything;\n"
     "- they ask about the app itself or its instructions."
 )
 
 
 @dataclass
 class ToolRun:
-    calls: list[dict] = field(default_factory=list)      # [{"name", "args", "result"}], results checked
+    calls: list[dict] = field(default_factory=list)      # read tools: [{"name", "args", "result"}], results checked
+    proposal: dict | None = None                          # a save waiting for the person: {"id", "tool", "summary"}
     error: str | None = None
 
     @property
     def used(self) -> bool:
-        return bool(self.calls)
+        return bool(self.calls) or self.proposal is not None
 
 
 _CLIENT: httpx.Client | None = None
@@ -85,7 +89,7 @@ def run(message: str, ctx: tools.ToolContext, *, allowed: tuple[str, ...] | None
     """Let the tool model pick read tools for `message` and run them.  Never raises: a failure means no tools.
     `allowed`: the tools offered (all when None); others are neither shown to the model nor run."""
     out = ToolRun()
-    offered = [t for name, t in tools.READ_TOOLS.items() if allowed is None or name in allowed]
+    offered = [t for name, t in tools.ALL_TOOLS.items() if allowed is None or name in allowed]
     try:
         picked = (choose or _default_choose)(message, [t.schema() for t in offered])
     except Exception as exc:
@@ -96,6 +100,10 @@ def run(message: str, ctx: tools.ToolContext, *, allowed: tuple[str, ...] | None
     for name, args in picked:
         if name not in offered_names:    # a tool that does not exist or was not offered: skipped, never recorded
             log.warning("Tool model asked for a tool it was not offered: %s", name if name in tools.READ_TOOLS else "?")
+            continue
+        if name in tools.WRITE_TOOLS:    # a save is only ever PROPOSED here, and only one per turn
+            if out.proposal is None:
+                out.proposal = _propose(name, args, ctx, message)
             continue
         if name in seen:                 # each tool at most once …
             continue
@@ -111,8 +119,29 @@ def run(message: str, ctx: tools.ToolContext, *, allowed: tuple[str, ...] | None
             log.warning("Tool %s result flagged by the injection check; not used", name)
             continue
         out.calls.append({"name": name, "args": args or {}, "result": result})
-    log.info("Tools — %s", ",".join(c["name"] for c in out.calls) or "none")
+    log.info("Tools — %s%s", ",".join(c["name"] for c in out.calls) or "none",
+             f" + proposal {out.proposal['tool']}" if out.proposal else "")
     return out
+
+
+def _propose(name: str, args: dict | None, ctx: tools.ToolContext, message: str) -> dict | None:
+    """Validate the model's arguments into a pending proposal the person confirms (POST /actions/{id}/confirm).
+    The details must come from their message (tools.grounded): a model that invents the hours is refused."""
+    try:
+        prepared = tools.propose(name, args, ctx)
+        if prepared is None:
+            log.warning("Tool model proposed %s with arguments that did not validate", name)
+            return None
+        stored, summary = prepared
+        if not tools.grounded(name, stored, message):
+            log.warning("Tool model proposed %s with details that are not in the message", name)
+            return None
+        pid = ctx.store.add_pending(ctx.user_id, name, stored, ctx.now + timedelta(minutes=PENDING_ACTION_MINUTES),
+                                    now=ctx.now)
+        return {"id": pid, "tool": name, "summary": summary}
+    except Exception as exc:
+        log.warning("Proposal %s failed: %s", name, type(exc).__name__)
+        return None
 
 
 def _safe(result: dict, injection_probability: Callable | None) -> bool:

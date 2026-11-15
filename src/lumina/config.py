@@ -157,6 +157,10 @@ TTS_SAMPLE_RATE = 24000
 
 # ── Accounts (lumina/auth) ────────────────────────────────────────────────────
 USER_DB_PATH        = Path(os.getenv("LUMINA_USER_DB", str(DATA_DIR / "user" / "lumina.db")))   # not in git
+# Key for the person's own words (journal entries, mood notes; lumina/memory/crypto.py).  LUMINA_DATA_KEY wins;
+# otherwise a key is generated once into this file.  Not in git.  Losing it makes those entries unreadable.
+DATA_KEY_PATH       = Path(os.getenv("LUMINA_DATA_KEY_FILE", str(USER_DB_PATH.parent / "data.key")))
+PENDING_ACTION_MINUTES = 30    # a proposed save waits this long for the person's yes (A3)
 AUTH_TOKEN_TTL_DAYS = 30
 PASSWORD_MIN_CHARS  = 8
 LOGIN_MAX_ATTEMPTS  = 5        # per email + client address …

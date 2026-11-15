@@ -324,7 +324,7 @@ def test_length_budget_and_opening_rule_come_last(engines):
         assert "CONVERSATION STYLE" not in tail                       # persona comes before, not after
 
 
-def test_action_requests_get_an_honest_cannot_yet_reply_without_retrieval_or_memory(engines, monkeypatch):
+def test_action_requests_without_a_tool_result_get_an_honest_reply_without_retrieval_or_memory(engines, monkeypatch):
     class Fake:
         def query(self, q, top_k): raise AssertionError("an action request must not retrieve")
     monkeypatch.setattr(ee, "_RETRIEVER", Fake())
@@ -332,7 +332,8 @@ def test_action_requests_get_an_honest_cannot_yet_reply_without_retrieval_or_mem
     out = ee.build_prompt("log my sleep, 4 hours", SAFE, memory={"recalled": [{"when": "x", "summary": "s"}]})
     p = out["system_prompt"]
     assert out["intent_category"] == "action" and out["rag_hits"] == 0
-    assert "You cannot do any of that yet" in p and "Never say or imply that you saved" in p
+    assert "Nothing was prepared or looked up" in p and "Never say or imply that you saved" in p
+    assert "You cannot set reminders" in p and "Deleting is done by them in the app" in p
     assert "WHAT YOU REMEMBER" not in p and p.rstrip().endswith('Do not begin with "It sounds like".')
 
 

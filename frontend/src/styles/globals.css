@@ -558,6 +558,21 @@ dialog[open] { animation: lift 0.35s var(--ease); }
 .insight-chain li:not(:last-child)::after { content: ''; position: absolute; left: 4.5px; top: 21px; bottom: -10px; width: 2px; background: var(--coral); }
 .insight-label { color: var(--forest-2); font-size: 13.5px; padding-top: 1px; }
 
+/* ── A prepared save: a slip pinned under the reply, waiting for the person's Save ── */
+.proposal {
+  margin-top: 14px; padding: 14px 20px 14px; border-radius: 22px; max-width: 52ch;
+  background: var(--paper-hi); box-shadow: 0 0 0 2px var(--forest); border-left: 6px solid var(--coral);
+}
+.proposal-what { font-size: 15.5px; line-height: 1.45; color: var(--ink); }
+.proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.proposal-save { padding: 10px 24px; font-size: 14px; }
+.proposal-save:disabled { opacity: 0.7; cursor: progress; }
+.proposal-status { font-size: 14px; color: var(--forest-2); }
+.proposal-status:not(:empty) { margin-top: 8px; }
+.proposal.is-saved { box-shadow: 0 0 0 2px var(--sage); border-left-color: var(--sage); }
+.proposal.is-dismissed, .proposal.is-gone { box-shadow: 0 0 0 1px var(--line); border-left-color: var(--line); }
+.proposal.is-dismissed .proposal-what, .proposal.is-gone .proposal-what { color: var(--forest-2); text-decoration: line-through; text-decoration-thickness: 1px; }
+
 /* ── Account: sign up / log in ───────────────────────────────────────────── */
 .auth-grid {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); column-gap: 56px; align-items: start;

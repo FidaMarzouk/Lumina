@@ -49,6 +49,12 @@ def generic_fallback() -> str:
             "I'm here to listen.")
 
 
+def proposal_reply(summary: str) -> str:
+    """When a save is waiting for the person's Save button and the model wrote that it was already done."""
+    return (f"Here is what I prepared for you: {summary}. It is only kept if you press Save below, and you can "
+            "delete it later. Is there anything you'd like to talk through?")
+
+
 def unsupported_language_reply() -> str:
     """For messages written in a way Lumina cannot read reliably (Arabic in Latin letters with digits).
 

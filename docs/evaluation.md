@@ -356,6 +356,43 @@ A turn without a look-up takes about 3.2 s. Reports: `eval/reports/agent_tools_<
 - Once, with nothing found ("what have I said about my parents?"), the reply hedged that they had "mentioned
   them briefly a long time ago": the prompt forbids inventing, but the 8B model can still slip.
 
+## 4d. Saving, with the person's yes (A3)
+The same tool model can now prepare four saves: `journal_save` (their words, copied), `sleep_log` (hours, how it
+felt, which night), `mood_log` (today's inner weather and a note) and `jar_add`. **Nothing is written when the
+model picks one.** Its arguments are validated, checked against the message (`tools.grounded`: the hours must be
+a number they wrote, and at least 80% of the saved words must be theirs), stored as a pending proposal for 30
+minutes, and shown under the reply as a slip with **Save** / **Not now**. Only `POST /actions/{id}/confirm`, by
+the same person and only once, writes it. There are no reminders (no scheduler) and no delete tool: each entry
+is deleted by the person (`DELETE /journal/entries/{id}`, `/logs/{sleep|mood}/{id}`). Journal text and mood
+notes are encrypted at rest (Fernet; `src/lumina/memory/crypto.py`), included in the export, and removed with
+the account. Saves are offered at "elevated" risk too, never in a crisis, after one, or to guests.
+
+Look-ups now also read back what was saved. To the person there is one journal and one mood, so `journal_search`
+covers the conversation pages and the saved entries, and `feelings_over_time` the detected feelings and the
+logged moods (a first version with separate `journal_entries` and `mood_history` tools dropped look-ups from 30
+to 25 of 40: the model picked the new tool for "show me my journal"). `sleep_history` reads the sleep log.
+
+| `agent_tools.py`, Qwen 2.5 3B on the CPU | A2 | A3 |
+|---|---|---|
+| Look-ups with the right tool (wrong tool only) | 30 / 40 (3) | **31 / 40 (0)** |
+| Clear saves proposed with the right tool / their words in the summary | — | **7 / 9 · 7 / 7** |
+| Saves proposed where none should be: write requests / plain messages | — | 2 / 11 · 2 / 40 |
+| Saved without the Save button | — | **0** |
+| Replies with a waiting save that said it was already done | — | 2 / 11 → **0** (output guard) |
+| Tool step / look-up turn (median) | 1.8 s / 4.3 s | 2.0 s / 4.6 s |
+
+**How to read this:**
+- **The two wrong "already saved" replies** ("I've added 'breathing exercise' to your jar… press Save") came
+  despite the prompt forbidding it. While a save is waiting, the output guard now replaces a reply that says it
+  is done with a fixed line naming what was prepared (`claims_done`, reason `claimed_save`; whole and streamed
+  replies). On the 89 eval replies without a waiting save it would have flagged none.
+- **Proposals nobody asked for:** "can you save that last thing I said" (nothing before it) saved those words
+  literally; "record my mood, 6/10" became "partly cloudy" (a guess the slip shows before anything is kept);
+  "I slept badly again, maybe 4 hours" and "the walk by the sea really helped today" got a sleep log and a jar
+  slip. Each only costs a "Not now"; none is saved on its own.
+- **Missed saves:** "write down that I'm proud of today" and "mark today as a stormy day" were routed to plain
+  talk by the intent classifier, so the tool model never saw them.
+
 ## 5. Speed and routing (turn traces)
 Every turn leaves a trace (`src/lumina/observability.py`) in its own SQLite file, `data/user/traces.db`: time
 per stage, the safety outcome, the reply path, the output guard's reasons and the reply's token counts. Traces

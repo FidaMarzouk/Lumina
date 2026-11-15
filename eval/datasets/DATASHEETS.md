@@ -80,12 +80,12 @@ Known gaps: only 98 FAQ questions, so the `information` and `help_seeking` class
 | Our use | `eval/runners/safety_multilingual.py`: crisis recall, crisis-or-elevated recall, crisis flag rate on ordinary messages and the number scored as prompt injection, per writing system, with and without language handling. |
 | Biases | Tiny, explicit and parallel: every crisis item is a clear statement. Real messages mix languages, are longer and are often indirect, so real recall will be lower. Use it as a regression check. |
 
-## Read-tool cases (`data/eval/agent_tools/cases.jsonl`)
+## Tool cases (`data/eval/agent_tools/cases.jsonl`)
 | | |
 |---|---|
-| Content | **100** English messages: 40 look-ups with the read tool that should answer them (journal 15, feelings 8, jar 8, journey 9), 20 write requests that no read tool should answer, and 40 plain messages on the same topics. |
-| Origin | Written by Claude (Fable 5.1) on 2026-11-14. **Status: not yet reviewed by the user.** No real user text. |
-| Our use | `eval/runners/agent_tools.py`, end to end against a seeded synthetic account. Failures on this set were read and fixed (A2), so its numbers are optimistic. |
+| Content | **100** English messages: 40 look-ups with the read tool that should answer them (journal 15, feelings 8, jar 8, journey 9), 20 write requests and 40 plain messages on the same topics. Of the write requests, 9 are clear and complete and expect a save proposal (journal 3, sleep 2, mood 2, jar 2); 11 expect none: reminders, deleting, clearing, starting a journey, "save that last thing" with nothing before it, and details that would have to be invented ("record my mood, 6/10" has no weather; "woke up three times" has no hours). Two accept a second tool (`also_ok`). |
+| Origin | Written by Claude (Fable 5.1) on 2026-11-14; write expectations set for A3 on 2026-11-15. **Status: not yet reviewed by the user.** No real user text. |
+| Our use | `eval/runners/agent_tools.py`, end to end against a seeded synthetic account. Failures on this set were read and fixed (A2, A3), so its numbers are optimistic. |
 
 ## Synthetic histories (`src/lumina/memory/synthetic.py`)
 | | |

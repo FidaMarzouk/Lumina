@@ -19,6 +19,9 @@ export default defineConfig({
       '/journey': api,
       '/insights': api,
       '/jar': api,
+      '/actions': api,
+      '/journal': api,
+      '/logs': api,
     }
   },
   // npm test: unit tests for the pure logic (no browser, no backend)

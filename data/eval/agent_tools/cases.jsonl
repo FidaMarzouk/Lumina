@@ -38,26 +38,26 @@
 {"id": "2dbe711730", "text": "what's the next part of my programme?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
 {"id": "99fc6245a0", "text": "remind me which step comes next", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
 {"id": "194dd6bbee", "text": "how many steps are left in my journey?", "kind": "read", "expected_tool": "journey_status", "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "3c2ffa6f3f", "text": "log my sleep, about 5 hours", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "4ed8ef06eb", "text": "save this to my journal: I called my mum today", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "435ec667b9", "text": "remind me at 9pm to stretch", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "f5138ff01f", "text": "log my mood as rainy", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "5e36deef89", "text": "delete my last journal page", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "ac4eda6bf0", "text": "please note that the walk helped", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "efd4e6c12f", "text": "track that I slept 7 hours", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "7518c1621b", "text": "add 'breathing exercise' to my jar", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "be0dd8faf3", "text": "set a reminder for my therapy session on friday", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "63493d4c15", "text": "forget what I said about my ex", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "152071f42c", "text": "write down that I'm proud of today", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "0bd3b5d8ab", "text": "mark today as a stormy day", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "fcc0f4f13e", "text": "remove my mood history", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "8f2d15de68", "text": "can you save that last thing I said", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "a3565e7f82", "text": "remind me tomorrow to drink water", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "d19bb26374", "text": "log that I woke up three times", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "3ec6e665bc", "text": "start the sleep journey for me", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "31e25f2de2", "text": "clear my jar", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "240eb22ae0", "text": "put this in my journal: work was hard", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
-{"id": "77c59c8a6c", "text": "record my mood, 6/10", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
+{"id": "3c2ffa6f3f", "text": "log my sleep, about 5 hours", "kind": "write", "expected_tool": "sleep_log", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "4ed8ef06eb", "text": "save this to my journal: I called my mum today", "kind": "write", "expected_tool": "journal_save", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "435ec667b9", "text": "remind me at 9pm to stretch", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "f5138ff01f", "text": "log my mood as rainy", "kind": "write", "expected_tool": "mood_log", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "5e36deef89", "text": "delete my last journal page", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "ac4eda6bf0", "text": "please note that the walk helped", "kind": "write", "expected_tool": "jar_add", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user", "also_ok": ["journal_save"]}
+{"id": "efd4e6c12f", "text": "track that I slept 7 hours", "kind": "write", "expected_tool": "sleep_log", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "7518c1621b", "text": "add 'breathing exercise' to my jar", "kind": "write", "expected_tool": "jar_add", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "be0dd8faf3", "text": "set a reminder for my therapy session on friday", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "63493d4c15", "text": "forget what I said about my ex", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "152071f42c", "text": "write down that I'm proud of today", "kind": "write", "expected_tool": "journal_save", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "0bd3b5d8ab", "text": "mark today as a stormy day", "kind": "write", "expected_tool": "mood_log", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "fcc0f4f13e", "text": "remove my mood history", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "8f2d15de68", "text": "can you save that last thing I said", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "a3565e7f82", "text": "remind me tomorrow to drink water", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "d19bb26374", "text": "log that I woke up three times", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user", "also_ok": ["journal_save"]}
+{"id": "3ec6e665bc", "text": "start the sleep journey for me", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "31e25f2de2", "text": "clear my jar", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "240eb22ae0", "text": "put this in my journal: work was hard", "kind": "write", "expected_tool": "journal_save", "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
+{"id": "77c59c8a6c", "text": "record my mood, 6/10", "kind": "write", "expected_tool": null, "labeller": "written by claude 2026-11-14; A3 expectations 2026-11-15; not yet reviewed by the user"}
 {"id": "4452b90cca", "text": "I slept badly again, maybe 4 hours", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
 {"id": "c32b629c34", "text": "I wrote in my diary as a kid and it never helped", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}
 {"id": "9c23cc691c", "text": "my therapist wants me to keep a mood journal", "kind": "talk", "expected_tool": null, "labeller": "written by claude 2026-11-14; not yet reviewed by the user"}

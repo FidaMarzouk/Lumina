@@ -169,7 +169,7 @@ function App() {
                       onStarter={send} onSuggest={auth.user ? () => navigate('journeys') : null}
                       onLeaveGuided={() => chat.startWith({ mode: 'open' })}
                       onWeather={chat.setWeather} onTear={chat.addLuminaLine} helped={auth.token ? helped : []}
-                      night={night} />
+                      night={night} onProposal={chat.resolveProposal} />
           {chat.error && <p className="error" role="alert">{chat.error}</p>}
           {chat.crisis && <CrisisPanel key={chat.crisis} subtype={chat.crisis} />}
           <InputBar onSend={send} disabled={chat.isTyping} onListeningChange={onListeningChange}

@@ -118,6 +118,13 @@ class Insight(BaseModel):
     behaviour: str | None = None
 
 
+class Proposal(BaseModel):
+    """A save Lumina prepared; nothing is stored until POST /actions/{id}/confirm."""
+    id     : str
+    tool   : str
+    summary: str
+
+
 class ChatResponse(BaseModel):
     reply              : str
     intent             : str
@@ -128,6 +135,7 @@ class ChatResponse(BaseModel):
     risk_level         : Literal["none", "elevated", "crisis"]
     injection_detected : bool
     insight            : Insight | None = None     # omitted when there is none (and always for guests)
+    proposal           : Proposal | None = None    # omitted when there is none
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────

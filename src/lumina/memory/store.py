@@ -15,6 +15,13 @@ What is stored (derived data only — never the messages themselves):
     journey_progress the user's position in each journey
     next_steps       the step waiting for the user's next visit
     jar_items        "things that helped": noticed by Lumina (suggested) or kept by the person (kept)
+    journal_entries  entries the person asked to save, in their own words: ENCRYPTED (memory/crypto.py)  (A3)
+    sleep_logs       nights the person logged: date, hours, quality                                       (A3)
+    mood_logs        mood check-ins the person logged: the five weathers, an optional ENCRYPTED note      (A3)
+    pending_actions  a save Lumina proposed and the person has not confirmed yet (expires; args ENCRYPTED)  (A3)
+
+The person's own words are the only raw text stored, and only when they ask for it; each entry can be deleted
+on its own.
 
 Deleting a user removes every row that belongs to them (foreign keys with ON DELETE CASCADE).
 """
@@ -119,6 +126,39 @@ CREATE TABLE IF NOT EXISTS jar_items (
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS jar_user_created ON jar_items(user_id, created_at);
+CREATE TABLE IF NOT EXISTS journal_entries (
+    id         TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    text_enc   BLOB NOT NULL
+);
+CREATE INDEX IF NOT EXISTS journal_user_created ON journal_entries(user_id, created_at);
+CREATE TABLE IF NOT EXISTS sleep_logs (
+    id         TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    night      TEXT NOT NULL,
+    hours      REAL NOT NULL,
+    quality    TEXT,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS sleep_user_night ON sleep_logs(user_id, night);
+CREATE TABLE IF NOT EXISTS mood_logs (
+    id         TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    day        TEXT NOT NULL,
+    weather    TEXT NOT NULL,
+    note_enc   BLOB,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS mood_user_day ON mood_logs(user_id, day);
+CREATE TABLE IF NOT EXISTS pending_actions (
+    id         TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tool       TEXT NOT NULL,
+    args_enc   BLOB NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
 """
 
 
@@ -401,6 +441,94 @@ class Store:
             row = _row(c.execute("SELECT * FROM next_steps WHERE user_id = ?", (user_id,)).fetchone())
         return row["step"] if row else None
 
+    # ── journal, sleep and mood logs (A3) ──────────────────────────────────
+    def add_journal_entry(self, user_id: str, text: str, now: datetime | None = None) -> dict:
+        from . import crypto
+        eid = uuid.uuid4().hex
+        with self._conn() as c:
+            c.execute("INSERT INTO journal_entries VALUES (?, ?, ?, ?)",
+                      (eid, user_id, iso(now or utcnow()), crypto.encrypt(text)))
+        return {"id": eid, "created_at": iso(now or utcnow()), "text": text}
+
+    def journal_entries(self, user_id: str, since: datetime | None = None) -> list[dict]:
+        from . import crypto
+        q, args = "SELECT * FROM journal_entries WHERE user_id = ?", [user_id]
+        if since is not None:
+            q, args = q + " AND created_at >= ?", args + [iso(since)]
+        with self._conn() as c:
+            rows = [dict(r) for r in c.execute(q + " ORDER BY created_at DESC", args)]
+        return [{"id": r["id"], "created_at": r["created_at"], "text": crypto.decrypt(r["text_enc"])} for r in rows]
+
+    def add_sleep_log(self, user_id: str, night: str, hours: float, quality: str | None,
+                      now: datetime | None = None) -> dict:
+        sid = uuid.uuid4().hex
+        with self._conn() as c:
+            c.execute("INSERT INTO sleep_logs VALUES (?, ?, ?, ?, ?, ?)",
+                      (sid, user_id, night, float(hours), quality, iso(now or utcnow())))
+        return {"id": sid, "night": night, "hours": float(hours), "quality": quality}
+
+    def sleep_logs(self, user_id: str, since_night: str | None = None) -> list[dict]:
+        q, args = "SELECT id, night, hours, quality, created_at FROM sleep_logs WHERE user_id = ?", [user_id]
+        if since_night is not None:
+            q, args = q + " AND night >= ?", args + [since_night]
+        with self._conn() as c:
+            return [dict(r) for r in c.execute(q + " ORDER BY night DESC, created_at DESC", args)]
+
+    def add_mood_log(self, user_id: str, day: str, weather: str, note: str | None,
+                     now: datetime | None = None) -> dict:
+        from . import crypto
+        mid = uuid.uuid4().hex
+        with self._conn() as c:
+            c.execute("INSERT INTO mood_logs VALUES (?, ?, ?, ?, ?, ?)",
+                      (mid, user_id, day, weather, crypto.encrypt(note) if note else None, iso(now or utcnow())))
+        return {"id": mid, "day": day, "weather": weather, "note": note}
+
+    def mood_logs(self, user_id: str, since_day: str | None = None) -> list[dict]:
+        from . import crypto
+        q, args = "SELECT * FROM mood_logs WHERE user_id = ?", [user_id]
+        if since_day is not None:
+            q, args = q + " AND day >= ?", args + [since_day]
+        with self._conn() as c:
+            rows = [dict(r) for r in c.execute(q + " ORDER BY day DESC, created_at DESC", args)]
+        return [{"id": r["id"], "day": r["day"], "weather": r["weather"], "created_at": r["created_at"],
+                 "note": crypto.decrypt(r["note_enc"]) if r["note_enc"] else None} for r in rows]
+
+    _OWN_ROWS = {"journal": "journal_entries", "sleep": "sleep_logs", "mood": "mood_logs"}
+
+    def delete_own(self, kind: str, item_id: str, user_id: str) -> bool:
+        """Delete one journal entry, sleep log or mood log, only if it belongs to `user_id`."""
+        table = self._OWN_ROWS[kind]
+        with self._conn() as c:
+            return c.execute(f"DELETE FROM {table} WHERE id = ? AND user_id = ?", (item_id, user_id)).rowcount == 1
+
+    def delete_all_own(self, kind: str, user_id: str) -> int:
+        with self._conn() as c:
+            return c.execute(f"DELETE FROM {self._OWN_ROWS[kind]} WHERE user_id = ?", (user_id,)).rowcount
+
+    # ── proposals waiting for a yes (A3) ───────────────────────────────────
+    def add_pending(self, user_id: str, tool: str, args: dict, expires_at: datetime,
+                    now: datetime | None = None) -> str:
+        from . import crypto
+        pid = uuid.uuid4().hex
+        with self._conn() as c:
+            c.execute("DELETE FROM pending_actions WHERE expires_at < ?", (iso(now or utcnow()),))
+            c.execute("INSERT INTO pending_actions VALUES (?, ?, ?, ?, ?, ?)",
+                      (pid, user_id, tool, crypto.encrypt(_dump(args)), iso(now or utcnow()), iso(expires_at)))
+        return pid
+
+    def take_pending(self, pending_id: str, user_id: str, now: datetime | None = None) -> dict | None:
+        """The proposal (removed, so it can run only once), if it is the user's and has not expired."""
+        from . import crypto
+        with self._conn() as c:
+            row = c.execute("SELECT * FROM pending_actions WHERE id = ? AND user_id = ?",
+                            (pending_id, user_id)).fetchone()
+            if row is None:
+                return None
+            c.execute("DELETE FROM pending_actions WHERE id = ?", (pending_id,))
+        if row["expires_at"] < iso(now or utcnow()):
+            return None
+        return {"tool": row["tool"], "args": json.loads(crypto.decrypt(row["args_enc"]))}
+
     # ── export ─────────────────────────────────────────────────────────────
     def export_user(self, user_id: str) -> dict:
         """Everything stored about the user (minus the password hash and login tokens)."""
@@ -416,7 +544,8 @@ class Store:
         return {"account": user, "sessions": self.user_sessions(user_id), "turn_signals": self.user_turns(user_id),
                 "episodes": episodes, "insights": self.list_insights(user_id, limit=10_000),
                 "journey_progress": progress, "next_step": self.get_next_step(user_id),
-                "jar": self.jar_items(user_id)}
+                "jar": self.jar_items(user_id), "journal_entries": self.journal_entries(user_id),
+                "sleep_logs": self.sleep_logs(user_id), "mood_logs": self.mood_logs(user_id)}
 
 
 # ── default instance ─────────────────────────────────────────────────────────
