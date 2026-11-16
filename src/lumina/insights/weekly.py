@@ -34,7 +34,7 @@ _INTRO = (
     "You are Lumina, a warm mental health support companion. Write this person's WEEKLY REFLECTION from the "
     "evidence below, which was computed automatically from their past conversations (it may be imperfect).\n"
     "Write 4 to 6 sentences in one or two short paragraphs, addressed to them directly:\n"
-    "1. What this week's conversations circled around, in plain words.\n"
+    "1. What this week's conversations (and their journal, if given) circled around, in plain words.\n"
     "2. One pattern from LINKS or THEMES, such as a feeling that tends to follow a certain thought or situation, "
     "or what they tend to do next. Phrase it tentatively (\"it seems\", \"I noticed\") and never as a fact about "
     "who they are.\n"
@@ -63,8 +63,9 @@ _FEEDBACK_MAX = 6
 _FEEDBACK_CHARS = 220
 
 
-def _system_prompt(report: patterns.PatternReport, feedback: list[dict]) -> str:
-    return _INTRO + (_WITH_ECHO if report.echo else _WITHOUT_ECHO) + _RULES + (_FEEDBACK_RULE if feedback else "")
+def _system_prompt(report: patterns.PatternReport, feedback: list[dict], journal: list[dict] = ()) -> str:
+    return (_INTRO + (_WITH_ECHO if report.echo else _WITHOUT_ECHO) + _RULES + (_FEEDBACK_RULE if feedback else "")
+            + (_JOURNAL_RULE if journal else ""))
 
 
 def recent_feedback(store: Store, user_id: str, now: datetime) -> list[dict]:
@@ -82,9 +83,41 @@ def _ago(days: int) -> str:
     return f"about {round(days / 30)} months ago" if days >= 60 else f"about {round(days / 7)} weeks ago"
 
 
-def _evidence_text(report: patterns.PatternReport, feedback: list[dict] = ()) -> str:
+_JOURNAL_MAX = 6
+_JOURNAL_CHARS = 220
+_JOURNAL_RULE = (
+    "\nTHEIR JOURNAL is what they wrote privately in the app this week, in their own words: let it inform what the "
+    "week circled around, but never quote it, never correct it, and do not list it."
+)
+
+
+def week_journal(store: Store, user_id: str, now: datetime, injection_probability: Callable | None = None) -> list[dict]:
+    """The person's journal entries from this period, as evidence: never ones saved at crisis risk, scratched-out
+    words gone, each excerpt passing the injection check.  [{"date", "text"}], oldest first."""
+    from ..memory.extraction import safe_to_store
+    from ..memory.store import visible_text
+    out = []
+    for e in reversed(store.journal_entries(user_id, since=now - timedelta(days=WEEKLY_PERIOD_DAYS))):
+        text = visible_text(e["text"])
+        if e["risk"] == "crisis" or not text:
+            continue
+        text = text if len(text) <= _JOURNAL_CHARS else text[:_JOURNAL_CHARS - 1].rsplit(" ", 1)[0] + "…"
+        if safe_to_store(text, injection_probability):
+            out.append({"date": parse_iso(e["created_at"]).strftime("%A"), "text": text})
+    return out[-_JOURNAL_MAX:]
+
+
+def _have(report: patterns.PatternReport, journal: list[dict]) -> int:
+    """What counts towards a letter: each summarised conversation, and each day they wrote in their journal."""
+    return len(report.episodes) + len({j["date"] for j in journal})
+
+
+def _evidence_text(report: patterns.PatternReport, feedback: list[dict] = (), journal: list[dict] = ()) -> str:
     parts = ["THIS WEEK'S CONVERSATIONS:"]
-    parts += [f"- {e['date']}: {e['summary']}" for e in report.episodes]
+    parts += [f"- {e['date']}: {e['summary']}" for e in report.episodes] or ["- (none summarised this week)"]
+    if journal:
+        parts.append("THEIR JOURNAL:")
+        parts += [f"- {j['date']}: \"{j['text']}\"" for j in journal]
     if report.themes:
         parts.append("THEMES: " + "; ".join(
             t["theme"] + (" (has come up in earlier weeks too)" if t["earlier_weeks"] else "") for t in report.themes))
@@ -132,13 +165,15 @@ def weekly_status(store: Store, user: dict, *, now: datetime | None = None) -> d
     if current:
         return {"status": "ready", "insight": public_insight(current)}
     _, report = _evidence(store, user, now)
-    if len(report.episodes) < WEEKLY_MIN_EPISODES:
-        return {"status": "not_enough_data", "have": len(report.episodes), "need": WEEKLY_MIN_EPISODES}
+    have = _have(report, week_journal(store, user["id"], now, injection_probability=lambda _: 0.0))   # a count only
+    if have < WEEKLY_MIN_EPISODES:
+        return {"status": "not_enough_data", "have": have, "need": WEEKLY_MIN_EPISODES}
     return {"status": "due"}
 
 
 def weekly_insight(store: Store, user: dict, *, now: datetime | None = None, complete: Callable | None = None,
-                   response_guard: Callable | None = None, force: bool = False) -> dict:
+                   response_guard: Callable | None = None, force: bool = False,
+                   injection_probability: Callable | None = None) -> dict:
     """What POST /insights/weekly returns: writes this week's insight unless one is current."""
     now = now or utcnow()
     if not user["memory_enabled"]:
@@ -149,14 +184,15 @@ def weekly_insight(store: Store, user: dict, *, now: datetime | None = None, com
         return {"status": "ready", "insight": public_insight(current)}
 
     feedback, report = _evidence(store, user, now)
-    if len(report.episodes) < WEEKLY_MIN_EPISODES:
-        return {"status": "not_enough_data", "have": len(report.episodes), "need": WEEKLY_MIN_EPISODES}
+    journal = week_journal(store, user["id"], now, injection_probability)
+    if _have(report, journal) < WEEKLY_MIN_EPISODES:
+        return {"status": "not_enough_data", "have": _have(report, journal), "need": WEEKLY_MIN_EPISODES}
 
     if complete is None:
         from ..dialogue.llm_client import complete
     try:
-        text = complete([{"role": "system", "content": _system_prompt(report, feedback)},
-                         {"role": "user", "content": _evidence_text(report, feedback)}],
+        text = complete([{"role": "system", "content": _system_prompt(report, feedback, journal)},
+                         {"role": "user", "content": _evidence_text(report, feedback, journal)}],
                         max_tokens=WEEKLY_MAX_TOKENS, temperature=0.5).strip()
     except Exception as exc:
         log.warning("Weekly insight generation failed: %s", type(exc).__name__)
@@ -169,7 +205,7 @@ def weekly_insight(store: Store, user: dict, *, now: datetime | None = None, com
         log.warning("Weekly insight rejected by the output guard — reasons=%s", ",".join(checked.reasons))
         return {"status": "unavailable"}
 
-    evidence = {**report.as_evidence(), "feedback_used": {
+    evidence = {**report.as_evidence(), "journal_days": len({j["date"] for j in journal}), "feedback_used": {
         "fits": sum(f["verdict"] == "fits" for f in feedback),
         "not_quite": sum(f["verdict"] == "not_quite" for f in feedback)}}
     row = store.add_insight(user["id"], "weekly", text, evidence,

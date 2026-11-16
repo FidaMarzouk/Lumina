@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from ..memory.store import Store, utcnow
+from ..memory.store import Store, utcnow, visible_text
 from . import catalog
 from .catalog import Journey
 
@@ -77,7 +77,12 @@ def recommend(store: Store, user_id: str, now: datetime | None = None,
     now = now or utcnow()
     episodes = [e for e in store.user_episodes(user_id, since=now - timedelta(days=_RECENT_DAYS))
                 if not e["had_crisis"] and e["embedding"] is not None]
-    if not episodes:
+    # What they wrote in their journal counts too (memory on only: it is personal context like the summaries).
+    user = store.get_user(user_id)
+    journal = [] if not (user and user["memory_enabled"]) else \
+        [t for t in (visible_text(e["text"]) for e in store.journal_entries(user_id, since=now - timedelta(days=_RECENT_DAYS))
+                     if e["risk"] != "crisis") if t][:30]
+    if not episodes and not journal:
         return None
     finished = {jid for jid, row in store.journey_progress(user_id).items() if row["status"] == "completed"}
     candidates = [j for j in catalog.load_catalog().values() if j.id not in finished]
@@ -85,7 +90,8 @@ def recommend(store: Store, user_id: str, now: datetime | None = None,
         return None
     embed = embed or _default_embed
     try:
-        recent = np.stack([np.asarray(e["embedding"], dtype=np.float32) for e in episodes])
+        recent = np.stack([np.asarray(e["embedding"], dtype=np.float32) for e in episodes]
+                          + [np.asarray(embed(t), dtype=np.float32) for t in journal])
         recent /= np.linalg.norm(recent, axis=1, keepdims=True) + 1e-9
         profiles = np.stack([_profile(j, embed) for j in candidates])
         profiles /= np.linalg.norm(profiles, axis=1, keepdims=True) + 1e-9

@@ -184,6 +184,27 @@ def parse_iso(text: str) -> datetime:
     return datetime.fromisoformat(text)
 
 
+# Words the person scratched out of a journal entry are gone; the page keeps a scribble in their place, stored
+# as this private-use character so the page can draw it.  Everything that reads journal text uses visible_text().
+SCRATCH = ""
+
+
+def visible_text(text: str) -> str:
+    return " ".join(text.replace(SCRATCH, " ").split()) if "\n" not in text else \
+        "\n".join(" ".join(line.replace(SCRATCH, " ").split()) for line in text.splitlines()).strip()
+
+
+def only_scratched(before: str, after: str) -> bool:
+    """True when `after` is `before` with some words replaced by SCRATCH: nothing added, nothing reordered."""
+    import re
+    old = re.findall(r"\S+", before.replace(SCRATCH, " "))
+    new = re.findall(r"\S+", after.replace(SCRATCH, " "))
+    if after.count(SCRATCH) < before.count(SCRATCH):
+        return False
+    it = iter(old)
+    return all(any(w == o for o in it) for w in new)
+
+
 def _row(row: sqlite3.Row | None) -> dict | None:
     if row is None:
         return None
@@ -208,6 +229,9 @@ class Store:
         with self._conn() as c:
             c.execute("PRAGMA journal_mode=WAL")
             c.executescript(_SCHEMA)
+            # Databases from before the journal was safety-checked: entries saved then count as unchecked ("none").
+            if "risk" not in {r[1] for r in c.execute("PRAGMA table_info(journal_entries)")}:
+                c.execute("ALTER TABLE journal_entries ADD COLUMN risk TEXT NOT NULL DEFAULT 'none'")
 
     @contextmanager
     def _conn(self):
@@ -442,13 +466,15 @@ class Store:
         return row["step"] if row else None
 
     # ── journal, sleep and mood logs (A3) ──────────────────────────────────
-    def add_journal_entry(self, user_id: str, text: str, now: datetime | None = None) -> dict:
+    def add_journal_entry(self, user_id: str, text: str, now: datetime | None = None, risk: str = "none") -> dict:
+        """`risk`: the safety assessment of the text when it was saved (none | elevated | crisis).  Entries saved
+        at crisis risk are never fed back into conversations, letters or recommendations."""
         from . import crypto
         eid = uuid.uuid4().hex
         with self._conn() as c:
-            c.execute("INSERT INTO journal_entries VALUES (?, ?, ?, ?)",
-                      (eid, user_id, iso(now or utcnow()), crypto.encrypt(text)))
-        return {"id": eid, "created_at": iso(now or utcnow()), "text": text}
+            c.execute("INSERT INTO journal_entries (id, user_id, created_at, text_enc, risk) VALUES (?, ?, ?, ?, ?)",
+                      (eid, user_id, iso(now or utcnow()), crypto.encrypt(text), risk))
+        return {"id": eid, "created_at": iso(now or utcnow()), "text": text, "risk": risk}
 
     def journal_entries(self, user_id: str, since: datetime | None = None) -> list[dict]:
         from . import crypto
@@ -457,7 +483,21 @@ class Store:
             q, args = q + " AND created_at >= ?", args + [iso(since)]
         with self._conn() as c:
             rows = [dict(r) for r in c.execute(q + " ORDER BY created_at DESC", args)]
-        return [{"id": r["id"], "created_at": r["created_at"], "text": crypto.decrypt(r["text_enc"])} for r in rows]
+        return [{"id": r["id"], "created_at": r["created_at"], "text": crypto.decrypt(r["text_enc"]), "risk": r["risk"]}
+                for r in rows]
+
+    def scratch_journal_entry(self, entry_id: str, user_id: str, text: str) -> dict | None:
+        """Replace an entry's text after the person scratched words out (only theirs; the caller checks that
+        nothing was added).  An entry with nothing left is deleted.  Returns the entry, or None if gone."""
+        from . import crypto
+        with self._conn() as c:
+            if not visible_text(text):
+                c.execute("DELETE FROM journal_entries WHERE id = ? AND user_id = ?", (entry_id, user_id))
+                return None
+            c.execute("UPDATE journal_entries SET text_enc = ? WHERE id = ? AND user_id = ?",
+                      (crypto.encrypt(text), entry_id, user_id))
+            row = c.execute("SELECT * FROM journal_entries WHERE id = ? AND user_id = ?", (entry_id, user_id)).fetchone()
+        return row and {"id": row["id"], "created_at": row["created_at"], "text": text, "risk": row["risk"]}
 
     def add_sleep_log(self, user_id: str, night: str, hours: float, quality: str | None,
                       now: datetime | None = None) -> dict:
@@ -544,7 +584,9 @@ class Store:
         return {"account": user, "sessions": self.user_sessions(user_id), "turn_signals": self.user_turns(user_id),
                 "episodes": episodes, "insights": self.list_insights(user_id, limit=10_000),
                 "journey_progress": progress, "next_step": self.get_next_step(user_id),
-                "jar": self.jar_items(user_id), "journal_entries": self.journal_entries(user_id),
+                "jar": self.jar_items(user_id),
+                "journal_entries": [{**e, "text": e["text"].replace(SCRATCH, "[scratched out]")}
+                                    for e in self.journal_entries(user_id)],
                 "sleep_logs": self.sleep_logs(user_id), "mood_logs": self.mood_logs(user_id)}
 
 

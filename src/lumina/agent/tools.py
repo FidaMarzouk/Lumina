@@ -30,7 +30,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ..journey import planner
-from ..memory.store import Store, parse_iso
+from ..memory.store import Store, parse_iso, visible_text
 
 EXCERPT_CHARS = 200
 MAX_RESULTS = 5
@@ -116,7 +116,10 @@ def journal_search(ctx: ToolContext, args: JournalSearchArgs) -> dict:
 
 def _saved_entries(ctx: ToolContext, args: JournalSearchArgs) -> tuple[list[dict], str | None]:
     """The entries they saved themselves in the window, best match first when there is a query."""
-    entries = ctx.store.journal_entries(ctx.user_id, since=ctx.now - timedelta(days=args.days_back))
+    # Scratched-out words are gone; entries saved at crisis risk are not read back (as crisis conversations).
+    entries = [{**e, "text": visible_text(e["text"])}
+               for e in ctx.store.journal_entries(ctx.user_id, since=ctx.now - timedelta(days=args.days_back))
+               if e["risk"] != "crisis" and visible_text(e["text"])]
     if not entries:
         return [], "No entries saved in that period."
     if args.query and ctx.embed is not None:
@@ -218,8 +221,28 @@ def prepare_journal(ctx: ToolContext, args: JournalSaveArgs) -> tuple[dict, str]
     return {"text": text}, f'Save to your journal: "{_excerpt(text)}"'
 
 
+def journal_risk(text: str) -> tuple[str, str]:
+    """(risk level, crisis subtype) of words about to be saved to the journal: the same safety assessment as a
+    chat message.  Tests replace ASSESS; a failure fails closed to "elevated" (help shown, not fed back unchecked)."""
+    try:
+        a = (ASSESS or _assess)(text)
+        return a.risk_level, a.crisis_subtype
+    except Exception:
+        return "elevated", "none"
+
+
+def _assess(text: str):
+    from ..safety.assessment import assess
+    return assess(text, [])
+
+
+ASSESS: Callable | None = None
+
+
 def run_journal(ctx: ToolContext, stored: dict) -> dict:
-    return ctx.store.add_journal_entry(ctx.user_id, stored["text"], now=ctx.now)
+    risk, subtype = journal_risk(stored["text"])
+    entry = ctx.store.add_journal_entry(ctx.user_id, stored["text"], now=ctx.now, risk=risk)
+    return {**entry, "support": subtype if risk == "crisis" else ("elevated" if risk == "elevated" else None)}
 
 
 def prepare_sleep(ctx: ToolContext, args: SleepLogArgs) -> tuple[dict, str]:

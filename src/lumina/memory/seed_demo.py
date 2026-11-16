@@ -5,8 +5,9 @@
 
 The history is invented (lumina/memory/synthetic.py).  It includes a planted pattern: a work
 deadline → "I'm not good enough" → anxiety → working late, about a year ago and again this week,
-so POST /insights/weekly can connect today's story to last year.  An existing account with the same
-email is deleted first.
+so POST /insights/weekly can connect today's story to last year.  It also fills what a person keeps by
+hand: 8 saved journal entries, two weeks of sleep and mood logs, a jar of five things, one finished journey and
+one in progress.  An existing account with the same email is deleted first.
 """
 
 from __future__ import annotations
@@ -64,7 +65,44 @@ def seed(store: Store, email: str, password: str, name: str, embed=None, seed_va
                            embedding=embed(summary) if embed else None, now=when + timedelta(minutes=20))
         store.add_insight(user["id"], "session", summary, {"themes": sc["pain"], "synthetic": True},
                           session_id=session["id"], now=when + timedelta(minutes=20))
+    _seed_personal(store, user["id"], now, rng)
     return user
+
+
+# What a person keeps by hand (A3 saves, the jar, journeys), so every page of the app has something on it.
+# Invented, in the same voice as the planted pattern: a hard work week, short nights, small things that helped.
+_ENTRIES = [
+    (19, "Went to the sea after work. Didn't fix anything but I could breathe again."),
+    (16, "Called my sister. We laughed about the kitchen disaster from last summer."),
+    (13, "Bad night. Kept replaying the meeting. Wrote the thought down and it looked smaller on paper."),
+    (10, "Said no to the extra project. My hands were shaking but I said it."),
+    (7, "Proud of today: I left my laptop closed after 8."),
+    (4, "The deadline is back and so is the old voice saying I'm not good enough. Noticing it this time."),
+    (2, "Walked the long way home. The jacaranda on the corner is flowering."),
+    (1, "Tired, but I asked for help at work instead of staying late."),
+]
+_JAR = ["a walk by the sea", "calling my sister", "the 4-7-8 breathing", "laptop closed after 8",
+        "writing the thought down"]
+_WEATHER = ["part", "rain", "fog", "part", "clear", "rain", "storm", "fog", "part", "clear", "part", "rain",
+            "part", "clear"]
+_NOTES = {1: "asked for help", 4: "the deadline again", 7: "laptop closed early", 9: "rough meeting"}
+
+
+def _seed_personal(store: Store, uid: str, now, rng: random.Random) -> None:
+    for days_ago, text in _ENTRIES:
+        store.add_journal_entry(uid, text, now=now - timedelta(days=days_ago, hours=rng.randint(1, 6)))
+    for i, text in enumerate(_JAR):
+        store.add_jar_item(uid, text, "kept", now=now - timedelta(days=30 - 5 * i))
+    for days_ago in range(14, 0, -1):
+        night = (now - timedelta(days=days_ago)).date().isoformat()
+        hours = round(rng.uniform(4.5, 7.5) * 2) / 2 if days_ago > 5 else round(rng.uniform(4.0, 6.0) * 2) / 2
+        store.add_sleep_log(uid, night, hours, "poor" if hours < 5.5 else "ok" if hours < 7 else "good",
+                            now=now - timedelta(days=days_ago - 1))
+    for days_ago, weather in zip(range(13, -1, -1), _WEATHER):
+        day = (now - timedelta(days=days_ago)).date().isoformat()
+        store.add_mood_log(uid, day, weather, _NOTES.get(days_ago), now=now - timedelta(days=days_ago))
+    store.set_progress(uid, "grounding_anxiety", 4, "completed", now=now - timedelta(days=60))
+    store.set_progress(uid, "sleep_reset", 1, "active", now=now - timedelta(days=6))
 
 
 def main() -> None:

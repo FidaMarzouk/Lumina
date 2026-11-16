@@ -21,3 +21,19 @@ export const addToJar = (token, text) => request('/jar', { method: 'POST', token
 export const keepInJar = (token, id) => request(`/jar/${encodeURIComponent(id)}/keep`, { method: 'POST', token })
 export const removeFromJar = (token, id) => request(`/jar/${encodeURIComponent(id)}`, { method: 'DELETE', token })
 
+// What the person saved themselves (A3): journal entries, sleep and mood logs. Each can be removed on its own.
+export const fetchEntries = token => request('/journal/entries', { token }).then(r => r.entries)
+export const addEntry = (token, text) => request('/journal/entries', { method: 'POST', token, body: { text } })
+export const removeEntry = (token, id) => request(`/journal/entries/${encodeURIComponent(id)}`, { method: 'DELETE', token })
+// Words scratched out on the page ( where each was). Only taking words away is accepted.
+export const scratchEntry = (token, id, text) =>
+  request(`/journal/entries/${encodeURIComponent(id)}`, { method: 'PATCH', token, body: { text } })
+export const fetchSleep = token => request('/logs/sleep', { token }).then(r => r.nights)
+export const addSleep = (token, hours, quality = null, night = 'last_night') =>
+  request('/logs/sleep', { method: 'POST', token, body: { hours, quality, night } })
+export const removeSleep = (token, id) => request(`/logs/sleep/${encodeURIComponent(id)}`, { method: 'DELETE', token })
+export const fetchMood = token => request('/logs/mood', { token }).then(r => r.days)
+export const addMood = (token, weather, note = null) =>
+  request('/logs/mood', { method: 'POST', token, body: { weather, ...(note ? { note } : {}) } })
+export const removeMood = (token, id) => request(`/logs/mood/${encodeURIComponent(id)}`, { method: 'DELETE', token })
+

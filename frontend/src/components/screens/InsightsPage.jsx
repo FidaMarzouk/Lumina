@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchInsights, fetchWeekly, writeWeekly } from '../../api/personal.js'
 import { ART } from '../art/artwork'
-import Jar from '../insights/Jar'
 import Journal from '../insights/Journal'
 import PatternLoop from '../insights/PatternLoop'
 import Stamps from '../insights/Stamps'
@@ -59,13 +58,9 @@ function InsightsPage({ token, name, onOpenAccount }) {
         </div>
       </div>
 
-      <div className="insights-keep">
-        <Jar token={token} />
-      </div>
-
       <section className="looking-back" aria-labelledby="history-h">
-        <h2 id="history-h" className="section-title">Your journal</h2>
-        <p className="section-lede">Every conversation leaves a page. Turn back through them to see where you’ve been.</p>
+        <h2 id="history-h" className="section-title">Lumina’s pages</h2>
+        <p className="section-lede">Every conversation leaves a page in Lumina’s hand. Turn back through them to see where you’ve been. What you write yourself is on your Today page.</p>
         {items === null && !error && <p className="page-loading">Opening your journal…</p>}
         {items !== null && history.length === 0 && (
           <div className="journal-empty">

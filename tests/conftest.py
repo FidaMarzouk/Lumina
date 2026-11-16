@@ -37,6 +37,20 @@ def trace_store(tmp_path):
     set_default_traces(None)
 
 
+@pytest.fixture(autouse=True)
+def journal_assess(monkeypatch):
+    """Journal saves are safety-checked with the real models in production; here a stub reads a marker word
+    ("CRISISWORD" → crisis, "HEAVYWORD" → elevated) so tests can exercise each path without the models."""
+    from lumina.agent import tools
+    from lumina.safety.assessment import SafetyAssessment
+
+    def fake(text):
+        if "CRISISWORD" in text:
+            return SafetyAssessment("crisis", "ideation", False, {})
+        return SafetyAssessment("elevated" if "HEAVYWORD" in text else "none", "none", False, {})
+    monkeypatch.setattr(tools, "ASSESS", fake)
+
+
 @pytest.fixture
 def fake_sentence_transformers(monkeypatch):
     """ingestion / retriever import sentence_transformers at module level; tests never need the real model."""

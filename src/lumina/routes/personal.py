@@ -200,6 +200,67 @@ def cancel_action(action_id: str, user: dict = Depends(current_user), store: Sto
     store.take_pending(action_id, user["id"])          # nothing is saved; unknown or expired is fine too
 
 
+# Writing directly in the app (the journal page, the sleep line, the mood stamps) needs no confirm step: the
+# person typed it and pressed Save themselves.  The same validation and the same writers as the chat's saves.
+def _write(name: str, body: dict, user: dict, store: Store) -> dict:
+    from ..agent import tools
+    from ..memory.store import utcnow
+    prepared = tools.propose(name, body, tools.ToolContext(store, user["id"], bool(user["memory_enabled"]), utcnow()))
+    if prepared is None:
+        raise HTTPException(status_code=422, detail="That could not be saved as written.")
+    return tools.WRITE_TOOLS[name].run(tools.ToolContext(store, user["id"], bool(user["memory_enabled"]), utcnow()),
+                                       prepared[0])
+
+
+class JournalEntryIn(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class SleepIn(BaseModel):
+    hours: float = Field(ge=0, le=16)
+    quality: Literal["poor", "ok", "good"] | None = None
+    night: Literal["last_night", "night_before"] = "last_night"
+
+
+class MoodIn(BaseModel):
+    weather: Literal["clear", "part", "fog", "rain", "storm"]
+    note: str | None = Field(default=None, max_length=300)
+
+
+@router.post("/journal/entries", status_code=201)
+def add_journal_entry(body: JournalEntryIn, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return _write("journal_save", body.model_dump(), user, store)
+
+
+class ScratchIn(BaseModel):
+    text: str = Field(max_length=2000)
+
+
+@router.patch("/journal/entries/{item_id}")
+def scratch_journal_entry(item_id: str, body: ScratchIn, user: dict = Depends(current_user),
+                          store: Store = Depends(get_store)):
+    """Words scratched out of an entry, by the person, on the page.  Scratching can only take words away: text
+    that adds or reorders anything is refused.  An entry with nothing left is deleted ({"deleted": true})."""
+    from ..memory.store import only_scratched
+    entry = next((e for e in store.journal_entries(user["id"]) if e["id"] == item_id), None)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Not found.")
+    if not only_scratched(entry["text"], body.text):
+        raise HTTPException(status_code=422, detail="Only scratching words out is possible here.")
+    kept = store.scratch_journal_entry(item_id, user["id"], body.text)
+    return {"deleted": True, "id": item_id} if kept is None else kept
+
+
+@router.post("/logs/sleep", status_code=201)
+def add_sleep_log(body: SleepIn, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return _write("sleep_log", body.model_dump(), user, store)
+
+
+@router.post("/logs/mood", status_code=201)
+def add_mood_log(body: MoodIn, user: dict = Depends(current_user), store: Store = Depends(get_store)):
+    return _write("mood_log", body.model_dump(exclude_none=True), user, store)
+
+
 
 @router.get("/journal/entries")
 def journal_entries(user: dict = Depends(current_user), store: Store = Depends(get_store)):

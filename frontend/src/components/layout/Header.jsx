@@ -1,11 +1,15 @@
 import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
 import AppearanceMenu from '../ui/AppearanceMenu'
-import { ChatIcon, CompassIcon, LighthouseIcon, NewChatIcon, SlidersIcon, SparkIcon, UserIcon } from '../ui/Icons'
+import { ChatIcon, CompassIcon, DaySunIcon, LighthouseIcon, NewChatIcon, PenIcon, SlidersIcon, SparkIcon, UserIcon } from '../ui/Icons'
+import { Circled, Hl } from '../ui/Marks'
 
-// Signed-in people move between talking, their journeys and their insights; the open conversation carries on.
+// Signed-in people move between talking, today's desk, their journeys and their insights; the open
+// conversation carries on. The current page is circled; hovering highlights the word.
 const PAGES = [
   { id: 'app', label: 'Talk', Icon: ChatIcon },
+  { id: 'today', label: 'Today', Icon: DaySunIcon },
+  { id: 'journal', label: 'Journal', Icon: PenIcon },
   { id: 'journeys', label: 'Journeys', Icon: CompassIcon },
   { id: 'insights', label: 'Insights', Icon: SparkIcon },
 ]
@@ -27,7 +31,7 @@ function Header({ view = 'app', onNavigate, onHome, onNewChat, onHelp, onSetting
           {PAGES.map(({ id, label, Icon }) => (
             <button key={id} type="button" className={`link-quiet ${view === id ? 'is-current' : ''}`}
                     aria-current={view === id ? 'page' : undefined} onClick={() => onNavigate(id)}>
-              <Icon /><span>{label}</span>
+              <Icon />{view === id ? <Circled on>{label}</Circled> : <Hl>{label}</Hl>}
             </button>
           ))}
         </nav>

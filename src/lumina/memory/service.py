@@ -100,6 +100,44 @@ def _embed(text: str):
     return embed(text)
 
 
+JOURNAL_DAYS = 30          # how far back their own journal is looked at during a conversation
+JOURNAL_TOP_K = 2
+JOURNAL_CHARS = 240
+
+
+def journal_recall(store: Store, ctx: SessionContext, message: str, embed: Callable | None = None,
+                   now: datetime | None = None, injection_probability: Callable | None = None) -> list[dict]:
+    """Up to JOURNAL_TOP_K of the person's own journal entries from the last JOURNAL_DAYS that relate to
+    `message`.  Entries saved at crisis risk are never used, scratched-out words are gone, and every entry passes
+    the injection check before it reaches a prompt (they are the person's words, but still data)."""
+    from datetime import timedelta
+
+    from .embeddings import cosine
+    from .extraction import safe_to_store
+    from .store import utcnow, visible_text
+    now = now or utcnow()
+    entries = [(e, visible_text(e["text"])) for e in store.journal_entries(ctx.user_id, since=now - timedelta(days=JOURNAL_DAYS))
+               if e["risk"] != "crisis"]
+    entries = [(e, t) for e, t in entries if t]
+    if not entries:
+        return []
+    try:
+        embed = embed or _embed
+        query = embed(message)
+        scored = sorted(((cosine(query, embed(t)), e, t) for e, t in entries[:60]), key=lambda p: -p[0])
+    except Exception as exc:
+        log.warning("Journal recall unavailable: %s", type(exc).__name__)
+        return []
+    out = []
+    for score, e, t in scored:
+        if score < MEMORY_MIN_SIMILARITY or len(out) >= JOURNAL_TOP_K:
+            break
+        excerpt = t if len(t) <= JOURNAL_CHARS else t[:JOURNAL_CHARS - 1].rsplit(" ", 1)[0] + "…"
+        if safe_to_store(excerpt, injection_probability):
+            out.append({"when": human_when(e["created_at"], now), "text": excerpt})
+    return out
+
+
 def load_context(store: Store, ctx: SessionContext, message: str,
                  embed: Callable | None = None) -> tuple[dict, Connections | None]:
     """(memory dict for empathy_engine.build_prompt, in-session connections or None)."""
@@ -113,6 +151,7 @@ def load_context(store: Store, ctx: SessionContext, message: str,
         if conn.turns_with_elements:
             memory["connections"] = conn.as_prompt_dict()
         memory["recalled"] = recall(store, ctx, message, embed)
+        memory["journal"] = journal_recall(store, ctx, message, embed)
     return memory, conn
 
 

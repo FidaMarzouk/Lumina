@@ -22,6 +22,13 @@ from dotenv import load_dotenv
 # ── Project paths ─────────────────────────────────────────────────────────────
 PROJECT_ROOT     = Path(__file__).resolve().parents[2]
 DATA_DIR         = PROJECT_ROOT / "data"
+
+
+def _project_path(value: str) -> Path:
+    """A path from the environment: relative ones are relative to the project, not to wherever the server was
+    started (started from frontend/, "data/user/lumina.db" silently became a second, empty database)."""
+    path = Path(value)
+    return path if path.is_absolute() else PROJECT_ROOT / path
 RAW_DIR          = DATA_DIR / "knowledge" / "raw"
 PROCESSED_DIR    = DATA_DIR / "knowledge" / "processed"        # cleaned + chunked documents (cleaning v1)
 INDEX_VERSION    = os.getenv("LUMINA_INDEX_VERSION", "v1")
@@ -156,10 +163,10 @@ TTS_MAX_CHARS = 600                                    # per request
 TTS_SAMPLE_RATE = 24000
 
 # ── Accounts (lumina/auth) ────────────────────────────────────────────────────
-USER_DB_PATH        = Path(os.getenv("LUMINA_USER_DB", str(DATA_DIR / "user" / "lumina.db")))   # not in git
+USER_DB_PATH        = _project_path(os.getenv("LUMINA_USER_DB", str(DATA_DIR / "user" / "lumina.db")))   # not in git
 # Key for the person's own words (journal entries, mood notes; lumina/memory/crypto.py).  LUMINA_DATA_KEY wins;
 # otherwise a key is generated once into this file.  Not in git.  Losing it makes those entries unreadable.
-DATA_KEY_PATH       = Path(os.getenv("LUMINA_DATA_KEY_FILE", str(USER_DB_PATH.parent / "data.key")))
+DATA_KEY_PATH       = _project_path(os.getenv("LUMINA_DATA_KEY_FILE", str(USER_DB_PATH.parent / "data.key")))
 PENDING_ACTION_MINUTES = 30    # a proposed save waits this long for the person's yes (A3)
 AUTH_TOKEN_TTL_DAYS = 30
 PASSWORD_MIN_CHARS  = 8
@@ -203,7 +210,7 @@ AGENT_NUM_GPU    = int(os.getenv("AGENT_NUM_GPU", "0"))   # 0 = tool model on th
 # Per turn: stage timings, safety outcome, reply path, guard reasons.  No text and no user or session id; a
 # separate file from the accounts database.  Not in git.
 TRACES_ENABLED       = os.getenv("TRACES_ENABLED", "1") != "0"
-TRACE_DB_PATH        = Path(os.getenv("LUMINA_TRACE_DB", str(DATA_DIR / "user" / "traces.db")))
+TRACE_DB_PATH        = _project_path(os.getenv("LUMINA_TRACE_DB", str(DATA_DIR / "user" / "traces.db")))
 TRACE_RETENTION_DAYS = 30
 
 # ── HTTP API ──────────────────────────────────────────────────────────────────

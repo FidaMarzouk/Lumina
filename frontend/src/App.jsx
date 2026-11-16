@@ -6,6 +6,8 @@ import LandingPage from './components/landing/LandingPage'
 import AuthPage from './components/auth/AuthPage'
 import JourneysPage from './components/screens/JourneysPage'
 import InsightsPage from './components/screens/InsightsPage'
+import TodayPage from './components/screens/TodayPage'
+import JournalPage from './components/screens/JournalPage'
 import Pond from './components/orb/Pond'
 import PaperDefs from './components/paper/PaperDefs'
 import NightSky from './components/paper/NightSky'
@@ -37,7 +39,7 @@ function App() {
   const [accountOpen, setAccountOpen] = useState(false)
   const started = view === 'app'
   // The conversation stays open while a signed-in person looks at their journeys or insights.
-  const inside = view === 'app' || view === 'journeys' || view === 'insights'
+  const inside = ['app', 'today', 'journal', 'journeys', 'insights'].includes(view)
   const [persona, setPersona] = usePersisted('lumina.style', 'listener')
   const [gender, setGender] = usePersisted('lumina.voice', 'female')
   // No sound by default: replies are read aloud only once the person turns it on.
@@ -145,6 +147,15 @@ function App() {
               onSettings={() => setSettingsOpen(true)} user={auth.user} onAccount={() => setAccountOpen(true)}
               onSignIn={() => openAuth('register')} appearance={appearance} />
 
+      {view === 'today' && auth.token && (
+        <div className="page-scroll"><TodayPage token={auth.token} name={auth.user?.display_name} onStartJourney={startJourney}
+                                                onTalk={() => navigate('app')} onInsights={() => navigate('insights')}
+                                                onJournal={() => navigate('journal')} /></div>
+      )}
+      {view === 'journal' && auth.token && (
+        <div className="page-scroll"><JournalPage token={auth.token} user={auth.user} onTalk={() => navigate('app')}
+                                                  onHelp={() => setHelpOpen(true)} /></div>
+      )}
       {view === 'journeys' && auth.token && (
         <div className="page-scroll"><JourneysPage token={auth.token} onStartJourney={startJourney} onTalk={() => navigate('app')} /></div>
       )}

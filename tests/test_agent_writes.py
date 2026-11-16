@@ -240,3 +240,20 @@ def test_the_turn_replaces_a_claim_while_a_save_waits(turn, user_store):
                        reply="I've logged 5 hours of sleep for you.")
     assert result.proposal and "press Save" in result.reply and "I've logged" not in result.reply
     assert user_store.sleep_logs(uid) == []
+
+
+# ─────────────────────────── writing directly in the app ───────────────────────────
+def test_writing_in_the_app_needs_no_confirm_step_but_the_same_rules(api, user_store):
+    c, register = api
+    headers, uid = register("a@x.io")
+    r = c.post("/journal/entries", json={"text": "  proud of   today "}, headers=headers)
+    assert r.status_code == 201 and r.json()["text"] == "proud of today"
+    r = c.post("/logs/sleep", json={"hours": 5.5, "quality": "poor"}, headers=headers)
+    assert r.status_code == 201 and r.json()["hours"] == 5.5
+    r = c.post("/logs/mood", json={"weather": "rain"}, headers=headers)
+    assert r.status_code == 201 and r.json()["weather"] == "rain" and r.json()["note"] is None
+    assert c.post("/logs/sleep", json={"hours": 30}, headers=headers).status_code == 422
+    assert c.post("/logs/mood", json={"weather": "sunny"}, headers=headers).status_code == 422
+    assert c.post("/journal/entries", json={"text": ""}, headers=headers).status_code == 422
+    assert c.post("/journal/entries", json={"text": "x"}).status_code == 401                 # signed in only
+    assert user_store.path.read_bytes().find(b"proud of today") == -1                        # still encrypted

@@ -28,3 +28,11 @@ def test_config_does_not_create_directories_on_import(tmp_path):
     code = "import lumina.config as c; print(c.VECTORSTORE_PATH.exists())"
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=config.PROJECT_ROOT)
     assert out.stdout.strip() == "True"        # exists because it ships with the project, not because import creates it
+
+
+def test_relative_data_paths_are_relative_to_the_project_not_the_shell(tmp_path, monkeypatch):
+    """Started from frontend/, LUMINA_USER_DB=data/user/lumina.db once created a second, empty database there."""
+    from lumina import config
+    monkeypatch.chdir(tmp_path)
+    assert config._project_path("data/user/lumina.db") == config.PROJECT_ROOT / "data" / "user" / "lumina.db"
+    assert config._project_path(str(tmp_path / "x.db")) == tmp_path / "x.db"

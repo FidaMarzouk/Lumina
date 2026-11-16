@@ -35,6 +35,9 @@ export const CompassIcon = () => (
 export const SparkIcon = () => (
   <svg {...base}><path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z" /><path d="M18.5 16v4M16.5 18h4" /></svg>
 )
+export const PenIcon = () => (
+  <svg {...base}><path d="M5 19.5c3-.5 5.5-2 6.5-3L19 9a2.1 2.1 0 0 0-3-3l-7.5 7.5c-1 1-2.5 3.5-3.5 6z" /><path d="M14.5 7.5l2 2M4 21h7" /></svg>
+)
 export const UserIcon = () => (
   <svg {...base}><circle cx="12" cy="8.5" r="3.5" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
 )
