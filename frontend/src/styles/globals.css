@@ -1,6 +1,6 @@
-/* Lumina: a sunlit sketchbook. Cream paper, forest ink, coral lines; grain, torn edges, tape and stamps.
-   Type: Montserrat Black (uppercase, tight) for headlines; Poppins for reading and UI; Caveat for one-line
-   notes "written" by Lumina, never for paragraphs.
+/* Lumina: a sunlit sketchbook. Cream paper, forest ink, coral lines; grain, tape and stamps.
+   Type, two hands: Mynerve, bold, for titles; Handlee for everything else (reading, UI, notes, the conversation,
+   the journal). Poppins only where a person may need to read fast: help lines and their numbers.
    Lines and outlines are smooth; paper texture (grain, fibre, torn slips) comes from the tiles below and the
    SVG filters in components/paper/PaperDefs.jsx, on fills and drawings only, so text stays crisp. Motion is breath-paced (4 to 8 s) and stops
    with reduced motion. "Get help" stays plain: no texture, no motion. Design reference: docs/design/. */
@@ -30,10 +30,10 @@
      files are present: src/fonts.js); Poppins stays for controls, forms and the conversation. */
   --scrawl:  'Manic', 'Mynerve', 'Segoe Print', 'Bradley Hand', cursive;
   --display: var(--scrawl);
-  --text:    'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --hand:    'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
-  --your:    var(--scrawl);    /* the person's own hand: their journal */
-  --hi:      #cdebb0;      /* the green highlighter: a mark under words, never a surface */
+  --text:    'Handlee', 'Segoe Print', 'Bradley Hand', system-ui, sans-serif;
+  --plain:   'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --hand:    var(--text);       /* Lumina's notes: the same hand as everything else, in coral */
+  --your:    var(--text);       /* the person's journal: the same readable hand */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Risograph grain and paper fibre, as tiles */
@@ -45,6 +45,13 @@
   --tape-a: rgba(234, 106, 51, 0.45); --tape-b: rgba(59, 165, 130, 0.4);
   --grain-light: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .96 0 0 0 0 .93 0 0 0 0 .82 0 0 0 1.4 -.6'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   --paper-hi: var(--paper);   /* paper laid on paper: slips, the tear-off sheet, pinned notes */
+  /* page markers: a resting and a pulled-out shade of each */
+  --mk-coral: #fbd9c6; --mk-coral-on: #f5b08e;
+  --mk-butter: #f7e9bd; --mk-butter-on: #f1d47e;
+  --mk-mint: #d5ecdf; --mk-mint-on: #a9d8bf;
+  --mk-peach: #fbe2cf; --mk-peach-on: #f6c49f;
+  --mk-sage: #dfe6dc; --mk-sage-on: #bccbb8;
+  --moon-lit: #f1d47e; --moon-short: #f5b08e; --moon-dark: #c9d4c5;   /* the fourteen nights */
   --stroke: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 12' preserveAspectRatio='none'><path d='M3 7 C 70 3, 150 9, 220 6 S 340 4, 397 7' fill='none' stroke='%23EA6A33' stroke-width='4.5' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
 }
 
@@ -61,6 +68,19 @@ body::before {
 }
 button, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+/* The pointer is the logo's star (coral by day, amber at night), with sparkles behind it (Sparkles.jsx).
+   Typing places keep the text cursor; mouse users only: touch screens never see a cursor. */
+@media (hover: hover) and (pointer: fine) {
+  html, button, a, label, [role="button"], select {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><path d='M13 1.5 Q14.4 11.6 24.5 13 Q14.4 14.4 13 24.5 Q11.6 14.4 1.5 13 Q11.6 11.6 13 1.5Z' fill='%23ea6a33' stroke='%23fffaec' stroke-width='1.6' stroke-linejoin='round'/></svg>") 13 13, auto;
+  }
+  :root[data-paper="night"], :root[data-paper="night"] :is(button, a, label, [role="button"], select) {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><path d='M13 1.5 Q14.4 11.6 24.5 13 Q14.4 14.4 13 24.5 Q11.6 14.4 1.5 13 Q11.6 11.6 13 1.5Z' fill='%23f3d58a' stroke='%2313291f' stroke-width='1.6' stroke-linejoin='round'/></svg>") 13 13, auto;
+  }
+  input, textarea, [contenteditable="true"] { cursor: text; }
+  button:disabled { cursor: not-allowed; }
+}
+.sparkles { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 60; pointer-events: none; }
 h1, h2, h3, p, dl, dd, ul, fieldset, figure { margin: 0; }
 a { color: inherit; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 8px; }
@@ -84,18 +104,14 @@ a { color: inherit; }
 .your { font-family: var(--your); }
 .bar { display: block; height: 12px; background: var(--stroke) no-repeat center / 100% 100%; }
 
-/* ── Marks: how the app points at things (docs/design/concept-board-2.html) ──
-   .hl   a highlighter sweep under the word; drawn on hover/focus of the parent, or always with .is-on
-   .circ a coral circle drawn once around the word (the current page, a call to action)
-   .ul2  a double underline for inline links */
-.hl { background: linear-gradient(var(--hi), var(--hi)) no-repeat 0 62% / 0% 48%; padding-inline: 0.08em; transition: background-size 0.45s var(--ease); }
-.hl.is-on, :is(a, button):is(:hover, :focus-visible) > .hl, :is(a, button):is(:hover, :focus-visible) .hl { background-size: 100% 48%; }
+/* ── Marks: a coral circle drawn once around a word (a call to action, a card title);
+   .ul2 a double underline for inline links. (The green highlighter is gone.) */
 .circ { position: relative; display: inline-block; padding: 0.05em 0.3em; }
 .circ-line { position: absolute; inset: -22% -12%; width: 124%; height: 144%; pointer-events: none; overflow: visible; }
 .circ-line path { fill: none; stroke: var(--coral); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 600; stroke-dashoffset: 600; transition: stroke-dashoffset 0.7s var(--ease); }
 .circ.is-on .circ-line path, :is(a, button):is(:hover, :focus-visible) .circ-line path { stroke-dashoffset: 0; }
 .ul2 { text-decoration: none; padding-bottom: 5px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 10' preserveAspectRatio='none'><path d='M2 4 C 30 2, 60 6, 118 3 M6 8 C 40 6, 80 9, 116 7' fill='none' stroke='%230d5541' stroke-width='1.3' stroke-linecap='round'/></svg>") no-repeat 0 100% / 100% 10px; }
-@media (prefers-reduced-motion: reduce) { .hl, .circ-line path { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .circ-line path { transition: none; } }
 
 /* ── Outlines: drawn on a pseudo-element as one smooth line ─────────────── */
 .btn-quiet, .chip, .seg, .pill-cta, .composer-field, .conversation, .auth-card, .plate, .stamp {
@@ -235,30 +251,49 @@ a { color: inherit; }
 .pill-cta .ring-btn { width: 74px; height: 74px; }
 
 .how {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 40px;
-  padding: 72px 44px 96px 52px; margin: 0 44px 0 0; position: relative;
+  display: block; padding: 72px 44px 96px 52px; margin: 0 44px 0 0; position: relative;
 }
 .how::before { content: ''; position: absolute; top: -4px; left: 52px; right: 0; height: 10px; background: var(--stroke) no-repeat center / 100% 100%; }
 .how-copy .display-md { margin-bottom: 40px; }
-.dots { display: flex; flex-direction: column; gap: 22px; margin-bottom: 44px; }
+.dots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 36px; margin-bottom: 44px; max-width: 1180px; }
 .dots > div { display: grid; grid-template-columns: 30px minmax(0, 1fr); }
 .dots > div::before { content: ''; width: 14px; height: 14px; margin-top: 6px; border-radius: 50%; background: var(--coral); grid-row: span 2; }
 .dots dt { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 20px; letter-spacing: 0.02em; line-height: 1.25; }
 .dots dd { color: var(--forest-2); max-width: 40ch; }
 .how-go { margin-left: 8px; }
-.how-art { position: relative; display: grid; grid-template-columns: 1.2fr 1fr; align-items: end; }
-.how-plant { width: 100%; }
-.how-leaves { width: 100%; margin-left: -12%; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* ── App shell ───────────────────────────────────────────────────────────── */
 .app { height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
 .rulebar-app { padding: 18px 28px 14px 32px; gap: 8px; }
+
+/* ── Page markers: the pages as bookmark ribbons clipped to the top of the notebook ─────────────────────
+   Each its own colour; the open page pulled all the way out; hovering pulls a marker out a little, with a
+   small sway, as if a finger caught it. Smooth edges, a notched end. */
+.marker-tabs { display: flex; gap: 6px; align-self: flex-start; margin-top: -18px; }
+.marker { position: relative; border: 0; background: none; padding: 0; color: var(--forest); filter: drop-shadow(0 3px 2px rgba(13, 85, 65, 0.14)); }
+.marker-flag {
+  display: flex; align-items: center; gap: 7px; padding: 20px 15px 17px; font-size: 17px; line-height: 1;
+  background: var(--tone); transform-origin: 50% 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 9px), 0 100%);
+  transition: padding-top 0.4s var(--ease), background-color 0.3s;
+}
+.marker-flag svg { width: 19px; height: 19px; flex: none; }
+.marker:hover .marker-flag, .marker:focus-visible .marker-flag { padding-top: 28px; animation: marker-sway 0.9s var(--ease); }
+.marker.is-current .marker-flag { padding-top: 34px; background: var(--tone-on); }
+.marker.is-current .marker-label { -webkit-text-stroke: 0.03em currentColor; }
+.marker:focus-visible { outline: none; }
+.marker:focus-visible .marker-flag { box-shadow: inset 0 0 0 3px var(--focus); }
+@keyframes marker-sway { 0% { transform: rotate(0); } 30% { transform: rotate(-3.5deg); } 60% { transform: rotate(2deg); } 85% { transform: rotate(-0.6deg); } 100% { transform: rotate(0); } }
+.marker.is-coral { --tone: var(--mk-coral); --tone-on: var(--mk-coral-on); }
+.marker.is-butter { --tone: var(--mk-butter); --tone-on: var(--mk-butter-on); }
+.marker.is-mint { --tone: var(--mk-mint); --tone-on: var(--mk-mint-on); }
+.marker.is-peach { --tone: var(--mk-peach); --tone-on: var(--mk-peach-on); }
+.marker.is-sage { --tone: var(--mk-sage); --tone-on: var(--mk-sage-on); }
+@media (prefers-reduced-motion: reduce) { .marker:hover .marker-flag { animation: none; } }
 .rulebar-app .rule { margin: 0 18px; }
-.page-tabs { display: flex; gap: 6px; }
-.page-tabs .link-quiet:hover { background: transparent; }        /* the highlighter marks the hover instead */
-.link-quiet.is-current { font-weight: 600; }
+
 .room { display: grid; grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.6fr); min-height: 0; }
 
 /* the left column: pond, style, pebbles, voice */
@@ -1053,7 +1088,12 @@ body { transition: background-color 1.2s ease, color 1.2s ease; }
   --slow: 1.6;                             /* the pond ripples more slowly */
   --stroke: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 12' preserveAspectRatio='none'><path d='M3 7 C 70 3, 150 9, 220 6 S 340 4, 397 7' fill='none' stroke='%23F2A65A' stroke-width='4.5' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");   /* amber underlines */
   --band: #a07a3f;                         /* ochre: the notebook's elastic band */
-  --hi: rgba(157, 196, 140, 0.34);         /* a fern highlighter: moonlit text stays readable over it */
+  --mk-coral: #3d3123; --mk-coral-on: #6b4a2b;      /* page markers in earth tones, amber when pulled out */
+  --mk-butter: #39382a; --mk-butter-on: #5f5733;
+  --mk-mint: #2c3a2c; --mk-mint-on: #3f5a3e;
+  --mk-peach: #3b3326; --mk-peach-on: #634a31;
+  --mk-sage: #323a2f; --mk-sage-on: #4c5745;
+  --moon-lit: #f6edd2; --moon-short: #f2a65a; --moon-dark: #1b2a20;   /* moonlight on the night garden */
 }
 /* grain turns into starlight: faint light specks, screen-blended */
 :root[data-paper="night"] body::before { background-image: var(--grain-light); opacity: 0.1; mix-blend-mode: screen; }
@@ -1075,7 +1115,7 @@ body { transition: background-color 1.2s ease, color 1.2s ease; }
 @keyframes star-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 0.7; transform: none; } }
 @keyframes twinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.85; } }
 /* the illustrations sit on a lit page, like a window at night */
-:root[data-paper="night"] :is(.hero-art, .page-head-img, .insights-art, .journal-empty img, .jpage-blank-art, .how-art) {
+:root[data-paper="night"] :is(.hero-art, .page-head-img, .insights-art, .journal-empty img, .jpage-blank-art) {
   background: #f6edd2; border-radius: 28px; padding: 12px; filter: brightness(0.9);   /* dimmed a little for dark rooms */
 }
 /* Get help never changes: plain and high contrast, in the day palette (the crisis panel too) */
@@ -1104,9 +1144,9 @@ body { transition: background-color 1.2s ease, color 1.2s ease; }
   .pill-cta { justify-self: stretch; justify-content: space-between; padding-left: 26px; margin-top: 28px; }
   .pill-cta .ring-btn { width: 60px; height: 60px; }
   .pill-word { font-size: clamp(22px, 7vw, 38px); white-space: nowrap; }
-  .how { grid-template-columns: minmax(0, 1fr); padding: 48px 18px 64px; margin: 0 18px 0 0; }
+  .how { padding: 48px 18px 64px; margin: 0 18px 0 0; }
+  .dots { grid-template-columns: minmax(0, 1fr); }
   .how::before { left: 18px; }
-  .how-art { width: min(100%, 420px); }
 
   .rulebar-app { padding: 12px 8px 10px 18px; flex-wrap: wrap; column-gap: 4px; row-gap: 6px; }
   .rulebar-app .rule { margin: 0 4px; min-width: 8px; }
@@ -1115,11 +1155,11 @@ body { transition: background-color 1.2s ease, color 1.2s ease; }
   .brand { font-size: 21px; }
   .label-wide { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .only-narrow { display: inline-flex; }
-  .page-tabs { order: 10; flex-basis: 100%; gap: 2px; min-width: 0; }
-  /* five pages on a phone: the icon over the word, all in one row */
-  .page-tabs .link-quiet { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; justify-content: center;
-                           padding: 6px 2px; font-size: 13px; line-height: 1.2; }
-  .page-tabs .circ { padding: 0.05em 0.2em; }
+  /* five markers on a phone: one row under the logo, icon over the word */
+  .marker-tabs { order: 10; flex-basis: 100%; align-self: auto; margin: 4px -8px -10px -18px; padding: 0 6px; gap: 3px; justify-content: stretch; }
+  .marker { flex: 1 1 0; min-width: 0; }
+  .marker-flag { flex-direction: column; gap: 1px; padding: 4px 2px 12px; min-width: 0; width: 100%; font-size: 14px; }
+  .marker-flag svg { width: 18px; height: 18px; }
 
   .room { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .stage { flex-direction: row; align-items: center; gap: 14px; padding: 0 14px 10px 18px; overflow: visible; }
@@ -1194,34 +1234,53 @@ body { transition: background-color 1.2s ease, color 1.2s ease; }
   .guided-bar { margin: 10px 12px 0; padding: 10px 14px; }
 }
 
-/* ── Today: the desk ─────────────────────────────────────────────────────────
-   Four pieces of paper at slight angles: the list, the jar card, the sleep line, the letter. Then the journal
-   spread. Smooth edges; the hand-drawn feel comes from the marks and the handwriting, not from torn paper. */
-.page-date { font-size: 24px; color: var(--coral-ink); line-height: 1; margin-top: 10px; }
-.desk { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 26px 22px; align-items: start; margin-top: 8px; }
+/* ── Today: at a glance, then two rows of cards ──────────────────────────────
+   Organised, not scattered: one strip of what matters this morning, then the plan beside the letter, and the
+   nights beside the jar. Cards share edges, padding and height per row; smooth corners, no tilt. */
+.today-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 40px; margin-bottom: 24px; }
+.today-head .page-lede { max-width: 44ch; padding-bottom: 10px; }
+.page-date { font-size: 22px; color: var(--coral-ink); line-height: 1.1; margin-top: 8px; }
+.glance { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1.25fr); border-radius: 14px; background: var(--paper);
+          box-shadow: 0 1px 0 var(--line), 0 18px 34px -26px rgba(13, 85, 65, 0.4); margin-bottom: 22px; overflow: hidden; }
+.glance-stub { display: flex; align-items: center; gap: 12px; padding: 14px 20px; min-width: 0; border: 0; background: none; text-align: left; color: var(--forest); }
+.glance-stub + .glance-stub { border-left: 1.5px dashed var(--line); }
+button.glance-stub:hover { background: var(--butter-soft); }
+.glance-label { display: block; font-size: 14px; color: var(--forest-2); line-height: 1.2; }
+.glance-value { display: block; font-size: 19px; line-height: 1.25; color: var(--ink); overflow-wrap: anywhere; }
+.glance-mood { flex-direction: column; align-items: flex-start; gap: 2px; }
+.glance-weather { display: flex; flex-wrap: wrap; gap: 0; margin-left: -8px; }
+.glance-next { justify-content: space-between; }
+.glance-go { flex: none; border: 0; border-radius: 999px; background: var(--forest); color: var(--cream); padding: 9px 20px; min-height: 42px; font-size: 16px; }
+.glance-go:hover { background: var(--ink); }
+
+.desk { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 22px; align-items: stretch; }
 .desk > * { min-width: 0; }
-.todo, .jarcard, .sleepline, .lettercard { position: relative; isolation: isolate; border-radius: 6px; box-shadow: 0 1px 0 var(--line), 0 22px 40px -28px rgba(13, 85, 65, 0.4); }
-.todo::after, .jarcard::after, .sleepline::after, .lettercard::after { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background-image: var(--fibre); opacity: 0.2; pointer-events: none; }
+.card { position: relative; isolation: isolate; border-radius: 14px; padding: 22px 24px 20px; background: var(--paper);
+        box-shadow: 0 1px 0 var(--line), 0 20px 38px -28px rgba(13, 85, 65, 0.42); }
+.card::after { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background-image: var(--fibre); opacity: 0.18; pointer-events: none; }
+.card-title { font-size: 28px; line-height: 1.05; color: var(--forest); margin-bottom: 14px; }
 
-.todo { grid-column: span 5; background: var(--paper); padding: 24px 22px 18px; transform: rotate(-0.8deg); }
-.todo-title { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: 30px; line-height: 1; letter-spacing: -0.01em; }
-.todo-list { list-style: none; padding: 0; margin: 16px 0 0; }
-.todo-list li { display: flex; align-items: center; gap: 8px; padding: 10px 0 8px; border-bottom: 1.5px solid #c6d4ea; font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 13.5px; letter-spacing: 0.04em; line-height: 1.35; }
-.todo-star { font-family: var(--hand); color: var(--coral); font-size: 22px; line-height: 1; }
-.todo-item { border: 0; background: none; padding: 0; text-align: left; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--forest); min-height: 28px; }
-button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink); }
-.todo-from { margin-left: auto; font-size: 16px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--forest-2); white-space: nowrap; }
+.todo-list { list-style: none; padding: 0; margin: 0; }
+.todo-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; padding: 11px 0 9px; border-bottom: 1.5px solid var(--line); font-size: 18px; line-height: 1.35; }
+.todo-mark { color: var(--coral); text-align: center; font-size: 18px; }
+.todo-item { border: 0; background: none; padding: 0; text-align: left; font: inherit; color: var(--forest); }
+.todo-item em { font-style: normal; color: var(--coral-ink); }
+button.todo-item { position: relative; }
+button.todo-item::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--coral); border-radius: 2px; transform: scaleX(0); transform-origin: left; transition: transform 0.35s var(--ease); }
+button.todo-item:hover::after, button.todo-item:focus-visible::after { transform: scaleX(1); }
+.todo-from { font-size: 14.5px; color: var(--forest-2); white-space: nowrap; }
 .todo-list li.is-done .todo-item { color: var(--forest-2); text-decoration: line-through; text-decoration-color: var(--sage); text-decoration-thickness: 1.5px; }
-.todo-list li.is-done .hl { background-size: 0 48%; }
+.todo-list li.is-done .todo-item em { color: inherit; }
+.todo-list li.is-done .todo-mark { color: var(--mint); }
 
-.jarcard { grid-column: span 7; background: var(--coral); color: var(--paper); padding: 26px 26px 22px; transform: rotate(0.6deg); }
+.jarcard { background: var(--coral); color: var(--paper); }
 .jarcard::after { background-image: var(--grain); opacity: 0.3; mix-blend-mode: multiply; }
-.jarcard-title { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: 26px; line-height: 1.02; letter-spacing: -0.01em; color: var(--paper); }
+.jarcard .card-title { color: var(--paper); }
 .jarcard-title .circ-line path { stroke: var(--paper); }
 .jarcard-wait { margin-top: 14px; color: rgba(255, 253, 246, 0.85); font-size: 14.5px; }
-.jarcard-lines { display: grid; gap: 10px; margin-top: 20px; }
+.jarcard-lines { display: grid; gap: 8px; margin-top: 6px; }
 .jarcard-line { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; border-bottom: 1.5px solid rgba(255, 253, 246, 0.55); padding-bottom: 3px; }
-.jarcard-line dt { font-family: var(--display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11.5px; color: rgba(255, 253, 246, 0.9); }
+.jarcard-line dt { font-size: 14px; color: rgba(255, 253, 246, 0.9); }
 .jarcard-line dd { font-size: 17px; line-height: 1.4; color: var(--paper); margin: 0; }
 .jarcard-x { border: 0; background: none; color: rgba(255, 253, 246, 0.7); font-size: 20px; line-height: 1; width: 28px; height: 28px; border-radius: 50%; opacity: 0; transition: opacity 0.2s; }
 .jarcard-line:hover .jarcard-x, .jarcard-x:focus-visible { opacity: 1; }
@@ -1240,18 +1299,17 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
 .jarcard-error { margin-top: 10px; color: var(--paper); font-weight: 600; font-size: 14px; }
 .jarcard :focus-visible { outline-color: var(--paper); }
 
-.sleepline { grid-column: span 7; background: var(--paper); padding: 20px 24px 18px; transform: rotate(-0.4deg); }
-.sleepline-title { font-size: 22px; line-height: 1; color: var(--coral-ink); }
-.tally { list-style: none; margin: 14px 0 0; padding: 0; display: flex; gap: 8px; align-items: flex-end; height: 86px; }
-.tally li { flex: 1; min-width: 0; height: 100%; display: grid; align-content: end; }
-.tally li.is-empty { border-bottom: 1.5px dashed var(--line); }
-.tally-night { position: relative; border: 0; background: none; padding: 0 0 2px; display: grid; gap: 3px; align-content: end; height: 100%; border-radius: 4px; }
-.tally-night i { display: block; height: 5px; border-radius: 3px; background: var(--forest); transform: rotate(-2deg); }
-.tally li:nth-child(even) .tally-night i { transform: rotate(2deg); }
-.tally li.is-short .tally-night i { background: var(--coral); }
-.tally-x { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--forest); color: var(--cream); font-size: 15px; line-height: 22px; text-align: center; opacity: 0; transition: opacity 0.2s; }
-.tally-night:hover .tally-x, .tally-night:focus-visible .tally-x { opacity: 1; }
-.tally-night:hover i { opacity: 0.55; }
+.moons { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; }
+.moons li { display: grid; justify-items: center; gap: 2px; min-width: 0; }
+.moons svg { width: 100%; max-width: 34px; height: auto; }
+.moons li.is-last svg { filter: drop-shadow(0 0 4px var(--peach)); }
+.moon-dark { fill: var(--moon-dark); }
+.moon-lit { fill: var(--moon-lit); }
+.moon-lit.is-short { fill: var(--moon-short); }
+.moon-rim { fill: none; stroke: var(--forest); stroke-width: 1.4; }
+.moon-none { fill: none; stroke: var(--forest-3); stroke-width: 1.4; stroke-dasharray: 2 3; }
+.moon-hours { font-size: 15px; line-height: 1; color: var(--ink); }
+.moon-day { font-size: 12.5px; line-height: 1; color: var(--forest-2); }
 .sleepline-avg { font-size: 19px; line-height: 1.4; color: var(--ink); margin-top: 10px; }
 .sleepline-form { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 12px; padding-top: 12px; border-top: 1.5px solid var(--line); font-size: 18px; color: var(--ink); }
 .sleepline-hours { width: 64px; border: 0; border-bottom: 1.5px solid var(--forest); background: transparent; font-size: 19px; text-align: center; padding: 2px 4px; caret-color: var(--coral); }
@@ -1260,22 +1318,25 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
 .sleepline-q { border: 0; background: none; padding: 4px 8px; border-radius: 999px; font-family: var(--your); font-size: 17px; color: var(--forest-2); min-height: 32px; }
 .sleepline-q:hover { color: var(--forest); }
 .sleepline-q.is-on { color: var(--coral-ink); background: var(--coral-wash); }
-.sleepline-keep { border: 0; border-radius: 999px; background: var(--forest); color: var(--cream); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 16px; min-height: 34px; margin-left: auto; }
+.sleepline-keep { border: 0; border-radius: 999px; background: var(--forest); color: var(--cream); font-size: 15px; padding: 6px 18px; min-height: 38px; margin-left: auto; }
 .sleepline-keep:disabled { opacity: 0.45; cursor: not-allowed; }
 .sleepline-error { margin-top: 8px; }
 
-.lettercard { grid-column: span 5; background: var(--butter); padding: 24px 22px 20px; transform: rotate(0.9deg); }
+.lettercard { background: var(--butter); }
 .lettercard .postmark { position: absolute; top: -12px; right: 6px; width: 112px; transform: rotate(-9deg); }
-.lettercard .letter-dear { font-size: 28px; }
-.lettercard-text { font-size: 14.5px; line-height: 1.65; color: var(--forest); max-width: 36ch; }
-.lettercard-ask { font-size: 22px; line-height: 1.15; color: var(--coral-ink); margin: 10px 0 12px; max-width: 30ch; }
-.lettercard .link-inline { font-size: 14.5px; }
+.lettercard .letter-dear { display: block; font-size: 24px; color: var(--coral-ink); line-height: 1.1; margin-bottom: 6px; }
+.lettercard-text { font-size: 17px; line-height: 1.6; color: var(--forest); max-width: 40ch; }
+.lettercard-ask { font-size: 19px; line-height: 1.3; color: var(--coral-ink); margin: 10px 0 12px; max-width: 34ch; }
+.lettercard .link-inline { font-size: 16px; }
 
 @media (max-width: 900px) {
-  .todo, .jarcard, .sleepline, .lettercard { grid-column: span 12; transform: none; }
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .glance { grid-template-columns: minmax(0, 1fr); }
+  .glance-stub + .glance-stub { border-left: 0; border-top: 1.5px dashed var(--line); }
 }
 @media (max-width: 480px) {
   .todo-from { display: none; }
+  .moons { grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 10px; }
 }
 
 @media (max-width: 420px) {
@@ -1308,7 +1369,8 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
    Smooth edges. Scratching out draws real ink over the words (ScratchText.jsx). */
 .journal-desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 40px; align-items: start; }
 .day {
-  position: relative; isolation: isolate; border-radius: 8px; min-height: 560px; padding: 30px 32px 26px 84px;
+  position: relative; isolation: isolate; border-radius: 8px; min-height: 680px; padding: 30px 32px 22px 84px;
+  display: flex; flex-direction: column;
   background-color: var(--page-paper, #fffbef);
   background-image:
     linear-gradient(to right, transparent 62px, rgba(234, 106, 51, 0.5) 62px, rgba(234, 106, 51, 0.5) 64px, transparent 64px),
@@ -1347,6 +1409,29 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
 @media (hover: none) { .scratch-all { opacity: 0.6; } }
 
 .day-write { margin-top: 0; }
+/* Writing that looks written (HandwritingArea.jsx): the input's own letters are invisible, the mirror over it
+   draws each new letter left to right in graphite, and a pencil rides the caret. */
+.handwriting { position: relative; }
+.handwriting-input { color: transparent !important; caret-color: var(--coral); position: relative; z-index: 1; }
+.handwriting-input::selection { color: transparent; background: var(--mk-butter-on); }
+.handwriting-ink { position: absolute; inset: 0; z-index: 2; pointer-events: none; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); min-height: 0 !important; }
+.handwriting-measure { visibility: hidden; z-index: 0; }
+.handwriting-mark { display: inline-block; width: 0; }
+.ink-new { animation-name: pencil-write; animation-timing-function: cubic-bezier(0.3, 0.6, 0.4, 1); animation-fill-mode: both; }
+@keyframes pencil-write {
+  0% { clip-path: inset(-10% 100% -10% 0); color: var(--sage); filter: blur(0.4px); }
+  70% { clip-path: inset(-10% 0 -10% 0); color: var(--sage); }
+  100% { clip-path: inset(-10% 0 -10% 0); color: var(--ink); filter: none; }
+}
+.pencil { position: absolute; left: 0; top: 0; z-index: 3; width: 30px; height: 30px; pointer-events: none; transition: transform 0.12s linear; }
+.pencil-body { transform-origin: 6px 34px; }
+.handwriting.is-writing .pencil-body { animation: pencil-wobble 0.22s ease-in-out infinite alternate; }
+@keyframes pencil-wobble { from { transform: rotate(-4deg) translate(0, -1px); } to { transform: rotate(3deg) translate(1px, 0.5px); } }
+@media (prefers-reduced-motion: reduce) {
+  .ink-new { animation: none; }
+  .handwriting.is-writing .pencil-body { animation: none; }
+  .pencil { transition: none; }
+}
 .day-area { display: block; width: 100%; border: 0; background: transparent; resize: none; overflow: hidden; font-size: 21px; line-height: 36px; color: var(--ink); padding: 0; min-height: 144px; caret-color: var(--coral); }
 .day-area::placeholder { color: var(--forest-3); }
 .day-area:focus-visible { outline: 0; box-shadow: none; }
@@ -1355,7 +1440,7 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
 .day-keep:hover:not(:disabled) { background: var(--ink); }
 .day-keep:disabled { opacity: 0.45; cursor: not-allowed; }
 .day-closed { margin-top: 20px; font-size: 18px; color: var(--forest-2); }
-.day-turn { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 28px; }
+.day-turn { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 28px; }
 .day-turn button { border: 0; background: none; font-size: 20px; color: var(--coral-ink); padding: 6px 8px; min-height: 44px; border-radius: 8px; }
 .day-turn button:hover:not(:disabled) { background: var(--butter-soft); }
 .day-turn button:disabled { opacity: 0.35; cursor: default; }
@@ -1387,8 +1472,6 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
 .mcal-day.is-today::after { content: ''; position: absolute; inset: 3px; border: 2px solid var(--coral); border-radius: 46% 54% 50% 48% / 52% 46% 54% 48%; transform: rotate(-6deg); pointer-events: none; }
 .mcal-ink { position: absolute; bottom: 5px; left: 50%; width: calc(4px + var(--n) * 1.5px); height: calc(4px + var(--n) * 1.5px); transform: translateX(-50%); border-radius: 50% 46% 54% 48%; background: var(--ink); }
 .mcal-num { line-height: 1; transform: translateY(-3px); }
-.mcal-weather { position: absolute; top: 3px; right: 3px; width: 11px; height: 11px; color: var(--sage); opacity: 0.85; }
-.mcal-weather svg { width: 11px; height: 11px; stroke-width: 2.2; }
 .mcal-foot { margin-top: 10px; font-size: 18px; color: var(--coral-ink); text-align: center; }
 .journal-where-goes { margin-top: 18px; font-size: 14px; line-height: 1.6; color: var(--forest-2); }
 
@@ -1411,14 +1494,19 @@ button.todo-item:hover, button.todo-item:focus-visible { color: var(--coral-ink)
    synthetic bold; letters stay apart. Get help stays plain: its title and the numbers people may need to read
    in a hurry are never handwritten. */
 .display, .section-title, .todo-title, .jarcard-title, .jpage-title, .trail-title, .plank-title, .postcard-title,
-.sheet-head h2, .guided-text strong, .day-title, .cal-month, .journal-where, .kicker, .dots dt {
+.sheet-head h2, .guided-text strong, .day-title, .cal-month, .journal-where, .dots dt, .card-title {
   font-family: var(--scrawl); font-weight: 400; letter-spacing: 0.01em;
-  -webkit-text-stroke: 0.028em currentColor; paint-order: stroke fill;
+  -webkit-text-stroke: 0.05em currentColor; paint-order: stroke fill;     /* bold, as if gone over twice */
 }
-.display { line-height: 0.95; }
-.page-lede, .section-lede, .dots dd, .post-note-text, .letter-wait, .jarcard-wait, .entry-empty {
-  font-family: var(--scrawl); font-weight: 400; font-size: 19px; line-height: 1.5; letter-spacing: 0.005em;
+.display { line-height: 0.95; -webkit-text-stroke-width: 0.055em; }
+.page-lede, .section-lede, .dots dd, .post-note-text, .letter-wait, .jarcard-wait, .entry-empty, .kicker {
+  font-family: var(--text); font-weight: 400; font-size: 19px; line-height: 1.55; letter-spacing: 0.005em;
 }
-.kicker { font-size: clamp(20px, 1.7vw, 24px); text-transform: none; letter-spacing: 0.01em; }
-.help-body h2, .help-number, .lifeline-number, .lifeline-title { font-family: var(--text); font-weight: 600; letter-spacing: 0; -webkit-text-stroke: 0; }
-.help-body h2 { font-weight: 600; text-transform: none; }
+.kicker { font-size: clamp(20px, 1.7vw, 24px); text-transform: none; }
+/* One hand everywhere: things that were set in another face before (bold labels, uppercase captions) */
+body, button, input, textarea, select { font-family: var(--text); }
+.hand { font-weight: 400; }
+strong, b, .btn-primary, .day-keep, .writing-keep, .sleepline-keep, .jarcard-keep { -webkit-text-stroke: 0.012em currentColor; }
+/* Get help stays plain: its title and the numbers people may need to read in a hurry */
+.help-body h2, .help-number, .lifeline-number, .lifeline-title { font-family: var(--plain); font-weight: 600; letter-spacing: 0; -webkit-text-stroke: 0; }
+.help-body h2 { text-transform: none; }

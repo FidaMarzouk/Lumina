@@ -1,15 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// Fonts are bundled, not loaded from a font CDN, so no request leaves the app.
-import '@fontsource/montserrat/800.css'
-import '@fontsource/montserrat/900.css'
+// Fonts are bundled (the wordmark's Fraunces, Mynerve and Handlee in fonts.js, Poppins for help numbers), not loaded from a font CDN, so no request leaves the app.
 import '@fontsource-variable/fraunces/full.css'
-import '@fontsource/caveat/500.css'
-import '@fontsource/caveat/700.css'
 import './fonts.js'
-import '@fontsource/poppins/400.css'
-import '@fontsource/poppins/500.css'
-import '@fontsource/poppins/600.css'
+import '@fontsource/poppins/600.css'      // plain face, only for help lines and numbers
 import './styles/globals.css'
 import App from './App.jsx'
 

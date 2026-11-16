@@ -34,8 +34,8 @@ function JarCard({ token, jar, onChange }) {
   }
 
   return (
-    <section className="jarcard" aria-labelledby="jar-h">
-      <h2 id="jar-h" className="jarcard-title">Little things<br />that <Circled on>helped</Circled></h2>
+    <section className="card jarcard" aria-labelledby="jar-h">
+      <h2 id="jar-h" className="card-title jarcard-title">Little things that <Circled on>helped</Circled></h2>
       {!jar && <p className="jarcard-wait">Opening the jar…</p>}
       {jar && (
         <dl className="jarcard-lines">

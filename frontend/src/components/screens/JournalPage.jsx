@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { addEntry, addMood, fetchEntries, fetchMood, fetchSleep, removeMood, scratchEntry } from '../../api/personal.js'
 import { WEATHER } from '../chat/weather'
+import HandwritingArea from '../journal/HandwritingArea'
 import MonthCalendar from '../journal/MonthCalendar'
 import ScratchText from '../journal/ScratchText'
 import { isoDay } from '../today/today.js'
@@ -45,7 +46,6 @@ function JournalPage({ token, user, onTalk, onHelp }) {
     ;(entries ?? []).forEach(e => { const d = dayOf(e.created_at); out[d] = (out[d] ?? 0) + 1 })
     return out
   }, [entries])
-  const moodBy = useMemo(() => Object.fromEntries(moods.map(m => [m.day, m.weather])), [moods])
   const page = (entries ?? []).filter(e => dayOf(e.created_at) === day).sort((a, b) => a.created_at.localeCompare(b.created_at))
   const mood = moods.find(m => m.day === day)
   const slept = sleep.find(s => s.night === nightBefore(day))
@@ -135,7 +135,7 @@ function JournalPage({ token, user, onTalk, onHelp }) {
           {isToday && (
             <form className="day-write" onSubmit={keep}>
               <label htmlFor="journal-write" className="sr-only">Write in today’s page</label>
-              <textarea id="journal-write" ref={writeRef} className="your day-area" rows={4} maxLength={2000} value={text}
+              <HandwritingArea id="journal-write" ref={writeRef} className="your day-area" rows={4} maxLength={2000} value={text}
                         onChange={e => {
                           setText(e.target.value)
                           // the page grows as you write, like paper: no scrollbar, no resize handle
@@ -165,7 +165,7 @@ function JournalPage({ token, user, onTalk, onHelp }) {
         </article>
 
         <div className="journal-side">
-          <MonthCalendar month={month} onMonth={setMonth} selected={day} onPick={open} written={written} moods={moodBy} />
+          <MonthCalendar month={month} onMonth={setMonth} selected={day} onPick={open} written={written} />
           <p className="journal-where-goes">
             {user?.memory_enabled
               ? 'Memory is on: Lumina can bring what you write here into your conversations, your weekly letter and the journeys it suggests. Pages written on a very hard day stay with you only.'

@@ -12,6 +12,7 @@ import Pond from './components/orb/Pond'
 import PaperDefs from './components/paper/PaperDefs'
 import NightSky from './components/paper/NightSky'
 import BreathingPebble from './components/ui/BreathingPebble'
+import Sparkles from './components/ui/Sparkles'
 import HelpSheet from './components/ui/HelpSheet'
 import CrisisPanel from './components/ui/CrisisPanel'
 import Preferences from './components/ui/Preferences'
@@ -106,6 +107,7 @@ function App() {
     return (
       <>
         <PaperDefs />
+        <Sparkles night={night} />
         {paper === 'night' && <NightSky />}
         <LandingPage onStart={start} onHelp={() => setHelpOpen(true)} user={auth.user} onLogIn={() => openAuth('login')}
                      appearance={appearance} />
@@ -118,6 +120,7 @@ function App() {
     return (
       <>
         <PaperDefs />
+        <Sparkles night={night} />
         {paper === 'night' && <NightSky />}
         <AuthPage key={authMode} initialMode={authMode} auth={auth} onDone={() => setView('app')}
                   onGuest={() => setView('app')} onHome={home} onHelp={() => setHelpOpen(true)}
@@ -142,6 +145,7 @@ function App() {
   return (
     <div className="app">
       <PaperDefs />
+        <Sparkles night={night} />
       {paper === 'night' && <NightSky />}
       <Header view={view} onNavigate={navigate} onHome={home} onNewChat={newChat} onHelp={() => setHelpOpen(true)}
               onSettings={() => setSettingsOpen(true)} user={auth.user} onAccount={() => setAccountOpen(true)}

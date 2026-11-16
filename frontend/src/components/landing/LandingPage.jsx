@@ -1,4 +1,4 @@
-import { LeafScatter, OpenDoor, PottedPlant } from '../art/Illustrations'
+import { OpenDoor } from '../art/Illustrations'
 import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
 import { HelpLink } from '../layout/Header'
@@ -44,10 +44,6 @@ function LandingPage({ onStart, onHelp, user, onLogIn, appearance }) {
             <div><dt>Here to support</dt><dd>Lumina offers a space for emotional support and reflection, alongside, not instead of, professional care.</dd></div>
           </dl>
           <RingButton label="Start talking" onClick={onStart} className="how-go" />
-        </div>
-        <div className="how-art">
-          <PottedPlant className="how-plant" />
-          <LeafScatter className="how-leaves" />
         </div>
       </section>
     </div>

@@ -1,4 +1,4 @@
-// The marks: a word circled in coral (drawn once when `on`, or when the parent link is hovered).
+// A word circled in coral (drawn once when `on`, or when the parent link is hovered).
 export function Circled({ children, on = false, className = '' }) {
   return (
     <span className={`circ ${on ? 'is-on' : ''} ${className}`}>
@@ -9,6 +9,3 @@ export function Circled({ children, on = false, className = '' }) {
     </span>
   )
 }
-
-// A word with the highlighter under it (always on, or on hover of the parent link/button).
-export const Hl = ({ children, on = false }) => <span className={`hl ${on ? 'is-on' : ''}`}>{children}</span>

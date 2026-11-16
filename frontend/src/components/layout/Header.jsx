@@ -2,16 +2,16 @@ import Logo from '../brand/Logo'
 import Horizon from '../paper/Horizon'
 import AppearanceMenu from '../ui/AppearanceMenu'
 import { ChatIcon, CompassIcon, DaySunIcon, LighthouseIcon, NewChatIcon, PenIcon, SlidersIcon, SparkIcon, UserIcon } from '../ui/Icons'
-import { Circled, Hl } from '../ui/Marks'
 
-// Signed-in people move between talking, today's desk, their journeys and their insights; the open
-// conversation carries on. The current page is circled; hovering highlights the word.
+// Signed-in people move between talking, today's desk, their journal, journeys and insights; the open
+// conversation carries on. The pages are page-marker tabs clipped to the top of the notebook: each its own
+// colour, the open one pulled all the way out, the others slide out a little when the pointer reaches them.
 const PAGES = [
-  { id: 'app', label: 'Talk', Icon: ChatIcon },
-  { id: 'today', label: 'Today', Icon: DaySunIcon },
-  { id: 'journal', label: 'Journal', Icon: PenIcon },
-  { id: 'journeys', label: 'Journeys', Icon: CompassIcon },
-  { id: 'insights', label: 'Insights', Icon: SparkIcon },
+  { id: 'app', label: 'Talk', Icon: ChatIcon, tone: 'coral' },
+  { id: 'today', label: 'Today', Icon: DaySunIcon, tone: 'butter' },
+  { id: 'journal', label: 'Journal', Icon: PenIcon, tone: 'mint' },
+  { id: 'journeys', label: 'Journeys', Icon: CompassIcon, tone: 'peach' },
+  { id: 'insights', label: 'Insights', Icon: SparkIcon, tone: 'sage' },
 ]
 
 // "Get help" is the same everywhere: a tiny lighthouse, plain and always visible.
@@ -27,11 +27,11 @@ function Header({ view = 'app', onNavigate, onHome, onNewChat, onHelp, onSetting
       <HelpLink onHelp={onHelp} />
       {/* On phones these wrap onto their own row under the header. */}
       {user && (
-        <nav className="page-tabs" aria-label="Pages">
-          {PAGES.map(({ id, label, Icon }) => (
-            <button key={id} type="button" className={`link-quiet ${view === id ? 'is-current' : ''}`}
+        <nav className="marker-tabs" aria-label="Pages">
+          {PAGES.map(({ id, label, Icon, tone }) => (
+            <button key={id} type="button" className={`marker is-${tone} ${view === id ? 'is-current' : ''}`}
                     aria-current={view === id ? 'page' : undefined} onClick={() => onNavigate(id)}>
-              <Icon />{view === id ? <Circled on>{label}</Circled> : <Hl>{label}</Hl>}
+              <span className="marker-flag"><Icon /><span className="marker-label">{label}</span></span>
             </button>
           ))}
         </nav>
