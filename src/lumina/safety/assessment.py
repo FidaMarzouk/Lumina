@@ -20,7 +20,7 @@ layer stands alone, as before S3:
               or  the translator's reading says "self" / "method" / "other"
     elevated, none   as above
 
-    Why (eval/runners/safety_policy_sweep.py, docs/evaluation.md): Llama Guard 1B and the classifier key on
+    Why (eval/runners/safety_policy_sweep.py): Llama Guard 1B and the classifier key on
     topic words, and alone they opened the crisis sheet on "I need a therapist I can afford" or a sertraline
     question.  The LLM reader (lumina/safety/reader.py) reads intent: requiring it to agree halves the false
     alarms on counselling posts at the same clinical recall, and it alone catches indirect risk such as "my

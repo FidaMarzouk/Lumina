@@ -6,7 +6,7 @@ time out, or miss.  The floor catches only *unambiguous, explicit* statements so
 the system never silently drops the most obvious crisis messages.
 
 What it is NOT: a coverage mechanism.  It does not try to enumerate wording — novel
-phrasing is the models' job and is measured in eval/ (see docs/evaluation.md).
+phrasing is the models' job and is measured in eval/.
 Keep this list short; every pattern must be explicit first-person self-harm/suicide
 language or an explicit request for a self-harm method.
 

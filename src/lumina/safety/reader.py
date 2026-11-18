@@ -2,7 +2,7 @@
 
 The risk classifier keys on wording ("kill myself", "suicide") and Llama Guard 1B on explicit intent.  Both
 missed "my brother texted goodbye to everyone and now he isn't answering" and "my kids would be happier with
-a different mum, one who isn't here" (docs/evaluation.md).  A general LLM reads such indirect statements.
+a different mum, one who isn't here".  A general LLM reads such indirect statements.
 
 Same JSON shape as the translator's reading (lumina/safety/language.py), so assessment.py treats both alike:
     "self"    the writer expresses a wish to die, suicidal thoughts or plans, or self-harm

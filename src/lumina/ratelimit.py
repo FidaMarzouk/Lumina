@@ -1,6 +1,6 @@
 """Request rate limits for the expensive endpoints (/chat, /tts), per person.
 
-A chat turn costs several seconds of the local models (docs/evaluation.md §5), so one client sending in a
+A chat turn costs several seconds of the local models, so one client sending in a
 loop would make Lumina unusable for everyone else.  The limits are far above how fast a person types or
 listens; they only stop automated floods.
 

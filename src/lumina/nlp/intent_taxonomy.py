@@ -7,8 +7,8 @@ method phrases, injection phrases, idiom exceptions) are gone:
   * intent                    → a trained classifier over these definitions (lumina/nlp/intent.py);
                                 the zero-shot model uses the same definitions until it ships.
 
-The definitions are the single source for: the zero-shot labels, the labelling guide used
-to build the intent dataset (eval/datasets/intent/), and docs/evaluation.md.
+The definitions are the single source for: the zero-shot labels, and the labelling guide used
+to build the intent dataset (eval/datasets/intent/).
 """
 
 INTENTS: dict[str, str] = {

@@ -10,7 +10,7 @@ Two uses:
 
 Recent turns are included so follow-ups ("how many would it take?") are judged in context.
 Failure policy: any error / timeout → available=False; the other layers still run.
-Quality is measured in eval/ (docs/evaluation.md) — do not assume it.
+Quality is measured in eval/ — do not assume it.
 """
 
 from __future__ import annotations
@@ -120,7 +120,7 @@ def _shared_client() -> httpx.Client:
     """One kept-alive connection pool for every guard call (httpx.Client is thread-safe).
 
     A new client per call cost ~2.1 s on Windows: "localhost" is tried over IPv6 first, Ollama listens on
-    IPv4 only, so each fresh connection waited for the fallback (P1, docs/evaluation.md §5).  Two guard calls
+    IPv4 only, so each fresh connection waited for the fallback.  Two guard calls
     on every risky turn made this the largest share of a turn's time.
     """
     global _SHARED

@@ -5,7 +5,7 @@
 #   - mental health entities mentioned (spaCy EntityRuler + biomedical NER fallback)
 #   - intent — WHY they are writing (trained classifier, see nlp/intent.py)
 #
-# Pain points are no longer classified here (Q1, docs/evaluation.md): the zero-shot NLI labels were noise —
+# Pain points are no longer classified here (Q1): the zero-shot NLI labels were noise —
 # 91% of small talk got one, and "physical symptoms of stress" scored a median 0.45 on every message.  The
 # themes of a conversation now come from the LLM-written session summary (lumina/memory/episodes.py).
 #   - clean tokens for downstream use

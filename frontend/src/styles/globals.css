@@ -3,7 +3,7 @@
    the journal). Poppins only where a person may need to read fast: help lines and their numbers.
    Lines and outlines are smooth; paper texture (grain, fibre, torn slips) comes from the tiles below and the
    SVG filters in components/paper/PaperDefs.jsx, on fills and drawings only, so text stays crisp. Motion is breath-paced (4 to 8 s) and stops
-   with reduced motion. "Get help" stays plain: no texture, no motion. Design reference: docs/design/. */
+   with reduced motion. "Get help" stays plain: no texture, no motion. */
 
 :root {
   color-scheme: light;

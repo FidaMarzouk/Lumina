@@ -3,7 +3,7 @@
 # Inclusion rationale: Lumina's direct rivals (AI conversational mental-health support) plus one
 # reference app per adjacent category.  Candidates were cross-checked against Apple's
 # "You Might Also Like" graph (data/raw/market/app_store_discovery/*), which also lists apps not
-# included here (e.g. Elomia, Sonia, Noah, Clarity, Rosebud) — see docs/market_methodology.md.
+# included here (e.g. Elomia, Sonia, Noah, Clarity, Rosebud).
 #
 # name_must_contain: the collector flags the run if the fetched page title does not contain it
 # (protects against a wrong App Store id).

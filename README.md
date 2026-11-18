@@ -8,8 +8,7 @@ A mental health **support** assistant with:
 - a market-intelligence pipeline that grounds product decisions in evidence.
 
 **Results at a glance:** open `reports/lumina_report.html` in a browser. It is one page, generated from the
-pipeline outputs, with every evaluation and market result as charts and tables. `docs/evaluation.md` explains
-what the numbers mean and what they do not show.
+pipeline outputs, with every evaluation and market result as charts and tables.
 
 ## Repository layout
 ```
@@ -61,8 +60,6 @@ tests/                 unit + integration tests; tests/regression = real-model c
 notebooks/             exploration: segmentation_v0_* (Phase 1, superseded by market/), dialogue_* (prompt walkthroughs)
 
 reports/               lumina_report.html (generated)
-
-docs/                  audit, evaluation, data collection plan, knowledge-source licensing
 ```
 
 

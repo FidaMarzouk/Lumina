@@ -6,7 +6,7 @@ lumina/knowledge/cleaning.py — knowledge-base cleaning + chunking (v1)
 One output record per source PAGE:
     {doc_id, source, url, title, language, chunks: [{chunk_id, heading, text, chunk_type, words}]}
 
-Fixes over v0 (docs/audit.md §3.2; the previous code and outputs are in git history and data/snapshots/v0):
+Fixes over v0 (the previous code and outputs are in git history and data/snapshots/v0):
   * real page URLs: metadata.url is used before the record UUID (provenance of every chunk; not shown to users)
   * NIMH / Wikipedia section records are grouped into one document per page (fragment stripped)
   * English check uses whole words (v0 counted substrings, e.g. "in" inside any word → never filtered)

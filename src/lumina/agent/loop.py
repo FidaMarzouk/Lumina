@@ -7,7 +7,7 @@
 Only the orchestrator calls this, and only when tools_allowed() says so.  The tool model sees the latest message
 and nothing else from the conversation.  It never writes the reply: the usual reply model does, from the results,
 so the voice stays the same.  Of the local models tried, only Qwen 2.5 7B chooses reliably: on the 100 tool cases
-it picked a tool for 1 of 60 messages that needed none; Llama 3.1 8B and Llama 3.2 3B for 54 and 56 (docs/evaluation.md).
+it picked a tool for 1 of 60 messages that needed none; Llama 3.1 8B and Llama 3.2 3B for 54 and 56.
 """
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ _CLIENT: httpx.Client | None = None
 def _default_choose(message: str, schemas: list[dict]) -> list[tuple[str, dict]]:
     """Ask the tool model through Ollama's own API, which (unlike its OpenAI-compatible one) lets us keep the model
     on the CPU: the chat model then never leaves the GPU.  On an 8 GB GPU, putting both there made Ollama swap
-    them on every look-up (~10 s); on the CPU the choice takes ~0.7 s (docs/evaluation.md §4c)."""
+    them on every look-up (~10 s); on the CPU the choice takes ~0.7 s."""
     global _CLIENT
     if _CLIENT is None:
         _CLIENT = httpx.Client(timeout=AGENT_TIMEOUT_S)      # one kept-alive connection (see safety/guard.py)

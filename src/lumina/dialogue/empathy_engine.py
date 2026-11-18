@@ -71,7 +71,7 @@ def _retriever():
 
 def warm_up_retrieval() -> None:
     """Open the knowledge base and run one query, so the first person who asks something does not wait for it
-    (it took ~4 s on first use: P2, docs/evaluation.md §5).  Never raises."""
+    (it took ~4 s on first use).  Never raises."""
     try:
         _retriever().query("warm up", top_k=1)
     except Exception as exc:
