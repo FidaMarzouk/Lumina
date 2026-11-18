@@ -50,8 +50,8 @@ Thumbs.db
 data/eval/raw/
 data/eval/cache/
 
-# Design reference, kept locally only
-docs/design/concept-board.html
+# Docs, kept locally only
+docs/
 
 .claude/
 .vite/
